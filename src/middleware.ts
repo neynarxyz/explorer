@@ -6,7 +6,7 @@ import type { NextRequest } from 'next/server'
 export function middleware(req: NextRequest) {
     const url = req.nextUrl
     const scheme = process.env.VERCEL_ENV !== 'development' ? 'https://' : 'http://';
-    const website = process.env.VERCEL_URL || 'localhost:3000';
+    const website = process.env.VERCEL_PROJECT_PRODUCTION_URL || 'localhost:3000';
     const allowedOrigin = scheme + website;
         if (url.origin !== allowedOrigin) {
         return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
