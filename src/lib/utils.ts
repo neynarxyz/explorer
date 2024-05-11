@@ -1,6 +1,7 @@
 import { type ClassValue, clsx } from "clsx"
 import { twMerge } from "tailwind-merge"
 import axios from "axios";
+import { tokenBearer } from "@/constants";
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
@@ -34,7 +35,7 @@ headers.api_key = `${process.env.NEYNAR_API_KEY}`;
 export async function fetchCastFromNeynarHub(hash: string,fid: number) {
   const start = performance.now(); 
   try {
-    const hubCastInfo = await axios.get(`/api/get_hub_cast/${hash}/${fid}`)
+    const hubCastInfo = await axios.get(`/api/get_hub_cast/${hash}/${fid}`, { headers: { "Content-Type": "application-json","Authorization": tokenBearer } })
 return hubCastInfo.data;
   } catch (e) {
     const durationInMs = performance.now() - start; 
