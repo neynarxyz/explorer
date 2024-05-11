@@ -2,7 +2,7 @@ import { fetchAuthorFromNeynarAPI} from "@/lib/utils";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(
-    _: NextRequest,
+    req: NextRequest,
     { params: { fid } }: { params: { fid: string } },
   ) {
     if(!fid) return NextResponse.json({error: "No fid provided"}, {status: 400});
