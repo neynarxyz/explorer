@@ -4,11 +4,18 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
 export function middleware(req: NextRequest) {
-    const url = req.nextUrl
-    const scheme = process.env.VERCEL_ENV !== 'development' ? 'https://' : 'http://';
-    const website = process.env.VERCEL_PROJECT_PRODUCTION_URL || 'localhost:3000';
-    const allowedOrigin = scheme + website;
-        if (url.origin !== allowedOrigin) {
+  const env = process.env.VERCEL_ENV ?? 'development'
+  if(env === 'development') {
+    return NextResponse.next()
+  }
+    //check if url has Authentication header passed in
+    if (!req.headers.get('Authorization')) {
+        return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+      }
+      //get authorization header
+      const authHeader = req.headers.get('Authorization');
+      //Add better token flow
+  if(authHeader !== `Bearer ${process.env.TOKEN_SECRET}`) {
         return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
       }
 
