@@ -39,13 +39,13 @@ export default function Home() {
     <div className="flex flex-col items-center justify-center space-y-4 p-2">
       <Input
         className="w-full max-w-xs h-10"
-        placeholder={`Enter hash... (${defaultHash.slice(0,5)}...)`}
+        placeholder={`Enter hash of cast... (${defaultHash.slice(0,5)}...)`}
         value={hash}
         onChange={(e) => setHash(e.target.value)}
       />
       <Input
         className="w-full max-w-xs h-10"
-        placeholder="Enter FID (fid of cast author required for hub casts to work)"
+        placeholder="Enter FID... (cast author if testing casts)"
         type="number"
         value={fid ?? ''}
         onChange={(e) => setFid(Number(e.target.value) || null)}
