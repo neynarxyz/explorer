@@ -45,7 +45,7 @@ export default function Home() {
       />
       <Input
         className="w-full max-w-xs h-10"
-        placeholder="Enter FID (optional unless API fails)"
+        placeholder="Enter FID (fid of cast author required for hub casts to work)"
         type="number"
         value={fid ?? ''}
         onChange={(e) => setFid(Number(e.target.value) || null)}
