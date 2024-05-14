@@ -82,7 +82,7 @@ export default function Home() {
 <div className="flex flex-row justify-center items-start space-x-4 w-full">
       {fidResponse &&
         <div className="flex-1">
-          <h3>FID Response: {fidResponse?.error ? '❌' : '✅'} ({fidResponse?.durationInMs.toFixed(2)} ms)</h3>
+          <h3>FID Response: {fidResponse?.error ? '❌' : '✅'} ({fidResponse?.durationInMs?.toFixed(2)} ms)</h3>
           <CodeBlock
             text={JSON.stringify(fidResponse, null, 2)}
             theme={dracula}
@@ -101,7 +101,7 @@ export default function Home() {
       }
       {castResponse &&
         <div className="flex-1">
-          <h3>Cast Response: {castResponse?.error ? '❌' : '✅'} ({castResponse?.durationInMs.toFixed(2)} ms)</h3>
+          <h3>Cast Response: {castResponse?.error ? '❌' : '✅'} ({castResponse?.durationInMs?.toFixed(2)} ms)</h3>
           <CodeBlock
             text={JSON.stringify(castResponse, null, 2)}
             theme={dracula}
