@@ -13,14 +13,15 @@ interface HubType {
 
 
 
-export async function fetchCastFromHub(hash: string, fid: number, hub: HubType,callAPIForNeynar: boolean = true) {
+export async function fetchCastFromHub(hash: string, fid: number | null, hub: HubType,callAPIForNeynar: boolean = true) {
+  if(!fid) return { data: null, durationInMs: 0, error: "No fid provided" };
   const start = performance.now(); 
   try {
     let headers: { "Content-Type": string, api_key?: string } = {"Content-Type": "application/json"};
-    if(hub.shortname === "neynar" && callAPIForNeynar) {
+    if(hub.shortname === "Neynar hub" && callAPIForNeynar) {
      return await fetchCastFromNeynarHub(hash,fid);
     }
-    else if(hub.shortname === "neynar" && !callAPIForNeynar) {
+    else if(hub.shortname === "Neynar hub" && !callAPIForNeynar) {
 headers.api_key = `${process.env.NEYNAR_API_KEY}`;
     }
       const response = await axios.get(`${hub.url}/v1/castById?fid=${fid}&hash=${hash}`, { headers });
@@ -57,6 +58,38 @@ export async function fetchCastFromNeynarAPI(hash: string) {
   } catch (e) {
     const durationInMs = performance.now() - start; // Calculate duration after the request
       return {durationInMs, error: e,cast: null}; // Return error and duration
+  }
+}
+
+export async function fetchFidFromHub(fid: number | null, hub: HubType,callAPIForNeynar: boolean = true) {
+  if(!fid) return { data: null, durationInMs: 0, error: "No fid provided" };
+  const start = performance.now(); 
+  try {
+    let headers: { "Content-Type": string, api_key?: string } = {"Content-Type": "application/json"};
+    if(hub.shortname === "Neynar hub" && callAPIForNeynar) {
+     return await fetchFidFromNeynarHub(fid);
+    }
+    else if(hub.shortname === "Neynar hub" && !callAPIForNeynar) {
+headers.api_key = `${process.env.NEYNAR_API_KEY}`;
+    }
+      const response = await axios.get(`${hub.url}/v1/userDataByFid?fid=${fid}`, { headers });
+      const durationInMs = performance.now() - start;
+      return { data: response.data, durationInMs, error: null};
+  } catch (e) {
+    const durationInMs = performance.now() - start;
+    console.log(e);
+      return { durationInMs, error: e, data: null };
+  }
+}
+
+export async function fetchFidFromNeynarHub(fid: number) {
+  const start = performance.now(); 
+  try {
+    const hubCastInfo = await axios.get(`/api/get_hub_fid/${fid}`, { headers: { "Content-Type": "application-json","Authorization": tokenBearer } })
+return hubCastInfo.data;
+  } catch (e) {
+    const durationInMs = performance.now() - start; 
+      return {durationInMs, error: e,cast: null}; 
   }
 }
 

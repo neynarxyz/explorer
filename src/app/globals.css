@@ -74,3 +74,13 @@
       @apply bg-background text-foreground;
     }
   }
+
+  .farcaster-embed-container {
+    max-height: 320px;
+  }
+
+  .farcaster-embed-container img {
+    max-height: 75px; /* This makes the image's max height equal to the container's max height */
+    
+  }
+  
