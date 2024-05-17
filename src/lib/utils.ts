@@ -1,7 +1,7 @@
 import { type ClassValue, clsx } from "clsx"
 import { twMerge } from "tailwind-merge"
 import axios from "axios";
-import { tokenBearer } from "@/constants";
+import { hubs, tokenBearer } from "@/constants";
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
@@ -11,7 +11,52 @@ interface HubType {
   url: string;
 }
 
+const fetchHubData = async (fid: number | null, hash: string) => {
+  const promises = hubs.map(async hub => {
+      const authorData = await fetchFidFromHub(fid, hub);
+      const castData = await fetchCastFromHub(hash, fid, hub);
+      return { name: hub.shortname, author: authorData, cast: castData };
+  });
 
+  return Promise.all(promises);
+}
+
+const fetchApiData = async (fid: number | null, hash: string) => {
+  let author = {}, cast = {} as any
+  let authorFid = fid;
+  try {
+      //TODO: clean author duration logic up
+      const authorResponseTime = performance.now();
+      const protocol = process.env.VERCEL_ENV && process.env.VERCEL_ENV !== "development" ? "https://" : "http://";
+      const url = process.env.VERCEL_URL ?? "localhost:3000";
+      const baseURL = `${protocol}${url}`
+      const castApiResponse = await axios.get(`${baseURL}/api/get_api_cast/${hash}`, {
+        headers: { 'Content-Type': 'application/json', 'Authorization': tokenBearer }
+    })
+    cast = castApiResponse.data
+    if(cast) {
+authorFid = cast.cast.author.fid;
+    }
+      const authorApiResponse = await axios.get(`${baseURL}/api/get_api_author/${fid}`, {
+          headers: { 'Content-Type': 'application/json', 'Authorization': tokenBearer }
+      });
+      const durationInMs = performance.now() - authorResponseTime;
+      author = {...authorApiResponse.data, durationInMs };
+  } catch (error) {
+      console.log("error in fetchApiData", error);
+  }
+  return { author, cast, name: "Neynar api" };
+}
+
+export async function fetchCastAndFidData(hash: string, fid: number | null) {
+if(!hash) return { apiData: null, hubData: null };
+const apiData = await fetchApiData(fid, hash);
+if(apiData.cast && !fid) {
+  fid = apiData.cast.author.fid;
+}
+const hubData = await fetchHubData(fid, hash);
+ return { apiData, hubData }
+}
 
 export async function fetchCastFromHub(hash: string, fid: number | null, hub: HubType,callAPIForNeynar: boolean = true) {
   if(!fid) return { data: null, durationInMs: 0, error: "No fid provided" };
@@ -38,8 +83,11 @@ headers.api_key = `${process.env.NEYNAR_API_KEY}`;
 
 export async function fetchCastFromNeynarHub(hash: string,fid: number) {
   const start = performance.now(); 
+  const protocol = process.env.VERCEL_ENV && process.env.VERCEL_ENV !== "development" ? "https://" : "http://";
+  const url = process.env.VERCEL_URL ?? "localhost:3000";
+  const baseURL = `${protocol}${url}`
   try {
-    const hubCastInfo = await axios.get(`/api/get_hub_cast/${hash}/${fid}`, { headers: { "Content-Type": "application-json","Authorization": tokenBearer } })
+    const hubCastInfo = await axios.get(`${baseURL}/api/get_hub_cast/${hash}/${fid}`, { headers: { "Content-Type": "application-json","Authorization": tokenBearer } })
 return hubCastInfo.data;
   } catch (e) {
     const durationInMs = performance.now() - start; 
@@ -48,6 +96,7 @@ return hubCastInfo.data;
 }
 
 export async function fetchCastFromNeynarAPI(hash: string) {
+
   const start = performance.now(); // Start timing before the request
   try {
       const cast = await axios.get(`https://api.neynar.com/v2/farcaster/cast?identifier=${hash}&type=hash`,{
@@ -83,15 +132,17 @@ headers.api_key = `${process.env.NEYNAR_API_KEY}`;
       return { data: response.data, durationInMs, error: null};
   } catch (e) {
     const durationInMs = performance.now() - start;
-    console.log(e);
       return { durationInMs, error: e, data: null };
   }
 }
 
 export async function fetchFidFromNeynarHub(fid: number) {
   const start = performance.now(); 
+  const protocol = process.env.VERCEL_ENV && process.env.VERCEL_ENV !== "development" ? "https://" : "http://";
+  const url = process.env.VERCEL_URL ?? "localhost:3000";
+  const baseURL = `${protocol}${url}`
   try {
-    const hubCastInfo = await axios.get(`/api/get_hub_fid/${fid}`, { headers: { "Content-Type": "application-json","Authorization": tokenBearer } })
+    const hubCastInfo = await axios.get(`${baseURL}/api/get_hub_fid/${fid}`, { headers: { "Content-Type": "application-json","Authorization": tokenBearer } })
 return hubCastInfo.data;
   } catch (e) {
     const durationInMs = performance.now() - start; 
