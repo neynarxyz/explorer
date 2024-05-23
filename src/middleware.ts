@@ -4,8 +4,10 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
 export function middleware(req: NextRequest) {
+  //TODO: fix authentication
+
+  return NextResponse.next()
   const env = process.env.VERCEL_ENV ?? 'development'
-  console.log("auth", req.headers && req.headers.get('Authorization') ? req.headers.get("Authorization") : "no auth")
   if(env === 'development') {
     return NextResponse.next()
   }
