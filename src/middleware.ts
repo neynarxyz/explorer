@@ -5,9 +5,11 @@ import type { NextRequest } from 'next/server'
 
 export function middleware(req: NextRequest) {
   const env = process.env.VERCEL_ENV ?? 'development'
+  console.log("auth",req.headers.get('Authorization'))
   if(env === 'development') {
     return NextResponse.next()
   }
+
     //check if url has Authentication header passed in
     if (!req.headers.get('Authorization')) {
         return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
