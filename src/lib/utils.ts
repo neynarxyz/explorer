@@ -21,39 +21,67 @@ const fetchHubData = async (fid: number | null, hash: string) => {
   return Promise.all(promises);
 }
 
+
 const fetchApiData = async (fid: number | null, hash: string) => {
-  let author = {}, cast = {} as any
+  let author = {}, cast = {} as any;
   let authorFid = fid;
+  
   try {
-      //TODO: clean author duration logic up
-      const authorResponseTime = performance.now();
-      const protocol = process.env.VERCEL_ENV && process.env.VERCEL_ENV !== "development" ? "https://" : "http://";
-      const url = process.env.VERCEL_URL ?? "localhost:3000";
-      const baseURL = `${protocol}${url}`
-      const castApiResponse = await axios.get(`${baseURL}/api/get_api_cast/${hash}`, {
-        headers: { 'Content-Type': 'application/json', 'Authorization': tokenBearer }
-    })
-    cast = castApiResponse.data
-    if(cast) {
-authorFid = cast.cast.author.fid;
+    const warpcastCastResponseStart = performance.now();
+    // Fetch data from the Warpcast API
+    const warpcastCastApiResponse = await axios.get(`https://api.warpcast.com/v2/cast?hash=${hash}`, {
+      headers: { 'Content-Type': 'application/json' }
+    });
+    const warpcastCastResponseTime = performance.now() - warpcastCastResponseStart
+    if(warpcastCastApiResponse.data) {
+      cast = warpcastCastApiResponse.data.result.cast
     }
-      const authorApiResponse = await axios.get(`${baseURL}/api/get_api_author/${fid}`, {
-          headers: { 'Content-Type': 'application/json', 'Authorization': tokenBearer }
-      });
-      const durationInMs = performance.now() - authorResponseTime;
-      author = {...authorApiResponse.data, durationInMs };
+    const warpcastAuthorApiStart = performance.now();
+    const warpcastAuthorApiResponse = await axios.get(`https://api.warpcast.com/v2/user?fid=${authorFid}`, {
+      headers: { 'Content-Type': 'application/json' }
+    });
+    const warpcastAuthorResponseTime = performance.now() - warpcastAuthorApiStart;
+    if(warpcastAuthorApiResponse.data) {
+    author = warpcastAuthorApiResponse.data.result.user
+    }
+
+
+    // Fetch data from the Neynar API
+    const protocol = process.env.VERCEL_ENV && process.env.VERCEL_ENV !== "development" ? "https://" : "http://";
+    const url = process.env.VERCEL_URL ?? "localhost:3000";
+    const baseURL = `${protocol}${url}`;
+    
+    const neynarCastApiResponse = await axios.get(`${baseURL}/api/get_api_cast/${hash}`, {
+      headers: { 'Content-Type': 'application/json', 'Authorization': tokenBearer }
+    });
+    const neynarAuthorApiResponse = await axios.get(`${baseURL}/api/get_api_author/${authorFid}`, {
+      headers: { 'Content-Type': 'application/json', 'Authorization': tokenBearer }
+    });
+
+
+    return {
+      warpcast: {
+        author: { ...author, durationInMs: warpcastAuthorResponseTime },
+        cast: { ...cast, durationInMs: warpcastCastResponseTime },
+        name: "Warpcast api"
+      },
+      neynar: {
+        author: neynarAuthorApiResponse.data,
+        cast: neynarCastApiResponse.data,
+        name: "Neynar api"
+      },
+    };
   } catch (error) {
-      console.log("error in fetchApiData", error);
+    console.log("error in fetchApiData", error);
+    return { author, cast, name: "Neynar api" };
   }
-  return { author, cast, name: "Neynar api" };
-}
+};
+
 
 export async function fetchCastAndFidData(hash: string, fid: number | null) {
 if(!hash) return { apiData: null, hubData: null };
 const apiData = await fetchApiData(fid, hash);
-if(apiData.cast && !fid) {
-  fid = apiData.cast.author.fid;
-}
+console.log("apiData", apiData)
 const hubData = await fetchHubData(fid, hash);
  return { apiData, hubData }
 }
