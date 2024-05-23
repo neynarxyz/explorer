@@ -6,5 +6,5 @@ export const hubs = [
   ]
   export const neynarHub = {"shortname": "Neynar hub", "url": "https://hub-api.neynar.com"}
   export const defaultHash = "0x3e7326f8da760ed926c1fe82e1444cd528fe6c78"
-  export const tokenBearer = `Bearer ${process.env.NEXT_PUBLIC_TOKEN_SECRET}`
+  export const tokenBearer = `${process.env.NEXT_PUBLIC_TOKEN_SECRET}`
   export const defaultFID = 242661
