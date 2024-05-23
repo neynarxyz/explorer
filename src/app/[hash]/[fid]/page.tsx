@@ -66,7 +66,7 @@ export default async function Response({ params }: ResponseProps) {
         <div className="w-full flex flex-col md:flex-row justify-center items-start p-2 space-x-0 md:space-x-8 space-y-4 md:space-y-0">
           <div>
             <h3>
-              Warpcast Hub FID Response: {nemesCast?.error ? '❌' : '✅'} ({nemesCast?.durationInMs?.toFixed(2)} ms)
+              Warpcast Hub Cast Response: {nemesCast?.error ? '❌' : '✅'} ({nemesCast?.durationInMs?.toFixed(2)} ms)
             </h3>
             <pre className="bg-gray-800 text-white p-2 rounded w-full md:w-auto font-mono text-sm max-w-lg max-h-72 overflow-y-scroll overflow-x-scroll">
               {JSON.stringify(nemesCast, null, 2)}
