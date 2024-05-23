@@ -115,7 +115,7 @@ export async function fetchCastFromNeynarHub(hash: string,fid: number) {
   const url = process.env.VERCEL_URL ?? "localhost:3000";
   const baseURL = `${protocol}${url}`
   try {
-    const hubCastInfo = await axios.get(`${baseURL}/api/get_hub_cast/${hash}/${fid}`, { headers: { "Content-Type": "application-json","Authorization": tokenBearer } })
+    const hubCastInfo = await axios.get(`${baseURL}/api/get_hub_cast/${hash}/${fid}`, { headers: { "Content-Type": "application-json", "Authorization": tokenBearer } })
 return hubCastInfo.data;
   } catch (e) {
     const durationInMs = performance.now() - start; 
@@ -127,6 +127,7 @@ export async function fetchCastFromNeynarAPI(hash: string) {
 
   const start = performance.now(); // Start timing before the request
   try {
+    console.log("fetching cast from Neynar API",process.env.NEYNAR_API_KEY)
       const cast = await axios.get(`https://api.neynar.com/v2/farcaster/cast?identifier=${hash}&type=hash`,{
         headers: {
           "Content-Type": "application-json",
