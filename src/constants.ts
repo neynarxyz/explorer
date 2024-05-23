@@ -1,6 +1,6 @@
 export const hubs = [
+  {"shortname": "nemes", "url": "https://nemes.farcaster.xyz:2281"},
     {"shortname": "Neynar hub", "url": "https://hub-api.neynar.com"},
-    {"shortname": "nemes", "url": "https://nemes.farcaster.xyz:2281"},
     {"shortname": "hoyt", "url": "https://hoyt.farcaster.xyz:2281"},
     {"shortname": "lamia", "url": "https://lamia.farcaster.xyz:2281"},
   ]
