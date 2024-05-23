@@ -5,7 +5,7 @@ import type { NextRequest } from 'next/server'
 
 export function middleware(req: NextRequest) {
   const env = process.env.VERCEL_ENV ?? 'development'
-  console.log("auth",req.headers.get('Authorization'))
+  console.log("auth", req.headers && req.headers.get('Authorization') ? req.headers.get("Authorization") : "no auth")
   if(env === 'development') {
     return NextResponse.next()
   }
