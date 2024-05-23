@@ -14,8 +14,9 @@ export function middleware(req: NextRequest) {
       }
       //get authorization header
       const authHeader = req.headers.get('Authorization');
+      console.log(authHeader)
       //Add better token flow
-  if(authHeader !== `Bearer ${process.env.NEXT_PUBLIC_TOKEN_SECRET}`) {
+  if(authHeader !== process.env.NEXT_PUBLIC_TOKEN_SECRET) {
         return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
       }
 
