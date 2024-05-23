@@ -21,6 +21,7 @@ export default async function Response({ params }: ResponseProps) {
   const { author: warpcastAuthor, cast: warpcastCast } = warpcast || {};
   const { author: neynarAuthor, cast: neynarCast } = neynar || {};
   console.log("neynar hub", neynarHub)
+  console.log("apiData", data.apiData)  
 
   return (
     <div className="flex flex-col items-center justify-center space-y-4 p-2">
