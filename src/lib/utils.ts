@@ -48,7 +48,7 @@ const fetchApiData = async (fid: number | null, hash: string) => {
 
     // Fetch data from the Neynar API
     const protocol = process.env.VERCEL_ENV && process.env.VERCEL_ENV !== "development" ? "https://" : "http://";
-    const url = process.env.VERCEL_URL ?? "localhost:3000";
+    const url = process.env.VERCEL_PROJECT_PRODUCTION_URL ?? "localhost:3000";
     const baseURL = `${protocol}${url}`;
     
     const neynarCastApiResponse = await axios.get(`${baseURL}/api/get_api_cast/${hash}`, {
@@ -112,7 +112,7 @@ headers.api_key = `${process.env.NEYNAR_API_KEY}`;
 export async function fetchCastFromNeynarHub(hash: string,fid: number) {
   const start = performance.now(); 
   const protocol = process.env.VERCEL_ENV && process.env.VERCEL_ENV !== "development" ? "https://" : "http://";
-  const url = process.env.VERCEL_URL ?? "localhost:3000";
+  const url = process.env.VERCEL_PROJECT_PRODUCTION_URL ?? "localhost:3000";
   const baseURL = `${protocol}${url}`
   try {
     const hubCastInfo = await axios.get(`${baseURL}/api/get_hub_cast/${hash}/${fid}`, { headers: { "Content-Type": "application-json", "Authorization": tokenBearer } })
@@ -168,7 +168,7 @@ headers.api_key = `${process.env.NEYNAR_API_KEY}`;
 export async function fetchFidFromNeynarHub(fid: number) {
   const start = performance.now(); 
   const protocol = process.env.VERCEL_ENV && process.env.VERCEL_ENV !== "development" ? "https://" : "http://";
-  const url = process.env.VERCEL_URL ?? "localhost:3000";
+  const url = process.env.VERCEL_PROJECT_PRODUCTION_URL ?? "localhost:3000";
   const baseURL = `${protocol}${url}`
   try {
     const hubCastInfo = await axios.get(`${baseURL}/api/get_hub_fid/${fid}`, { headers: { "Content-Type": "application-json","Authorization": tokenBearer } })
