@@ -19,7 +19,7 @@ export default function Home() {
   const [messages, setMessages] = useState<any>([]);
 
   useEffect(() => {
-    const eventSource = new EventSource('/api/stream');
+    const eventSource = new EventSource(`${process.env.NEXT_PUBLIC_STREAM_SERVER}/stream`);
 
     eventSource.onmessage = (event) => {
       const message = JSON.parse(event.data);
