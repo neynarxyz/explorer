@@ -8,7 +8,6 @@ export async function GET(
     if(!identifier) return NextResponse.json({error: "No fid provided"}, {status: 400});
   try {
     const apiCastData = await fetchAuthorFromNeynarAPI(decodeURIComponent(identifier));
-    console.log("apiCastData",apiCastData);
     return NextResponse.json(apiCastData);
   } catch (e) {
     console.log("error in get api author", e);
