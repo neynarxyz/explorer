@@ -3,11 +3,12 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(
     req: NextRequest,
-    { params: { fid } }: { params: { fid: string } },
+    { params: { identifier } }: { params: { identifier: string } },
   ) {
-    if(!fid) return NextResponse.json({error: "No fid provided"}, {status: 400});
+    if(!identifier) return NextResponse.json({error: "No fid provided"}, {status: 400});
   try {
-    const apiCastData = await fetchAuthorFromNeynarAPI(parseInt(fid,10));
+    const apiCastData = await fetchAuthorFromNeynarAPI(decodeURIComponent(identifier));
+    console.log("apiCastData",apiCastData);
     return NextResponse.json(apiCastData);
   } catch (e) {
     console.log("error in get api author", e);

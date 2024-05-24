@@ -9,7 +9,7 @@ export function CastComponent({cast}: any) {
 
   const avatarImg = cast.author.pfp_url ? cast.author.pfp_url : null  
   return (
-    <Link href={`/${cast.hash}/${cast.fid}`}>
+    <Link href={`/${cast.hash}`}>
     <Card className="w-full hover:bg-slate-100 rounded-lg max-w-md">
     <CardHeader className="flex flex-row items-center space-x-2">
   <Avatar >
