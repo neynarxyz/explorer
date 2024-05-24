@@ -165,8 +165,6 @@ return hubCastInfo.data;
 export async function fetchCastFromNeynarAPI(identifier: string, isURL: boolean = false) {
   //check if the identifier is a hash or a warpcast url
 
-  console.log("identifier",identifier)
-
   const start = performance.now(); // Start timing before the request
   try {
       const cast = await axios.get(`https://api.neynar.com/v2/farcaster/cast?identifier=${identifier}&type=${isURL ? 'url' : 'hash'}`,{
@@ -265,7 +263,6 @@ export async function fetchAuthorFromNeynarAPI(identifier: string) {
     else {
       //extract user
       const username = identifier.split("/")[3];
-        console.log("username",username)
         const start = performance.now(); // Start timing before the request
       const authorData = await axios.get(`https://api.neynar.com/v1/farcaster/user-by-username?username=${username}`,{
         headers: {
