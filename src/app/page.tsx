@@ -28,29 +28,14 @@ export default function Home() {
     };
   }, []);
 
-  const handleKeyPress = (e: any) => {
-    if (e.key === 'Enter') {
-      router.push(`/${encodeURIComponent(identifier)}`);
-    }
-  };
-
   return (
     <div className="flex flex-col items-center justify-center space-y-4 p-2">
-      <Input
-        className="w-full h-10 md:w-96"
-        placeholder="Enter a FID, hash, or warpcast url..."
-        value={identifier}
-        onChange={(e) => {
-          setIdentifier(e.target.value)}}
-       onKeyDown={handleKeyPress}
-      />
-
-      <Button onClick={() => router.push(`/${encodeURIComponent(identifier)}`)}>Fetch Identifier</Button>
-      <div className='flex flex-col space-y-4 p-5 m-5'>
+      <div className='flex flex-col items-center space-y-4 p-5 m-5'>
         {messages.map((message: any, index: number) => {
           return <CastComponent key={index} cast={message} />;
         })}
       </div>
     </div>
   );
+  
 }
