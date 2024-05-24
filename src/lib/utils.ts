@@ -26,7 +26,8 @@ const fetchApiData = async (fid: number | null, identifier: string | null) => {
   let neynarAuthor = {}, neynarCast = {} as any;
   let warpcastAuthor = {}, warpcastCast = {} as any;
   let authorFid = fid;
-  let hash = identifier;
+  const isWarpcastURL = isValidWarpcastUrl(identifier);
+  let hash = isWarpcastURL ? identifier : null;
 
   try {
     const protocol = process.env.VERCEL_ENV && process.env.VERCEL_ENV !== "development" ? "https://" : "http://";
@@ -42,22 +43,45 @@ const fetchApiData = async (fid: number | null, identifier: string | null) => {
       if (!authorFid && neynarCast && neynarCast.author && neynarCast.author.fid) {
         authorFid = neynarCast.author.fid; // Extract the fid from the cast data
       }
-      if (isValidWarpcastUrl(identifier)) {
+      if (isValidWarpcastUrl(identifier) && neynarCast && neynarCast.cast && neynarCast.cast.hash) {
         hash = neynarCast.cast.hash;
       }
       const warpcastCastResponseStart = performance.now();
       // Fetch data from the Warpcast API
       try {
-      const warpcastCastApiResponse = await axios.get(`https://api.warpcast.com/v2/cast?hash=${hash}`, {
+        let warpcastCastApiResponse = null
+        if(!isWarpcastURL) {
+       warpcastCastApiResponse = await axios.get(`https://api.warpcast.com/v2/cast?hash=${hash}`, {
         headers: { 'Content-Type': 'application/json' }
       });
       warpcastCastResponseTime = performance.now() - warpcastCastResponseStart;
       if (warpcastCastApiResponse.data && warpcastCastApiResponse.data.result && warpcastCastApiResponse.data.result.cast) {
         warpcastCast = warpcastCastApiResponse.data.result.cast;
+        hash = warpcastCast.hash;
         if (!authorFid && warpcastCast.author && warpcastCast.author.fid) {
           authorFid = warpcastCast.author.fid;
         }
       }
+    }
+    else {
+      //https://client.warpcast.com/v2/user-thread-casts?castHashPrefix=0x64c1b3ec&username=ciefa.eth&limit=15
+      const username = identifier.split("/")[3];
+      const hashPrefix = identifier.split("/")[4];
+      warpcastCastApiResponse = await axios.get(`https://api.warpcast.com/v2/user-thread-casts?castHashPrefix=${hashPrefix}&username=${username}&limit=15`, {
+        headers: { 'Content-Type': 'application/json' }
+      });
+      if(warpcastCastApiResponse.data && warpcastCastApiResponse.data.result && warpcastCastApiResponse.data.result.casts) {
+//find cast that has the prefix included
+        warpcastCast = warpcastCastApiResponse.data.result.casts.find((cast: any) => cast.hash.startsWith(hashPrefix));
+        if(warpcastCast && warpcastCast.author && warpcastCast.author.fid) {
+          authorFid = warpcastCast.author.fid;
+        }
+        if(warpcastCast && warpcastCast.hash) {
+          hash = warpcastCast.hash;
+        }
+      }
+      warpcastCastResponseTime = performance.now() - warpcastCastResponseStart;
+    }
     }
     catch (e) {
       //retrieve the error
