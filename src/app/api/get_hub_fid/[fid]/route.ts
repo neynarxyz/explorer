@@ -11,7 +11,7 @@ export async function GET(
     const apiCastData = await fetchFidFromHub(parseInt(fid,10),neynarHub,false);
     return NextResponse.json(apiCastData);
   } catch (e) {
-    console.log("error in get_channels", e);
+    console.log("error in get_hub_fid", e);
     return NextResponse.json(e);
   }
 }

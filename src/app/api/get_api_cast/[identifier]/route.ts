@@ -12,7 +12,7 @@ export async function GET(
     const apiCastData = await fetchCastFromNeynarAPI(processedIdentifier,isURL);
     return NextResponse.json(apiCastData);
   } catch (e) {
-    console.log("error in get_channels", e);
+    console.log("error in get_api_cast route", e);
     return NextResponse.json(e);
   }
 }
