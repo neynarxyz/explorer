@@ -47,6 +47,7 @@ const fetchApiData = async (fid: number | null, identifier: string | null) => {
       }
       const warpcastCastResponseStart = performance.now();
       // Fetch data from the Warpcast API
+      try {
       const warpcastCastApiResponse = await axios.get(`https://api.warpcast.com/v2/cast?hash=${hash}`, {
         headers: { 'Content-Type': 'application/json' }
       });
@@ -58,6 +59,11 @@ const fetchApiData = async (fid: number | null, identifier: string | null) => {
         }
       }
     }
+    catch (e) {
+      //retrieve the error
+      warpcastCast = { error: e };
+    }
+  }
 
     if (authorFid || isValidWarpcastUrl(identifier)) {
       const neynarAuthorApiResponse = await axios.get(`${baseURL}/api/get_api_author/${authorFid ? authorFid : encodeURIComponent(identifier as any)}`, {
@@ -66,13 +72,19 @@ const fetchApiData = async (fid: number | null, identifier: string | null) => {
       neynarAuthor = neynarAuthorApiResponse.data;
 
       const warpcastAuthorApiStart = performance.now();
+      let warpcastAuthorResponseTime = 0;
+      try {
       const warpcastAuthorApiResponse = await axios.get(`https://api.warpcast.com/v2/user?fid=${authorFid}`, {
         headers: { 'Content-Type': 'application/json' }
       });
-      const warpcastAuthorResponseTime = performance.now() - warpcastAuthorApiStart;
+      warpcastAuthorResponseTime = performance.now() - warpcastAuthorApiStart;
       if (warpcastAuthorApiResponse.data) {
         warpcastAuthor = warpcastAuthorApiResponse.data.result.user;
       }
+    } catch (e) {
+      //retrieve the error
+      warpcastAuthor = { error: e };
+    }
 
       return {
         warpcast: {
