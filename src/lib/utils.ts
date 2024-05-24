@@ -60,7 +60,7 @@ const fetchApiData = async (fid: number | null, identifier: string | null) => {
     }
 
     if (authorFid || isValidWarpcastUrl(identifier)) {
-      const neynarAuthorApiResponse = await axios.get(`${baseURL}/api/get_api_author/${authorFid ? authorFid : encodeURIComponent(identifier)}`, {
+      const neynarAuthorApiResponse = await axios.get(`${baseURL}/api/get_api_author/${authorFid ? authorFid : encodeURIComponent(identifier as any)}`, {
         headers: { 'Content-Type': 'application/json', 'Authorization': tokenBearer }
       });
       neynarAuthor = neynarAuthorApiResponse.data;
