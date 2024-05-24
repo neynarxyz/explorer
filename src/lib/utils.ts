@@ -43,7 +43,7 @@ const fetchApiData = async (fid: number | null, identifier: string | null) => {
       if (!authorFid && neynarCast && neynarCast.author && neynarCast.author.fid) {
         authorFid = neynarCast.author.fid; // Extract the fid from the cast data
       }
-      if (isValidWarpcastUrl(identifier) && neynarCast && neynarCast.cast && neynarCast.cast.hash) {
+      if (neynarCast && neynarCast.cast && neynarCast.cast.hash) {
         hash = neynarCast.cast.hash;
       }
       const warpcastCastResponseStart = performance.now();
