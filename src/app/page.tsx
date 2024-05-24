@@ -1,13 +1,9 @@
 "use client";
 import { useState, useEffect } from 'react';
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import { useRouter } from "next13-progressbar";
 import { CastComponent } from '@/components/cast-component';
 
 export default function Home() {
-  const [identifier, setIdentifier] = useState<string>("");
-  const router = useRouter();
 
   const [messages, setMessages] = useState<any>([]);
 
