@@ -12,10 +12,10 @@ interface HubType {
   url: string;
 }
 
-const fetchHubData = async (fid: number | null, hash: string | null) => {
+const fetchHubData = async (fid: number | null, hash: string | null, isCast = true) => {
   const promises = hubs.map(async hub => {
-    const authorData = await fetchFidFromHub(fid, hub);
-    const castData = await fetchCastFromHub(hash, fid, hub);
+    const authorData = await fetchFidFromHub(fid, hub,isCast);
+    const castData = await fetchCastFromHub(hash, fid, hub, isCast);
     return { name: hub.shortname, author: authorData, cast: castData };
   });
 
@@ -69,7 +69,7 @@ const fetchApiData = async (fid: number | null, identifier: string | null): Prom
       }
     }
 
-    if (authorFid || isWarpcastURL) {
+    if (fid || (isWarpcastURL && identifier && identifier.split("/").length === 4)) {
       try {
         neynarAuthor = await fetchAuthorFromNeynarAPI(authorFid?.toString() ?? identifier as any);
       } catch (error) {
@@ -208,19 +208,16 @@ if(isValidWarpcastUrl(processedHash)) {
   processedHash = null
 }
   if (!processedFid && !processedHash) return { apiData, hubData: null };
-
-  const hubData = await fetchHubData(processedFid, processedHash);
+  const hubData = await fetchHubData(processedFid, processedHash,apiData.neynar?.cast || apiData.warpcast?.cast);
   return { apiData, hubData };
 }
 
-export async function fetchCastFromHub(hash: string | null, fid: number | null, hub: HubType, callAPIForNeynar: boolean = true) {
-  if (!fid || !hash) return null;
+export async function fetchCastFromHub(hash: string | null, fid: number | null, hub: HubType, isCast = true) {
+  if (!fid || !hash || !isCast) return null;
   const start = performance.now();
   try {
     let headers: { "Content-Type": string, api_key?: string, "x-airstack-hubs"?: string } = { "Content-Type": "application/json" };
-    if (hub.shortname === "Neynar hub" && callAPIForNeynar) {
-      return await fetchCastFromNeynarHub(hash, fid);
-    } else if (hub.shortname === "Neynar hub" && !callAPIForNeynar) {
+    if (hub.shortname === "Neynar hub") {
       headers.api_key = `${process.env.NEYNAR_API_KEY}`;
     } else if (hub.shortname === "airstack") {
       headers = { "Content-Type": "application/json", "x-airstack-hubs": process.env.NEXT_PUBLIC_AIRSTACK_API_KEY };
@@ -231,20 +228,6 @@ export async function fetchCastFromHub(hash: string | null, fid: number | null, 
   } catch (e) {
     const durationInMs = performance.now() - start;
     return { durationInMs, error: formatError(e), data: null };
-  }
-}
-
-export async function fetchCastFromNeynarHub(hash: string | null, fid: number) {
-  const start = performance.now();
-  const protocol = process.env.VERCEL_ENV && process.env.VERCEL_ENV !== "development" ? "https://" : "http://";
-  const url = process.env.VERCEL_PROJECT_PRODUCTION_URL ?? "localhost:3000";
-  const baseURL = `${protocol}${url}`;
-  try {
-    const hubCastInfo = await axios.get(`${baseURL}/api/get_hub_cast/${hash}/${fid}`, { headers: { "Content-Type": "application-json", "Authorization": tokenBearer } });
-    return hubCastInfo.data;
-  } catch (e) {
-    const durationInMs = performance.now() - start;
-    return { durationInMs, error: formatError(e), cast: null };
   }
 }
 
@@ -265,14 +248,12 @@ export async function fetchCastFromNeynarAPI(identifier: string, isURL: boolean 
   }
 }
 
-export async function fetchFidFromHub(fid: number | null, hub: HubType, callAPIForNeynar: boolean = true) {
-  if (!fid) return { data: null, durationInMs: 0, error: "No fid provided" };
+export async function fetchFidFromHub(fid: number | null, hub: HubType,isCast = true) {
+  if (!fid || isCast) return null
   const start = performance.now();
   try {
     let headers: { "Content-Type": string, api_key?: string, "x-airstack-hubs"?: string } = { "Content-Type": "application/json" };
-    if (hub.shortname === "Neynar hub" && callAPIForNeynar) {
-      return await fetchFidFromNeynarHub(fid);
-    } else if (hub.shortname === "Neynar hub" && !callAPIForNeynar) {
+    if (hub.shortname === "Neynar hub") {
       headers.api_key = `${process.env.NEYNAR_API_KEY}`;
     } else if (hub.shortname === "airstack") {
       headers = { "Content-Type": "application/json", "x-airstack-hubs": process.env.NEXT_PUBLIC_AIRSTACK_API_KEY };
@@ -283,20 +264,6 @@ export async function fetchFidFromHub(fid: number | null, hub: HubType, callAPIF
   } catch (e) {
     const durationInMs = performance.now() - start;
     return { durationInMs, error: formatError(e), data: null };
-  }
-}
-
-export async function fetchFidFromNeynarHub(fid: number) {
-  const start = performance.now();
-  const protocol = process.env.VERCEL_ENV && process.env.VERCEL_ENV !== "development" ? "https://" : "http://";
-  const url = process.env.VERCEL_PROJECT_PRODUCTION_URL ?? "localhost:3000";
-  const baseURL = `${protocol}${url}`;
-  try {
-    const hubCastInfo = await axios.get(`${baseURL}/api/get_hub_fid/${fid}`, { headers: { "Content-Type": "application-json", "Authorization": tokenBearer } });
-    return hubCastInfo.data;
-  } catch (e) {
-    const durationInMs = performance.now() - start;
-    return { durationInMs, error: formatError(e), cast: null };
   }
 }
 
