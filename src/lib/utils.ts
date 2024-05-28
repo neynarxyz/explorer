@@ -260,7 +260,9 @@ export async function fetchFidFromHub(fid: number | null, hub: HubType,isCast = 
     }
     const response = await axios.get(`${hub.url}/v1/userDataByFid?fid=${fid}`, { headers });
     const durationInMs = performance.now() - start;
-    return { data: response.data, durationInMs, error: null };
+    const verificationsResponse = await axios.get(`${hub.url}/v1/verificationsByFid?fid=2?fid=${fid}`, { headers });
+    
+    return { data: {...response.data,verifications: verificationsResponse.data, durationInMs, error: null }};
   } catch (e) {
     const durationInMs = performance.now() - start;
     return { durationInMs, error: formatError(e), data: null };
