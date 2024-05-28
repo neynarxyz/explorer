@@ -1,35 +1,45 @@
-"use client";
-import { useState, useEffect } from 'react';
-import { useRouter } from "next13-progressbar";
 import { CastComponent } from '@/components/cast-component';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { FIDPFP, exampleCast, warpcastURLCast, warpcastURLCastURL, warpcastURLPFP, warpcastURLProfile } from '@/constants';
+import Link from 'next/link';
 
 export default function Home() {
-
-  const [messages, setMessages] = useState<any>([]);
-
-  useEffect(() => {
-    const eventSource = new EventSource(`${process.env.NEXT_PUBLIC_STREAM_SERVER}/stream`);
-
-    eventSource.onmessage = (event) => {
-      const message = JSON.parse(event.data);
-      setMessages((prevMessages: any) => [message, ...prevMessages]);
-    };
-
-    eventSource.onerror = (error) => {
-      eventSource.close();
-    };
-
-    return () => {
-      eventSource.close();
-    };
-  }, []);
 
   return (
     <div className="flex flex-col items-center justify-center space-y-4 p-2">
       <div className='flex flex-col items-center space-y-4 p-5 m-5'>
-        {messages.map((message: any, index: number) => {
-          return <CastComponent key={index} cast={message} />;
-        })}
+      <div className='flex flex-row space-x-2'>
+<div className='flex flex-col space-y-2 items-center justify-center '>
+
+  <p className='text-center'>Example hash</p>
+        <CastComponent cast={exampleCast} />
+        </div>
+        <div className='flex flex-col space-y-2 w-full items-center justify-center '>
+       <p className='text-center'>Example Warpcast Cast</p>
+       <CastComponent cast={warpcastURLCast} warpcastUrl={warpcastURLCastURL} />
+        </div>
+        </div>
+        <div className='flex flex-row space-x-2'>
+       <div className='flex flex-col space-y-2 w-full items-center justify-center '>
+       <p className='text-center'>Example FID</p>
+        <Link href={`/3`}>
+        <Avatar >
+    <AvatarImage alt={`@dwr.eth`} src={FIDPFP} />
+    <AvatarFallback>{"DW"}</AvatarFallback>
+  </Avatar>
+        </Link>
+        </div>
+        <div className='flex flex-col space-y-2 w-full items-center justify-center '>
+       <p className='text-center'>Example Warpcast Profile</p>
+        <Link href={`/${encodeURIComponent(warpcastURLProfile)}`}>
+        <Avatar >
+    <AvatarImage alt={`@dylsteck.eth`} src={warpcastURLPFP} />
+    <AvatarFallback>{"DY"}</AvatarFallback>
+  </Avatar>
+        </Link>
+        </div>
+        </div>
+      
       </div>
     </div>
   );
