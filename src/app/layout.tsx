@@ -14,17 +14,21 @@ export default function RootLayout({
 
   return (
     <html lang="en">
-      <body className="flex flex-col flex-1 items-center h-full">
+      <body className="relative h-full pt-10"> {/* Added pt-20 for padding-top */}
         <Providers>
-          <div className="w-full flex items-center justify-between px-10 py-2">
-            <Link href="/" className="text-black font-bold">
-              <p className="text-lg md:text-xl">Farcaster Explorer</p>
-            </Link>
+          <div className="absolute top-0 left-0 p-2">
             <Link href="https://www.neynar.com" target="_blank">
               <img className="w-16 md:w-32" src={"/neynar.png"} />
             </Link>
           </div>
-          <Search />
+          <div className="absolute top-5 left-1/2 transform -translate-x-1/2 p-2">
+            <Link href="/" className="text-black font-bold">
+              <p className="text-lg md:text-xl">Farcaster Explorer</p>
+            </Link>
+          </div>
+          <div className="w-full flex justify-center mt-16"> {/* Added mt-16 for margin-top */}
+            <Search />
+          </div>
           <div className="w-full px-4 md:px-8">
             {children}
           </div>
@@ -32,5 +36,4 @@ export default function RootLayout({
       </body>
     </html>
   );
-}
-
+}  
