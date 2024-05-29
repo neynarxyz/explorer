@@ -1,4 +1,4 @@
-import { HubRpcClient, MessagesResponse, getSSLHubRpcClient } from '@farcaster/hub-nodejs';
+import { HubRpcClient, bytesToHexString, getSSLHubRpcClient } from '@farcaster/hub-nodejs';
 import { NextResponse } from 'next/server';
 
 export async function GET(
@@ -8,9 +8,16 @@ export async function GET(
   
   let body: any = ['initial']
   const client = await createClient(params.hub);
-  const userData = await client.getUserDataByFid({ fid: params.fid})    
-  userData.map((m) => { 
-    body = m
+  const userData = await client.getUserDataByFid({ fid: params.fid }, )    
+  userData.map((data) => { 
+    body = data.messages.map((msg) => {
+      return {
+        ...msg,
+        hash: bytesToHexString(msg.hash),
+        signature: bytesToHexString(msg.signature),
+        signer: bytesToHexString(msg.signer)
+      }
+    })
   })
   
   client.close()
