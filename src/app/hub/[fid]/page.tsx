@@ -15,7 +15,6 @@ export default function Page(props: Props) {
   useEffect(() => {
     const fetchData = async () => {
       const response = await axios.get(`http://localhost:3000/api/get_user_data/${props.params.fid}/${props.searchParams.hub}`)
-      console.log('in the component')
       setResp(response.data)
     };
 
@@ -24,11 +23,11 @@ export default function Page(props: Props) {
   
 
   return (
-    <div>
+    <div className="p-2">
       {resp === undefined ? (
         <div>Loading...</div>
       ) : (
-        <pre className="bg-gray-800 text-white p-2 rounded w-full md:w-auto font-mono text-sm max-w-lg max-h-72 overflow-y-scroll overflow-x-scroll">
+        <pre className="bg-gray-800 text-white p-2 rounded w-full md:w-auto font-mono text-sm max-w-lg max-h-80 overflow-y-scroll overflow-x-scroll">
           {JSON.stringify(resp, null, 2)}
         </pre>
       )}
