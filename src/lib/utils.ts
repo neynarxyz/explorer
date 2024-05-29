@@ -1,9 +1,10 @@
-import { type ClassValue, clsx } from "clsx"
-import { twMerge } from "tailwind-merge"
-import axios from "axios";
+import axios from 'axios';
+import { type ClassValue, clsx } from "clsx";
+import { twMerge } from "tailwind-merge";
 import { hubs, tokenBearer } from "@/constants";
+
 export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs))
+  return twMerge(clsx(inputs));
 }
 
 interface HubType {
@@ -11,246 +12,260 @@ interface HubType {
   url: string;
 }
 
-const fetchHubData = async (fid: number | null, hash: string | null) => {
+const fetchHubData = async (fid: number | null, hash: string | null, isCast = true) => {
   const promises = hubs.map(async hub => {
-      const authorData = await fetchFidFromHub(fid, hub);
-      const castData = await fetchCastFromHub(hash, fid, hub);
-      return { name: hub.shortname, author: authorData, cast: castData };
+    const authorData = await fetchFidFromHub(fid, hub,isCast);
+    const castData = await fetchCastFromHub(hash, fid, hub, isCast);
+    return { name: hub.shortname, author: authorData, cast: castData };
   });
 
   return Promise.all(promises);
+};
+
+interface ApiResponse {
+  warpcast: {
+    author: any;
+    cast: any;
+    name: string;
+  };
+  neynar: {
+    author: any;
+    cast: any;
+    name: string;
+  };
+  error?: any;
 }
 
-
-const fetchApiData = async (fid: number | null, identifier: string | null) => {
-  let neynarAuthor = {}, neynarCast = {} as any;
-  let warpcastAuthor = {}, warpcastCast = {} as any;
+const fetchApiData = async (fid: number | null, identifier: string | null): Promise<ApiResponse> => {
+  let neynarAuthor: any = null;
+  let neynarCast: any = null;
+  let warpcastAuthor: any = null;
+  let warpcastCast: any = null;
   let authorFid = fid;
   const isWarpcastURL = isValidWarpcastUrl(identifier);
   let hash = isWarpcastURL ? identifier : null;
+  let warpcastCastResponseStart = null;
 
   try {
-    const protocol = process.env.VERCEL_ENV && process.env.VERCEL_ENV !== "development" ? "https://" : "http://";
-    const url = process.env.VERCEL_PROJECT_PRODUCTION_URL ?? "localhost:3000";
-    const baseURL = `${protocol}${url}`;
-    let warpcastCastResponseTime = 0
-
-    if (identifier) {
-      const neynarCastApiResponse = await axios.get(`${baseURL}/api/get_api_cast/${encodeURIComponent(identifier)}`, {
-        headers: { 'Content-Type': 'application/json', 'Authorization': tokenBearer }
-      });
-      neynarCast = neynarCastApiResponse.data;
-      if (!authorFid && neynarCast && neynarCast.author && neynarCast.author.fid) {
-        authorFid = neynarCast.author.fid; // Extract the fid from the cast data
-      }
-      if (neynarCast && neynarCast.cast && neynarCast.cast.hash) {
-        hash = neynarCast.cast.hash;
-      }
-      const warpcastCastResponseStart = performance.now();
-      // Fetch data from the Warpcast API
+    if (identifier && (!isWarpcastURL || identifier.split("/").length >= 5)) {
       try {
-        let warpcastCastApiResponse = null
-        if(!isWarpcastURL) {
-       warpcastCastApiResponse = await axios.get(`https://api.warpcast.com/v2/cast?hash=${hash}`, {
-        headers: { 'Content-Type': 'application/json' }
-      });
-      warpcastCastResponseTime = performance.now() - warpcastCastResponseStart;
-      if (warpcastCastApiResponse.data && warpcastCastApiResponse.data.result && warpcastCastApiResponse.data.result.cast) {
-        warpcastCast = warpcastCastApiResponse.data.result.cast;
-        hash = warpcastCast.hash;
-        if (!authorFid && warpcastCast.author && warpcastCast.author.fid) {
-          authorFid = warpcastCast.author.fid;
-        }
+       neynarCast = await fetchCastFromNeynarAPI(identifier, isWarpcastURL);
+        authorFid = authorFid || neynarCast?.author?.fid || null;
+        hash = neynarCast?.cast?.hash || hash;
+      } catch (error) {
+        neynarCast = formatError(error);
       }
-    }
-    else {
-      //https://client.warpcast.com/v2/user-thread-casts?castHashPrefix=0x64c1b3ec&username=ciefa.eth&limit=15
-      const username = identifier.split("/")[3];
-      const hashPrefix = identifier.split("/")[4];
-      warpcastCastApiResponse = await axios.get(`https://api.warpcast.com/v2/user-thread-casts?castHashPrefix=${hashPrefix}&username=${username}&limit=15`, {
-        headers: { 'Content-Type': 'application/json' }
-      });
-      if(warpcastCastApiResponse.data && warpcastCastApiResponse.data.result && warpcastCastApiResponse.data.result.casts) {
-//find cast that has the prefix included
-        warpcastCast = warpcastCastApiResponse.data.result.casts.find((cast: any) => cast.hash.startsWith(hashPrefix));
-        if(warpcastCast && warpcastCast.author && warpcastCast.author.fid) {
-          authorFid = warpcastCast.author.fid;
-        }
-        if(warpcastCast && warpcastCast.hash) {
-          hash = warpcastCast.hash;
-        }
-      }
-      warpcastCastResponseTime = performance.now() - warpcastCastResponseStart;
-    }
-    }
-    catch (e) {
-      //retrieve the error
-      warpcastCast = { error: e };
-    }
-  }
 
-    if (authorFid || isValidWarpcastUrl(identifier)) {
-      const neynarAuthorApiResponse = await axios.get(`${baseURL}/api/get_api_author/${authorFid ? authorFid : encodeURIComponent(identifier as any)}`, {
-        headers: { 'Content-Type': 'application/json', 'Authorization': tokenBearer }
-      });
-      neynarAuthor = neynarAuthorApiResponse.data;
+      try {
+        warpcastCastResponseStart = performance.now();
+        
+        warpcastCast = await fetchWarpcastCast(hash, isWarpcastURL, identifier);
+        if (warpcastCast) {
+          authorFid = authorFid || warpcastCast?.author?.fid || null;
+          hash = warpcastCast?.hash || hash;
+        }
+      } catch (error) {
+        warpcastCast = formatError(error);
+      }
+    }
+
+    if (fid || (isWarpcastURL && identifier && identifier.split("/").length === 4)) {
+      try {
+        neynarAuthor = await fetchAuthorFromNeynarAPI(authorFid?.toString() ?? identifier as any);
+      } catch (error) {
+        neynarAuthor = formatError(error);
+      }
 
       const warpcastAuthorApiStart = performance.now();
-      let warpcastAuthorResponseTime = 0;
       try {
-      const warpcastAuthorApiResponse = await axios.get(`https://api.warpcast.com/v2/user?fid=${authorFid}`, {
-        headers: { 'Content-Type': 'application/json' }
-      });
-      warpcastAuthorResponseTime = performance.now() - warpcastAuthorApiStart;
-      if (warpcastAuthorApiResponse.data) {
-        warpcastAuthor = warpcastAuthorApiResponse.data.result.user;
+
+        warpcastAuthor = await fetchWarpcastAuthor(authorFid?.toString() ?? identifier as any);
+      } catch (error) {
+        warpcastAuthor = formatError(error);
       }
-    } catch (e) {
-      //retrieve the error
-      warpcastAuthor = { error: e };
+
+      return formatResponse(warpcastAuthor, warpcastCast, neynarAuthor, neynarCast, warpcastAuthorApiStart, warpcastCastResponseStart ?? 0);
     }
 
-      return {
-        warpcast: {
-          author: { ...warpcastAuthor, durationInMs: warpcastAuthorResponseTime },
-          cast: warpcastCast && Object.keys(warpcastCast).length > 0 ? { ...warpcastCast,  durationInMs: warpcastCastResponseTime ?? 0  } : null,
-          name: "Warpcast api"
-        },
-        neynar: {
-          author: neynarAuthor,
-          cast: neynarCast && Object.keys(neynarCast).length > 0 ? neynarCast : null,
-          name: "Neynar api"
-        },
-      };
-    }
-
-    return {
-      warpcast: {
-        cast: { ...warpcastCast },
-        name: "Warpcast api",
-        author: null
-      },
-      neynar: {
-        cast: neynarCast,
-        name: "Neynar api",
-        author: null
-      },
-    };
+    return formatEmptyResponse(warpcastCast, neynarCast);
 
   } catch (error) {
-    console.log("error in fetchApiData", error);
-    return { error };
+    console.error("Error in fetchApiData", error);
+    return formatErrorResponse(error, warpcastCast, neynarCast);
   }
 };
 
+const fetchWarpcastCast = async (hash: string | null, isWarpcastURL: boolean, identifier: string | null) => {
+  if (!isWarpcastURL) {
+    const response = await axios.get(`https://api.warpcast.com/v2/cast?hash=${hash}`, {
+      headers: { 'Content-Type': 'application/json' }
+    });
+    return response.data?.result?.cast || null as any;
+  } else if (identifier && identifier.split("/").length > 3) {
+    const username = identifier.split("/")[3];
+    const hashPrefix = identifier.split("/")[4];
+    const response = await axios.get(`https://api.warpcast.com/v2/user-thread-casts?castHashPrefix=${hashPrefix}&username=${username}&limit=15`, {
+      headers: { 'Content-Type': 'application/json' }
+    });
+    return response.data?.result?.casts.find((cast: any) => cast.hash.startsWith(hashPrefix)) || null as any;
+  }
+  return null;
+};
 
+const fetchWarpcastAuthor = async (identifier: string | null) => {
+  //its a fid
 
+  const isWarpcastURL = isValidWarpcastUrl(identifier);
 
+  if (!isWarpcastURL) {
+    const response = await axios.get(`https://api.warpcast.com/v2/user?fid=${identifier}`, {
+      headers: { 'Content-Type': 'application/json' }
+    });
+    return response.data?.result?.user || null
+  } else if (identifier && identifier.split("/").length >= 3){
+    const username = identifier?.split("/")[3];
+    const response = await axios.get(`https://api.warpcast.com/v2/user-by-username?username=${username}`, {
+      headers: { 'Content-Type': 'application/json' }
+    });
+    return response.data?.result?.user || null
+  }
+  return null;
+};
+
+const formatResponse = (warpcastAuthor: any, warpcastCast: any, neynarAuthor: any, neynarCast: any, warpcastAuthorApiStart: number, warpcastCastResponseStart: number) => ({
+  warpcast: {
+    author: { ...warpcastAuthor, durationInMs: performance.now() - warpcastAuthorApiStart },
+    cast: warpcastCast && Object.keys(warpcastCast).length > 0 ? { ...warpcastCast, durationInMs: performance.now() - warpcastCastResponseStart } : null,
+    name: "Warpcast API"
+  },
+  neynar: {
+    author: neynarAuthor,
+    cast: neynarCast && Object.keys(neynarCast).length > 0 ? neynarCast : null,
+    name: "Neynar API"
+  },
+});
+
+const formatEmptyResponse = (warpcastCast: any, neynarCast: any) => ({
+  warpcast: {
+    cast: warpcastCast,
+    name: "Warpcast API",
+    author: null
+  },
+  neynar: {
+    cast: neynarCast,
+    name: "Neynar API",
+    author: null
+  },
+});
+
+const formatErrorResponse = (error: any, warpcastCast: any = null, neynarCast: any = null) => {
+  const errorInfo = {
+    message: error.message,
+    name: error.name,
+    stack: error.stack,
+    response: error.response ? {
+      status: error.response.status,
+      statusText: error.response.statusText,
+      data: error.response.data,
+    } : null
+  };
+
+  return {
+    warpcast: {
+      cast: warpcastCast,
+      name: "Warpcast API",
+      author: null
+    },
+    neynar: {
+      cast: neynarCast,
+      name: "Neynar API",
+      author: null
+    },
+    error: errorInfo
+  };
+};
+
+const formatError = (error: any) => ({
+  error: {
+    message: error.message,
+    name: error.name,
+    stack: error.stack,
+    response: error.response ? {
+      status: error.response.status,
+      statusText: error.response.statusText,
+      data: error.response.data,
+    } : null
+  }
+});
 
 export async function fetchCastAndFidData(hash: string | null, fid: number | null) {
-if(!hash && !fid) return { apiData: null, hubData: null };
-const apiData = await fetchApiData(fid, hash);
-//check if apiData has a valid fid and hash, if not, return null
-
-if(apiData.error ||(!apiData.neynar && !apiData.warpcast)) return { apiData, hubData: null };
-//check if apiData has a valid fid and hash, if not, return null
-const processedFid = apiData.neynar?.cast?.fid ?? apiData.warpcast?.cast?.author?.fid ?? fid;
-const processedHash = apiData.neynar?.cast?.hash ?? apiData.warpcast?.cast?.hash ?? hash;
-if(!processedFid && !processedHash) return { apiData, hubData: null };
-const hubData = await fetchHubData(processedFid, processedHash);
- return { apiData, hubData }
+  if (!hash && !fid) return { apiData: null, hubData: null };
+  const apiData = await fetchApiData(fid, hash);
+  if (apiData.error || (!apiData.neynar && !apiData.warpcast)) return { apiData, hubData: null };
+  const processedFid = apiData.neynar?.cast?.fid ?? apiData.warpcast?.cast?.author?.fid ?? apiData.warpcast?.author?.fid ?? apiData.neynar?.author?.fid ?? fid;
+  let processedHash = apiData.neynar?.cast?.hash ?? apiData.warpcast?.cast?.hash ?? hash;
+if(isValidWarpcastUrl(processedHash)) {
+  processedHash = null
+}
+  if (!processedFid && !processedHash) return { apiData, hubData: null };
+  const hubData = await fetchHubData(processedFid, processedHash,apiData.neynar?.cast || apiData.warpcast?.cast);
+  return { apiData, hubData };
 }
 
-export async function fetchCastFromHub(hash: string | null, fid: number | null, hub: HubType,callAPIForNeynar: boolean = true) {
-  if(!fid || !hash) return null
-  const start = performance.now(); 
+export async function fetchCastFromHub(hash: string | null, fid: number | null, hub: HubType, isCast = true) {
+  if (!fid || !hash || !isCast) return null;
+  const start = performance.now();
   try {
-    let headers: { "Content-Type": string, api_key?: string,"x-airstack-hubs"?: string } = {"Content-Type": "application/json"};
-    if(hub.shortname === "Neynar hub" && callAPIForNeynar) {
-     return await fetchCastFromNeynarHub(hash,fid);
+    let headers: { "Content-Type": string, api_key?: string, "x-airstack-hubs"?: string } = { "Content-Type": "application/json" };
+    if (hub.shortname === "Neynar hub") {
+      headers.api_key = `${process.env.NEYNAR_API_KEY}`;
+    } else if (hub.shortname === "airstack") {
+      headers = { "Content-Type": "application/json", "x-airstack-hubs": process.env.NEXT_PUBLIC_AIRSTACK_API_KEY };
     }
-    else if(hub.shortname === "Neynar hub" && !callAPIForNeynar) {
-headers.api_key = `${process.env.NEYNAR_API_KEY}`;
-    }
-    else if(hub.shortname === "airstack") {
-      headers = { "Content-Type": "application/json", "x-airstack-hubs": process.env.NEXT_PUBLIC_AIRSTACK_API_KEY }
-    }
-      const response = await axios.get(`${hub.url}/v1/castById?fid=${fid}&hash=${hash}`, { headers });
-      const durationInMs = performance.now() - start;
-      return { data: response.data, durationInMs, error: null};
+    const response = await axios.get(`${hub.url}/v1/castById?fid=${fid}&hash=${hash}`, { headers });
+    const durationInMs = performance.now() - start;
+    return { data: response.data, durationInMs, error: null };
   } catch (e) {
     const durationInMs = performance.now() - start;
-      return { durationInMs, error: e, data: null };
-  }
-}
-
-export async function fetchCastFromNeynarHub(hash: string | null,fid: number) {
-  const start = performance.now(); 
-  const protocol = process.env.VERCEL_ENV && process.env.VERCEL_ENV !== "development" ? "https://" : "http://";
-  const url = process.env.VERCEL_PROJECT_PRODUCTION_URL ?? "localhost:3000";
-  const baseURL = `${protocol}${url}`
-  try {
-    const hubCastInfo = await axios.get(`${baseURL}/api/get_hub_cast/${hash}/${fid}`, { headers: { "Content-Type": "application-json", "Authorization": tokenBearer } })
-return hubCastInfo.data;
-  } catch (e) {
-    const durationInMs = performance.now() - start; 
-      return {durationInMs, error: e,cast: null}; 
+    return { durationInMs, error: formatError(e), data: null };
   }
 }
 
 export async function fetchCastFromNeynarAPI(identifier: string, isURL: boolean = false) {
-  //check if the identifier is a hash or a warpcast url
-
-  const start = performance.now(); // Start timing before the request
+  const start = performance.now();
   try {
-      const cast = await axios.get(`https://api.neynar.com/v2/farcaster/cast?identifier=${identifier}&type=${isURL ? 'url' : 'hash'}`,{
-        headers: {
-          "Content-Type": "application-json",
-          "api_key": `${process.env.NEYNAR_API_KEY}`
-        }
-      });
-      const durationInMs = performance.now() - start; // Calculate duration after the request
-      return { cast: cast.data.cast, durationInMs ,error: null }; // Return cast and duration
-  } catch (e) {
-    const durationInMs = performance.now() - start; // Calculate duration after the request
-      return {durationInMs, error: e,cast: null}; // Return error and duration
-  }
-}
-
-export async function fetchFidFromHub(fid: number | null, hub: HubType,callAPIForNeynar: boolean = true) {
-  if(!fid) return { data: null, durationInMs: 0, error: "No fid provided" };
-  const start = performance.now(); 
-  try {
-    let headers: { "Content-Type": string, api_key?: string, "x-airstack-hubs"?: string } = {"Content-Type": "application/json"};
-    if(hub.shortname === "Neynar hub" && callAPIForNeynar) {
-     return await fetchFidFromNeynarHub(fid);
-    }
-    else if(hub.shortname === "Neynar hub" && !callAPIForNeynar) {
-headers.api_key = `${process.env.NEYNAR_API_KEY}`;
-    }
-    else if(hub.shortname === "airstack") {
-      headers = { "Content-Type": "application/json", "x-airstack-hubs": process.env.NEXT_PUBLIC_AIRSTACK_API_KEY }
-    }
-      const response = await axios.get(`${hub.url}/v1/userDataByFid?fid=${fid}`, { headers });
-      const durationInMs = performance.now() - start;
-      return { data: response.data, durationInMs, error: null};
+    const cast = await axios.get(`https://api.neynar.com/v2/farcaster/cast?identifier=${identifier}&type=${isURL ? 'url' : 'hash'}`, {
+      headers: {
+        "Content-Type": "application-json",
+        "api_key": `${process.env.NEYNAR_API_KEY}`
+      }
+    });
+    const durationInMs = performance.now() - start;
+    return { cast: cast.data.cast, durationInMs, error: null };
   } catch (e) {
     const durationInMs = performance.now() - start;
-      return { durationInMs, error: e, data: null };
+    return { durationInMs, error: formatError(e), cast: null };
   }
 }
 
-export async function fetchFidFromNeynarHub(fid: number) {
-  const start = performance.now(); 
-  const protocol = process.env.VERCEL_ENV && process.env.VERCEL_ENV !== "development" ? "https://" : "http://";
-  const url = process.env.VERCEL_PROJECT_PRODUCTION_URL ?? "localhost:3000";
-  const baseURL = `${protocol}${url}`
+export async function fetchFidFromHub(fid: number | null, hub: HubType,isCast = true) {
+  if (!fid || isCast) return null
+  const start = performance.now();
   try {
-    const hubCastInfo = await axios.get(`${baseURL}/api/get_hub_fid/${fid}`, { headers: { "Content-Type": "application-json","Authorization": tokenBearer } })
-return hubCastInfo.data;
+    let headers: { "Content-Type": string, api_key?: string, "x-airstack-hubs"?: string } = { "Content-Type": "application/json" };
+    if (hub.shortname === "Neynar hub") {
+      headers.api_key = `${process.env.NEYNAR_API_KEY}`;
+    } else if (hub.shortname === "airstack") {
+      headers = { "Content-Type": "application/json", "x-airstack-hubs": process.env.NEXT_PUBLIC_AIRSTACK_API_KEY };
+    }
+    const response = await axios.get(`${hub.url}/v1/userDataByFid?fid=${fid}`, { headers });
+    const durationInMs = performance.now() - start;
+    const verificationsResponse = await axios.get(`${hub.url}/v1/verificationsByFid?fid=2?fid=${fid}`, { headers });
+    
+    return { data: {...response.data,verifications: verificationsResponse.data, durationInMs, error: null }};
   } catch (e) {
-    const durationInMs = performance.now() - start; 
-      return {durationInMs, error: e,cast: null}; 
+    const durationInMs = performance.now() - start;
+    return { durationInMs, error: formatError(e), data: null };
   }
 }
 
@@ -269,53 +284,46 @@ function isEmbedVideoValid(url: string): boolean {
 
 export async function getEmbedType(url: string) {
   const isImage = await isEmbedImageValid(url);
-  if(isImage) return {type: "image", url};
+  if (isImage) return { type: "image", url };
 
   const isVideo = isEmbedVideoValid(url);
-  if(isVideo) return {type: "video", url};
+  if (isVideo) return { type: "video", url };
 
   return null;
 }
 
 export async function fetchAuthorFromNeynarAPI(identifier: string) {
-  let durationInMs = 0
+  let durationInMs = 0;
   try {
-
-    //check if a warpcast url
     const isURL = isValidWarpcastUrl(identifier);
-    //check if a number
-    const start = performance.now(); // Start timing before the request
-    if(!isURL) {
-      const authorData = await axios.get(`https://api.neynar.com/v2/farcaster/user/bulk?fids=${identifier}`,{
+    const start = performance.now();
+    if (!isURL) {
+      const authorData = await axios.get(`https://api.neynar.com/v2/farcaster/user/bulk?fids=${identifier}`, {
         headers: {
           "Content-Type": "application-json",
           "api_key": `${process.env.NEYNAR_API_KEY}`
         }
       });
-      const author = authorData.data.users[0]
-      durationInMs = performance.now() - start; // Calculate duration after the request
-      return { author, durationInMs, error: null }; // Return cast and duration
-    }
-    else {
-      //extract user
+      const author = authorData.data.users[0];
+      durationInMs = performance.now() - start;
+      return { author, durationInMs, error: null };
+    } else {
       const username = identifier.split("/")[3];
-        const start = performance.now(); // Start timing before the request
-      const authorData = await axios.get(`https://api.neynar.com/v1/farcaster/user-by-username?username=${username}`,{
+      const authorData = await axios.get(`https://api.neynar.com/v1/farcaster/user-by-username?username=${username}`, {
         headers: {
           "Content-Type": "application-json",
           "api_key": `${process.env.NEYNAR_API_KEY}`
         }
       });
-      durationInMs = performance.now() - start; // Calculate duration after the request
-      return { author: authorData,durationInMs, error: null }; // Return cast and duration
+      durationInMs = performance.now() - start;
+      return { author: authorData.data.result.user, durationInMs, error: null };
     }
   } catch (e) {
-      return { error: e, durationInMs,author: null }; // Return error and duration
+    return { error: formatError(e), durationInMs, author: null };
   }
 }
 
 export const isValidWarpcastUrl = (url: string | null) => {
-  if(!url) return false;
-  const warpcastUrlPattern = /^https:\/\/warpcast\.com\/[a-zA-Z0-9_-]+\/0x[0-9a-fA-F]{8}$/;
-  return warpcastUrlPattern.test(url);
+  if (!url) return false;
+  return url.includes('https://warpcast.com');
 };
