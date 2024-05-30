@@ -96,20 +96,22 @@ const fetchApiData = async (fid: number | null, identifier: string | null): Prom
 };
 
 const fetchWarpcastCast = async (hash: string | null, isWarpcastURL: boolean, identifier: string | null) => {
+  const start = performance.now();
+  let cast = null;
   if (!isWarpcastURL) {
     const response = await axios.get(`https://api.warpcast.com/v2/cast?hash=${hash}`, {
       headers: { 'Content-Type': 'application/json' }
     });
-    return response.data?.result?.cast || null as any;
+    cast = response.data?.result?.cast || null
   } else if (identifier && identifier.split("/").length > 3) {
     const username = identifier.split("/")[3];
     const hashPrefix = identifier.split("/")[4];
     const response = await axios.get(`https://api.warpcast.com/v2/user-thread-casts?castHashPrefix=${hashPrefix}&username=${username}&limit=15`, {
       headers: { 'Content-Type': 'application/json' }
     });
-    return response.data?.result?.casts.find((cast: any) => cast.hash.startsWith(hashPrefix)) || null as any;
+    cast = response.data?.result?.casts.find((cast: any) => cast.hash.startsWith(hashPrefix)) || null as any;
   }
-  return null;
+  return { ...cast, durationInMs: performance.now() - start, error: null };
 };
 
 const fetchWarpcastAuthor = async (identifier: string | null) => {
@@ -219,8 +221,6 @@ export async function fetchCastFromHub(hash: string | null, fid: number | null, 
     let headers: { "Content-Type": string, api_key?: string, "x-airstack-hubs"?: string } = { "Content-Type": "application/json" };
     if (hub.shortname === "Neynar hub") {
       headers.api_key = `${process.env.NEYNAR_API_KEY}`;
-    } else if (hub.shortname === "airstack") {
-      headers = { "Content-Type": "application/json", "x-airstack-hubs": process.env.NEXT_PUBLIC_AIRSTACK_API_KEY };
     }
     const response = await axios.get(`${hub.url}/v1/castById?fid=${fid}&hash=${hash}`, { headers });
     const durationInMs = performance.now() - start;
@@ -255,14 +255,12 @@ export async function fetchFidFromHub(fid: number | null, hub: HubType,isCast = 
     let headers: { "Content-Type": string, api_key?: string, "x-airstack-hubs"?: string } = { "Content-Type": "application/json" };
     if (hub.shortname === "Neynar hub") {
       headers.api_key = `${process.env.NEYNAR_API_KEY}`;
-    } else if (hub.shortname === "airstack") {
-      headers = { "Content-Type": "application/json", "x-airstack-hubs": process.env.NEXT_PUBLIC_AIRSTACK_API_KEY };
     }
     const response = await axios.get(`${hub.url}/v1/userDataByFid?fid=${fid}`, { headers });
     const durationInMs = performance.now() - start;
     const verificationsResponse = await axios.get(`${hub.url}/v1/verificationsByFid?fid=2?fid=${fid}`, { headers });
     
-    return { data: {...response.data,verifications: verificationsResponse.data, durationInMs, error: null }};
+    return {...response.data,verifications: verificationsResponse.data, durationInMs, error: null };
   } catch (e) {
     const durationInMs = performance.now() - start;
     return { durationInMs, error: formatError(e), data: null };

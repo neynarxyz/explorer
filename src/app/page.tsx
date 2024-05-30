@@ -1,4 +1,5 @@
 import { CastComponent } from '@/components/cast-component';
+import { ProfileComponent } from '@/components/profile-component';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { FIDPFP, exampleCast, warpcastURLCast, warpcastURLCastURL, warpcastURLPFP, warpcastURLProfile } from '@/constants';
 import Link from 'next/link';
@@ -22,21 +23,12 @@ export default function Home() {
         <div className='flex flex-row space-x-2'>
        <div className='flex flex-col space-y-2 w-full items-center justify-center '>
        <p className='text-center'>Example FID</p>
-        <Link href={`/3`}>
-        <Avatar >
-    <AvatarImage alt={`@dwr.eth`} src={FIDPFP} />
-    <AvatarFallback>{"DW"}</AvatarFallback>
-  </Avatar>
-        </Link>
+        <ProfileComponent pfp={FIDPFP} url={"3"} />
         </div>
         <div className='flex flex-col space-y-2 w-full items-center justify-center '>
        <p className='text-center'>Example Warpcast Profile</p>
-        <Link href={`/${encodeURIComponent(warpcastURLProfile)}`}>
-        <Avatar >
-    <AvatarImage alt={`@dylsteck.eth`} src={warpcastURLPFP} />
-    <AvatarFallback>{"DY"}</AvatarFallback>
-  </Avatar>
-        </Link>
+       <ProfileComponent pfp={warpcastURLPFP} url={warpcastURLProfile} />
+       
         </div>
         </div>
       
