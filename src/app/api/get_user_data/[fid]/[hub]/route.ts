@@ -7,21 +7,33 @@ export async function GET(
 ) { 
   
   let body: any = ['initial']
-  const client = await createClient(params.hub);
-  const userData = await client.getUserDataByFid({ fid: params.fid }, )    
-  userData.map((data) => { 
-    body = data.messages.map((msg) => {
-      return {
-        ...msg,
-        hash: bytesToHexString(msg.hash),
-        signature: bytesToHexString(msg.signature),
-        signer: bytesToHexString(msg.signer)
-      }
-    })
-  })
-  
-  client.close()
-  return NextResponse.json(body)
+
+
+  try {
+    const client = await createClient(params.hub);
+
+    try {
+      const userData = await client.getUserDataByFid({ fid: params.fid }, )    
+      userData.map((data) => { 
+        body = data.messages.map((msg) => {
+          return {
+            ...msg,
+            hash: bytesToHexString(msg.hash),
+            signature: bytesToHexString(msg.signature),
+            signer: bytesToHexString(msg.signer)
+          }
+        })
+      })
+
+      client.close()
+      return NextResponse.json(body)
+    } catch (err) {
+      client.close()
+      return NextResponse.json({ error: 'Error fetching user data', details: err }, { status: 500 });
+    }
+  } catch (error) {
+    return NextResponse.json({ error: 'Error fetching user data', details: error }, { status: 500 });
+  }
 }
 
 const createClient = async ( hub: string) : Promise<HubRpcClient> => {

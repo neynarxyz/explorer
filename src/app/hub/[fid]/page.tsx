@@ -14,8 +14,12 @@ export default function Page(props: Props) {
 
   useEffect(() => {
     const fetchData = async () => {
-      const response = await axios.get(`http://localhost:3000/api/get_user_data/${props.params.fid}/${props.searchParams.hub}`)
-      setResp(response.data)
+      try {
+        const response = await axios.get(`http://localhost:3000/api/get_user_data/${props.params.fid}/${props.searchParams.hub}`)
+        setResp(response.data)
+      } catch (error) {
+        setResp(error as JSON)
+      }
     };
 
     fetchData();
