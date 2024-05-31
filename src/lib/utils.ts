@@ -50,8 +50,10 @@ const fetchApiData = async (fid: number | null, identifier: string | null): Prom
     if (identifier && (!isWarpcastURL || identifier.split("/").length >= 5)) {
       try {
        neynarCast = await fetchCastFromNeynarAPI(identifier, isWarpcastURL);
+       if (neynarCast && neynarCast.cast.hash) {
         authorFid = authorFid || neynarCast?.author?.fid || null;
         hash = neynarCast?.cast?.hash || hash;
+       }
       } catch (error) {
         neynarCast = formatError(error);
       }
@@ -60,7 +62,7 @@ const fetchApiData = async (fid: number | null, identifier: string | null): Prom
         warpcastCastResponseStart = performance.now();
         
         warpcastCast = await fetchWarpcastCast(hash, isWarpcastURL, identifier);
-        if (warpcastCast) {
+        if (warpcastCast && warpcastCast.hash) {
           authorFid = authorFid || warpcastCast?.author?.fid || null;
           hash = warpcastCast?.hash || hash;
         }
