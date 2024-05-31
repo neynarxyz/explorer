@@ -11,10 +11,9 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-
   return (
     <html lang="en">
-      <body className="relative h-full pt-10"> {/* Added pt-20 for padding-top */}
+      <body className="relative h-screen flex flex-col items-center justify-center min-h-screen">
         <Providers>
           <div className="absolute top-0 left-0 p-2">
             <Link href="https://www.neynar.com" target="_blank">
@@ -23,17 +22,17 @@ export default function RootLayout({
           </div>
           <div className="absolute top-5 left-1/2 transform -translate-x-1/2 p-2">
             <Link href="/" className="text-black font-bold">
-              <p className="text-lg md:text-xl">Farcaster Explorer</p>
+              <p className="text-md md:text-">Farcaster Explorer</p>
             </Link>
           </div>
-          <div className="w-full flex justify-center mt-16"> {/* Added mt-16 for margin-top */}
+          <div className="w-full absolute top-10 justify-center mt-12 max-h-32 max-w-sm md:max-w-md">
             <Search />
-          </div>
-          <div className="w-full px-4 md:px-8">
+      </div>
+          <div className="w-full px-4 md:px-8 mt-24 md:mt-0 flex flex-col ">
             {children}
           </div>
         </Providers>
       </body>
     </html>
   );
-}  
+}
