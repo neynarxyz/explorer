@@ -1,11 +1,8 @@
+'use client'
+import Modal from "@/components/modal-component";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { fetchCastAndFidData } from "@/lib/utils";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible"
-import { CollapsibleCodeComponent } from "@/components/collapsible-code";
-
+import { useEffect, useState } from "react";
 
 interface ResponseProps {
   params: { identifier: string };
@@ -15,17 +12,54 @@ const isNumeric = (str: string): boolean => {
   return !isNaN(Number(str)) && !isNaN(parseFloat(str)) && !/^0x/.test(str);
 }
 
-export default async function Page({ params }: ResponseProps) {
-  const identifier = decodeURIComponent(params.identifier);
+const renderSkeletonHeader = () => (
+  <Card className="rounded-lg relative border-black md:p-8 text-xl min-w-40 flex flex-col items-center justify-center">
+    <div className="w-full flex flex-col items-center animate-pulse">
+      <CardHeader className="text-center relative z-10 md:text-lg text-sm w-full">
+        <div className="h-6 bg-gray-300 rounded w-24 mb-2"></div>
+      </CardHeader>
+      <hr className="w-full border-t border-gray-300 my-2" />
+      <CardContent className="flex items-center justify-center text-6xl w-full">
+        <div className="h-12 bg-gray-300 rounded-full w-12"></div>
+      </CardContent>
+    </div>
+  </Card>
+);
 
+export default function Page({ params }: ResponseProps) {
+  const identifier = decodeURIComponent(params.identifier);
   const fid: number | null = isNumeric(identifier) ? Number(identifier) : null;
   const hash = fid ? null : identifier;
-  const data = await fetchCastAndFidData(hash, fid) as any;
+  const [data, setData] = useState<any>(null);
+  const [modalData, setModalData] = useState<any>(null);
+  const [modalTitle, setModalTitle] = useState<string>("");
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  if (!data) return null;
+  const fetchData = async () => {
+    setLoading(true);
+    const data = await fetchCastAndFidData(hash, fid) as any;
+    setData(data);
+    setLoading(false);
+  }
 
-  const { warpcast, neynar } = data.apiData;
-  const hubs = data.hubData ?? [];
+  useEffect(() => {
+    fetchData();
+  }, [hash, fid]);
+
+  const openModal = (title: string, response: any) => {
+    setModalTitle(title);
+    setModalData(response);
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setModalData(null);
+  };
+
+  const { warpcast, neynar } = data?.apiData ?? {};
+  const hubs = data?.hubData ?? [];
   const nemes = hubs[0] ?? {};
   const neynarHub = hubs[1] ?? {};
   const { author: nemesAuthor, cast: nemesCast } = nemes || {};
@@ -33,112 +67,46 @@ export default async function Page({ params }: ResponseProps) {
   const { author: warpcastAuthor, cast: warpcastCast } = warpcast || {};
   const { author: neynarAuthor, cast: neynarCast } = neynar || {};
 
-
+  const renderHeader = (label: string, data: any) => (
+    <Card className="hover:bg-slate-100 rounded-lg relative border-black md:p-8 text-xl min-w-40 flex flex-col items-center justify-center">
+      <button onClick={() => openModal(label, data)} className="w-full flex flex-col items-center">
+        <CardHeader className="text-center relative z-10 md:text-lg text-sm w-full">
+          {label}
+        </CardHeader>
+        <hr className="w-full border-t border-black my-2" />
+        <CardContent className="flex items-center justify-center text-6xl w-full">
+          {data?.error ? '❌' : '✅'}
+        </CardContent>
+      </button>
+    </Card>
+  );
 
   return (
-    <div className="flex flex-col items-center justify-center space-y-4 p-2">     
-      <div className="w-full flex flex-col md:flex-row justify-center items-start p-2 space-x-0 md:space-x-8 space-y-4 md:space-y-0">
-        {warpcastAuthor && (
-          <div>
-         
-            <CollapsibleCodeComponent triggerContent={    <h3 className="text-center">
-              Warpcast API FID Response: {warpcastAuthor?.error ? '❌' : '✅'} ({warpcastAuthor?.durationInMs?.toFixed(2)} ms)
-            </h3>}>
-            <pre className="bg-gray-800 text-white p-2 rounded w-full md:w-auto font-mono text-sm max-w-lg max-h-72 overflow-y-scroll overflow-x-scroll">
-              {JSON.stringify(warpcastAuthor, null, 2)}
-            </pre>
-            </CollapsibleCodeComponent> 
-          </div>
-        )}
-        {warpcastCast && (
-          <div>
-            <CollapsibleCodeComponent triggerContent={   <h3 className="text-center">
-              Warpcast API Cast Response: {warpcastCast?.error ? '❌' : '✅'} ({warpcastCast?.durationInMs?.toFixed(2)} ms)
-            </h3>}>
-            <pre className="bg-gray-800 text-white p-2 rounded w-full md:w-auto font-mono text-sm max-w-lg max-h-72 overflow-y-scroll overflow-x-scroll">
-              {JSON.stringify(warpcastCast, null, 2)}
-            </pre>
-            </CollapsibleCodeComponent>
-          </div>
-        )}
+    <>
+      <Modal isOpen={isModalOpen} toggleModal={closeModal} response={modalData} title={modalTitle} />
+      <div className="flex flex-col w-full items-center justify-center">
+        <div className="w-full flex md:flex-row flex-col justify-center items-center md:space-x-0 ">
+          {loading ? (
+            <>
+              {renderSkeletonHeader()}
+              {renderSkeletonHeader()}
+              {renderSkeletonHeader()}
+              {renderSkeletonHeader()}
+            </>
+          ) : (
+            <>
+              {warpcastAuthor && renderHeader('Warpcast API', warpcastAuthor)}
+              {warpcastCast && renderHeader('Warpcast API', warpcastCast)}
+              {nemesAuthor && renderHeader('Warpcast Hub', nemesAuthor)}
+              {nemesCast && renderHeader('Warpcast Hub', nemesCast)}
+              {neynarHubAuthor && renderHeader('Neynar Hub', neynarHubAuthor)}
+              {neynarHubCast && renderHeader('Neynar Hub', neynarHubCast)}
+              {neynarAuthor && renderHeader('Neynar API', neynarAuthor)}
+              {neynarCast && renderHeader('Neynar API', neynarCast)}
+            </>
+          )}
+        </div>
       </div>
-      <div className="w-full flex flex-col md:flex-row justify-center items-start p-2 space-x-0 md:space-x-8 space-y-4 md:space-y-0">
-        {nemesAuthor && (
-          <div>
-        
-            <CollapsibleCodeComponent triggerContent={    <h3 className="text-center">
-              Warpcast Hub FID Response: {nemesAuthor?.error ? '❌' : '✅'} ({nemesAuthor?.durationInMs?.toFixed(2)} ms)
-            </h3>}>
-            <pre className="bg-gray-800 text-white p-2 rounded w-full md:w-auto font-mono text-sm max-w-lg max-h-72 overflow-y-scroll overflow-x-scroll">
-              {JSON.stringify(nemesAuthor, null, 2)}
-            </pre>
-            </CollapsibleCodeComponent>
-          </div>
-        )}
-        {nemesCast && (
-          <div>
-          
-            <CollapsibleCodeComponent triggerContent={   <h3 className="text-center">
-              Warpcast Hub Cast Response: {nemesCast?.error ? '❌' : '✅'} ({nemesCast?.durationInMs?.toFixed(2)} ms)
-            </h3>}>
-            <pre className="bg-gray-800 text-white p-2 rounded w-full md:w-auto font-mono text-sm max-w-lg max-h-72 overflow-y-scroll overflow-x-scroll">
-              {JSON.stringify(nemesCast, null, 2)}
-            </pre>
-            </CollapsibleCodeComponent>
-          </div>
-        )}
-      </div>
-      <div className="w-full flex flex-col md:flex-row justify-center items-start p-2 space-x-0 md:space-x-8 space-y-4 md:space-y-0">
-        {neynarHubAuthor && (
-          <div>
-            <CollapsibleCodeComponent triggerContent={   <h3 className="text-center">
-              Neynar Hub FID Response: {neynarHubAuthor?.error ? '❌' : '✅'} ({neynarHubAuthor?.durationInMs?.toFixed(2)} ms)
-            </h3>}>
-            <pre className="bg-gray-800 text-white p-2 rounded w-full md:w-auto font-mono text-sm max-w-lg max-h-72 overflow-y-scroll overflow-x-scroll">
-              {JSON.stringify(neynarHubAuthor, null, 2)}
-            </pre>
-            </CollapsibleCodeComponent>
-          </div>
-        )}
-        {neynarHubCast && (
-          <div>
-         
-            <CollapsibleCodeComponent triggerContent={   <h3 className="text-center">
-              Neynar Hub Cast Response: {neynarHubCast?.error ? '❌' : '✅'} ({neynarHubCast?.durationInMs?.toFixed(2)} ms)
-            </h3>}>
-            <pre className="bg-gray-800 text-white p-2 rounded w-full md:w-auto font-mono text-sm max-w-lg max-h-72 overflow-y-scroll overflow-x-scroll">
-              {JSON.stringify(neynarHubCast, null, 2)}
-            </pre>
-            </CollapsibleCodeComponent>
-          </div>
-        )}
-      </div>
-      <div className="w-full flex flex-col md:flex-row justify-center items-start p-2 space-x-0 md:space-x-8 space-y-4 md:space-y-0">
-        {neynarAuthor && (
-          <div>
-        
-            <CollapsibleCodeComponent triggerContent={  <h3 className="text-center">
-              Neynar API FID Response: {neynarAuthor?.error ? '❌' : '✅'} ({neynarAuthor?.durationInMs?.toFixed(2)} ms)
-            </h3>}> 
-            <pre className="bg-gray-800 text-white p-2 rounded w-full md:w-auto font-mono text-sm max-w-lg max-h-72 overflow-y-scroll overflow-x-scroll">
-              {JSON.stringify(neynarAuthor, null, 2)}
-            </pre>
-            </CollapsibleCodeComponent>
-          </div>
-        )}
-        {neynarCast && (
-          <div>
-       
-            <CollapsibleCodeComponent triggerContent={  <h3 className="text-center">
-              Neynar API Cast Response: {neynarCast?.error ? '❌' : '✅'} ({neynarCast?.durationInMs?.toFixed(2)} ms)
-            </h3>}>
-            <pre className="bg-gray-800 text-white p-2 rounded w-full md:w-auto font-mono text-sm max-w-lg max-h-72 overflow-y-scroll overflow-x-scroll">
-              {JSON.stringify(neynarCast, null, 2)}
-            </pre>
-            </CollapsibleCodeComponent>
-          </div>
-        )}
-      </div>
-    </div>
+    </>
   );
 }

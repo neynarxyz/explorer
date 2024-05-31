@@ -1,8 +1,8 @@
+'use client'
 import { CastComponent } from '@/components/cast-component';
 import { ProfileComponent } from '@/components/profile-component';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { FIDPFP, exampleCast, warpcastURLCast, warpcastURLCastURL, warpcastURLPFP, warpcastURLProfile } from '@/constants';
-import Link from 'next/link';
+
 
 export default function Home() {
 
