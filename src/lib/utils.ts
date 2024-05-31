@@ -96,8 +96,11 @@ const fetchApiData = async (fid: number | null, identifier: string | null): Prom
 };
 
 const fetchWarpcastCast = async (hash: string | null, isWarpcastURL: boolean, identifier: string | null) => {
-  const start = performance.now();
+  
   let cast = null;
+  try {
+
+  
   if (!isWarpcastURL) {
     const response = await axios.get(`https://api.warpcast.com/v2/cast?hash=${hash}`, {
       headers: { 'Content-Type': 'application/json' }
@@ -112,10 +115,16 @@ const fetchWarpcastCast = async (hash: string | null, isWarpcastURL: boolean, id
     cast = response.data?.result?.casts.find((cast: any) => cast.hash.startsWith(hashPrefix)) || null as any;
   }
   return { ...cast, error: null };
+}
+catch(error) {
+  return {error}
+}
 };
 
 const fetchWarpcastAuthor = async (identifier: string | null) => {
   //its a fid
+try {
+
 
   const isWarpcastURL = isValidWarpcastUrl(identifier);
 
@@ -132,6 +141,10 @@ const fetchWarpcastAuthor = async (identifier: string | null) => {
     return response.data?.result?.user || null
   }
   return null;
+}
+catch(error) {
+  return {error}
+}
 };
 
 const formatResponse = (warpcastAuthor: any, warpcastCast: any, neynarAuthor: any, neynarCast: any, warpcastAuthorApiStart: number, warpcastCastResponseStart: number) => ({
