@@ -71,7 +71,7 @@ const fetchApiData = async (fid: number | null, identifier: string | null): Prom
       }
     }
 
-    if (fid || (isWarpcastURL && identifier && identifier.split("/").length === 4)) {
+    if (authorFid || (isWarpcastURL && identifier && identifier.split("/").length === 4)) {
       try {
         neynarAuthor = await fetchAuthorFromNeynarAPI(authorFid?.toString() ?? identifier as any);
       } catch (error) {
