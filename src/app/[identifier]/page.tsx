@@ -89,7 +89,7 @@ export default function Page({ params }: ResponseProps) {
         <div className="w-full flex md:flex-row flex-col justify-center items-center md:space-x-0 ">
           {loading ? (
             <>
-              {renderSkeletonHeader()}
+              {/* {renderSkeletonHeader()} */}
               {renderSkeletonHeader()}
               {renderSkeletonHeader()}
               {renderSkeletonHeader()}
