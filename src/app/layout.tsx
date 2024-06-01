@@ -13,6 +13,17 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+         <head>
+        <meta property="og:title" content="Farcaster Explorer" />
+        <meta property="og:description" content="Explore the Farcaster network with ease." />
+        <meta property="og:image" content="/neynar.png" />
+        <meta property="og:url" content="https://www.neynar.com" />
+        <meta property="og:type" content="website" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Farcaster Explorer" />
+        <meta name="twitter:description" content="Explore the Farcaster network with ease." />
+        <meta name="twitter:image" content="/neynar.png" />
+      </head>
       <body className="relative h-screen flex flex-col items-center justify-center min-h-screen">
         <Providers>
           <div className="absolute top-0 left-0 p-2">
