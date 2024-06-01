@@ -68,8 +68,9 @@ export default function Page({ params }: ResponseProps) {
   const { author: neynarAuthor, cast: neynarCast } = neynar || {};
 
   const renderHeader = (label: string, data: any) => (
+    <button onClick={() => openModal(label, data)}>
     <Card className="hover:bg-slate-100 rounded-lg relative border-black md:p-8 text-xl min-w-40 flex flex-col items-center justify-center">
-      <button onClick={() => openModal(label, data)} className="w-full flex flex-col items-center">
+
         <CardHeader className="text-center relative z-10 md:text-lg text-sm w-full">
           {label}
         </CardHeader>
@@ -77,8 +78,8 @@ export default function Page({ params }: ResponseProps) {
         <CardContent className="flex items-center justify-center text-6xl w-full">
           {data?.error ? '❌' : '✅'}
         </CardContent>
-      </button>
     </Card>
+    </button>
   );
 
   return (
@@ -95,8 +96,8 @@ export default function Page({ params }: ResponseProps) {
             </>
           ) : (
             <>
-              {warpcastAuthor && renderHeader('Warpcast API', warpcastAuthor)}
-              {warpcastCast && renderHeader('Warpcast API', warpcastCast)}
+              {/* {warpcastAuthor && renderHeader('Warpcast API', warpcastAuthor)}
+              {warpcastCast && renderHeader('Warpcast API', warpcastCast)} */}
               {nemesAuthor && renderHeader('Warpcast Hub', nemesAuthor)}
               {nemesCast && renderHeader('Warpcast Hub', nemesCast)}
               {neynarHubAuthor && renderHeader('Neynar Hub', neynarHubAuthor)}
