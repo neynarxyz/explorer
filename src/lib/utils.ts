@@ -223,6 +223,8 @@ export async function fetchCastAndFidData(hash: string | null, fid: number | nul
   if (apiData.error || (!apiData.neynar && !apiData.warpcast)) return { apiData, hubData: null };
   const processedFid = apiData.neynar?.cast?.author?.fid ?? apiData.warpcast?.cast?.author?.fid ?? apiData.warpcast?.author?.fid ?? apiData.neynar?.author?.fid ?? fid;
   let processedHash = apiData.neynar?.cast?.hash ?? apiData.warpcast?.cast?.hash ?? hash;
+  console.log("processedFid", processedFid)
+  console.log("processedHash", processedHash)
 if(isValidWarpcastUrl(processedHash)) {
   processedHash = null
 }
