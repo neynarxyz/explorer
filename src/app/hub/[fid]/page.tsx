@@ -2,6 +2,7 @@
 
 import axios from "axios";
 import { useEffect, useState } from "react";
+import ReactDiffViewer from 'react-diff-viewer-continued';
 
 interface Props {
   params: { fid: number };
@@ -31,9 +32,11 @@ export default function Page(props: Props) {
       {resp === undefined ? (
         <div>Loading...</div>
       ) : (
-        <pre className="bg-gray-800 text-white p-2 rounded w-full md:w-auto font-mono text-sm max-w-lg max-h-80 overflow-y-scroll overflow-x-scroll">
-          {JSON.stringify(resp, null, 2)}
-        </pre>
+        <div className="flex justify-center w-full">
+          <pre className="bg-gray-800 text-white p-2 rounded w-full font-mono text-sm overflow-y-scroll overflow-x-scroll">
+            <ReactDiffViewer oldValue={JSON.stringify(resp, null, 2)} newValue={JSON.stringify(resp, null, 2)} splitView={true} />
+          </pre>
+        </div>
       )}
     </div>
   )
