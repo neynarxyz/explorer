@@ -19,7 +19,11 @@ type Cast = {
 };
 
 const fetcher = async (url: string) => {
-  const response = await axios.get(url);
+  const response = await axios.get(url, {
+    headers: {
+      'api_key': process.env.NEXT_PUBLIC_NEYNAR_API_KEY,
+    },
+  });
   return response.data.result.casts;
 };
 
@@ -27,7 +31,7 @@ export default function LatestCasts() {
   const apiKey = process.env.NEXT_PUBLIC_NEYNAR_API_KEY ?? "";
   const [casts, setCasts] = useState<Cast[]>([]);
   const { data, error } = useSWR(
-    `https://api.neynar.com/v1/farcaster/recent-casts?api_key=${apiKey}&limit=75`,
+    `https://api.neynar.com/v1/farcaster/recent-casts?limit=75`,
     fetcher
   );
 
