@@ -12,7 +12,7 @@ export function ProfileComponent({ pfp, url, headerText }: any) {
       <Card className="w-full hover:bg-slate-100 flex flex-col rounded-lg max-w-md md:min-w-64 md:min-h-32 items-center justify-center">
       {headerText && headerText.length > 0 &&
             <div className="pl-3 pb-1.5 border-b border-black/75 w-full">
-              <p>{headerText}</p>
+              <p className="font-medium text-black/90">{headerText}</p>
             </div>
         }
         <CardContent className="p-4 w-full flex flex-col justify-center items-center space-y-10">

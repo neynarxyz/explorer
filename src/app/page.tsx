@@ -14,30 +14,16 @@ import {
 
 export default function Home() {
   return (
-    <div className="flex flex-col items-center space-y-4 p-2 mt-[25%] md:mt-[12.5%] lg:mt-[15%]">
-      <div className="flex flex-col items-center space-y-4 p-5 m-5 mt-0">
-        <div className="flex flex-col w-full space-y-4">
-          <div className="flex flex-row space-x-2">
-            <div className="flex flex-col space-y-2 items-center justify-center w-full">
-              <CastComponent cast={exampleCast} headerText="Example hash" />
-            </div>
-            <div className="flex flex-col space-y-2 items-center justify-center w-full">
-              <CastComponent cast={warpcastURLCast} warpcastUrl={warpcastURLCastURL} headerText="Example Warpcast cast url" />
-            </div>
-          </div>
-          <div className="flex flex-row space-x-2">
-            <div className="flex flex-col space-y-2 items-center justify-center w-full">
-              <ProfileComponent pfp={FIDPFP} url="3" headerText="Example FID" />
-            </div>
-            <div className="flex flex-col space-y-2 items-center justify-center w-full">
-              <ProfileComponent pfp={warpcastURLPFP} url={warpcastURLProfile} headerText="Example Warpcast profile url" />
-            </div>
-          </div>
+    <div className="flex flex-col items-center space-y-4 mt-10 w-full">
+        <div className="flex flex-col gap-2 md:flex-row md:gap-0 justify-center md:justify-between w-[100%]">
+          <CastComponent cast={exampleCast} headerText="Example hash" />
+          <CastComponent cast={warpcastURLCast} warpcastUrl={warpcastURLCastURL} headerText="Example Warpcast cast url" />
         </div>
-        <div className="w-full mt-10">
-          <LatestCasts />
+        <div className="flex flex-col gap-2 md:flex-row md:gap-0 justify-center md:justify-between w-[100%]">
+          <ProfileComponent pfp={FIDPFP} url="3" headerText="Example FID" />
+          <ProfileComponent pfp={warpcastURLPFP} url={warpcastURLProfile} headerText="Example Warpcast profile url" />
         </div>
-      </div>
+        <LatestCasts />
     </div>
   )
 }

@@ -56,12 +56,12 @@ export default function LatestCasts() {
   if (!data) return <div>Loading...</div>;
 
   return (
-    <div className="w-full pb-24 overflow-auto h-screen mt-5">
+    <div className="w-[100%] pb-24 h-screen mt-10">
       <p className="text-xl font-semibold mt-3 mb-2">🚨 Latest Casts</p>
-      <div className="container mx-auto min-w-3xl my-12 px-8">
+      <div className="w-[100%] flex flex-col gap-3 items-start mx-auto min-w-3xl my-4">
         {casts.length === 0 && <div>Waiting for first cast...</div>}
         {casts.map((cast) => (
-          <div key={`cast-${cast.hash}`} className="min-w-full">
+          <div key={`cast-${cast.hash}`}>
             <CastComponent cast={cast} />
           </div>
         ))}

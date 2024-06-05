@@ -12,7 +12,7 @@ export function CastComponent({ cast, warpcastUrl, headerText }: any) {
       <Card className="w-full hover:bg-slate-100 rounded-lg max-w-md md:min-w-64">
         {headerText && headerText.length > 0 &&
           <div className="p-3 pt-1.5 pb-2 border-b border-black/75 w-full">
-            <p>{headerText}</p>
+            <p className="font-medium text-black/90">{headerText}</p>
           </div>
         }
         <CardHeader className="flex flex-row items-center space-x-2">
