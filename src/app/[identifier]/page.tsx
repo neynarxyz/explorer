@@ -85,7 +85,7 @@ export default function Page({ params }: ResponseProps) {
   return (
     <>
       <Modal isOpen={isModalOpen} toggleModal={closeModal} response={modalData} title={modalTitle} />
-      <div className="flex flex-col w-full items-center justify-center">
+      <div className="flex flex-col w-full items-center justify-center mt-[25%] md:mt-[12.5%] lg:mt-[15%]">
         <div className="w-full flex md:flex-row flex-col justify-center items-center md:space-x-0 ">
           {loading ? (
             <>
