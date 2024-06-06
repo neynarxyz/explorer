@@ -6,7 +6,7 @@ import ReactDiffViewer from 'react-diff-viewer-continued';
 
 interface Props {
   params: { fid: number };
-  searchParams: { hub1: string, hub2?: string};
+  searchParams: { hub1: string, hub2: string, useGrpc: boolean};
 }
 
 export default function Page(props: Props) {
@@ -17,7 +17,7 @@ export default function Page(props: Props) {
   useEffect(() => {
     const fetchData1 = async () => {
       try {
-        const response = await axios.get(`http://localhost:3000/api/get_user_data/${props.params.fid}/${props.searchParams.hub1}`)
+        const response = await axios.get(`http://localhost:3000/api/get_user_data/${props.params.fid}/${props.searchParams.hub1}?useGrpc=${props.searchParams.useGrpc}`)
         setResp1(response.data)
       } catch (error) {
         setResp1(error as JSON)
@@ -26,7 +26,7 @@ export default function Page(props: Props) {
 
     const fetchData2 = async () => {
       try {
-        const response = await axios.get(`http://localhost:3000/api/get_user_data/${props.params.fid}/${props.searchParams.hub2}`)
+        const response = await axios.get(`http://localhost:3000/api/get_user_data/${props.params.fid}/${props.searchParams.hub2}?useGrpc=${props.searchParams.useGrpc}`)
         setResp2(response.data)
       } catch (error) {
         setResp2(error as JSON)

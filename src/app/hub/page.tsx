@@ -12,11 +12,11 @@ export default function Page() {
   const [error, setError] = useState<string | null>()
   const router = useRouter()
 
-  const handleSubmit = () => {
+  const handleSubmit = ( useGrpc: boolean) => {
     const fIdNumber = parseInt(fID)
     if (fIdNumber) {
       setError(null)
-      router.push(`/hub/${fID}?hub1=${hubUrl1}&hub2=${hubUrl2}`)
+      router.push(`/hub/${fID}?hub1=${hubUrl1}&hub2=${hubUrl2}&useGrpc=${useGrpc}`)
     } else {
       setError("fID must be a number")
     }
@@ -39,13 +39,18 @@ export default function Page() {
        />
        <Input 
         className=""
-        placeholder="Enter Hub gRPC url 2 (optional)"
+        placeholder="Enter Hub gRPC url 2"
         value={hubUrl2}
         onChange={(e)=>{ setHubUrl2(e.target.value)}}
        />
-      <Button onClick={handleSubmit}>
-        Submit
-      </Button>
+      <div className="flex space-x-4">
+        <Button onClick={() => {handleSubmit(true)}}>
+          Get Using gRPC
+        </Button>
+        <Button onClick={() => {handleSubmit(false)}}>
+          Get Using HTTP
+        </Button>
+      </div>
       { error && <p className="text-red-600">{error}</p>}
     </div>
   )
