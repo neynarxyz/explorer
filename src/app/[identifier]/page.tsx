@@ -75,7 +75,7 @@ export default function Page({ params }: ResponseProps) {
           {label}
         </CardHeader>
         <hr className="w-full border-t border-black my-2" />
-        <CardContent className="flex items-center justify-center text-6xl w-full">
+        <CardContent className="flex items-center justify-center text-6xl w-full mt-1.5">
           {data?.error ? '❌' : '✅'}
         </CardContent>
     </Card>
@@ -85,8 +85,8 @@ export default function Page({ params }: ResponseProps) {
   return (
     <>
       <Modal isOpen={isModalOpen} toggleModal={closeModal} response={modalData} title={modalTitle} />
-      <div className="flex flex-col w-full items-center justify-center">
-        <div className="w-full flex md:flex-row flex-col justify-center items-center md:space-x-0 ">
+      <div className="flex flex-col w-full items-center justify-center mt-[25%] md:mt-[12.5%] lg:mt-[15%]">
+        <div className="w-full flex md:flex-row gap-4 flex-col justify-center items-center md:space-x-0 ">
           {loading ? (
             <>
               {/* {renderSkeletonHeader()} */}
