@@ -104,14 +104,14 @@ const fetchWarpcastCast = async (hash: string | null, isWarpcastURL: boolean, id
 
   
   if (!isWarpcastURL) {
-    const response = await axios.get(`https://client.warpcast.com/v2/thread-casts?castHash=${hash}`, {
+    const response = await axios.get(`https://api.warpcast.com/v2/thread-casts?castHash=${hash}`, {
       headers: { 'Content-Type': 'application/json' }
     });
     cast = response.data?.result?.casts.find((cast: any) => cast.hash.startsWith(hash)) || null as any;
   } else if (identifier && identifier.split("/").length > 3) {
     const username = identifier.split("/")[3];
     const hashPrefix = identifier.split("/")[4];
-    const response = await axios.get(`https://client.warpcast.com/v2/user-thread-casts?castHashPrefix=${hashPrefix}&username=${username}&limit=15`, {
+    const response = await axios.get(`https://api.warpcast.com/v2/user-thread-casts?castHashPrefix=${hashPrefix}&username=${username}&limit=15`, {
       headers: { 'Content-Type': 'application/json' }
     });
     cast = response.data?.result?.casts.find((cast: any) => cast.hash.startsWith(hashPrefix)) || null as any;
@@ -131,13 +131,13 @@ try {
   const isWarpcastURL = isValidWarpcastUrl(identifier);
 
   if (!isWarpcastURL) {
-    const response = await axios.get(`https://client.warpcast.com/v2/user?fid=${identifier}`, {
+    const response = await axios.get(`https://api.warpcast.com/v2/user?fid=${identifier}`, {
       headers: { 'Content-Type': 'application/json' }
     });
     return response.data?.result?.user || null
   } else if (identifier && identifier.split("/").length >= 3){
     const username = identifier?.split("/")[3];
-    const response = await axios.get(`https://client.warpcast.com/v2/user-by-username?username=${username}`, {
+    const response = await axios.get(`https://api.warpcast.com/v2/user-by-username?username=${username}`, {
       headers: { 'Content-Type': 'application/json' }
     });
     return response.data?.result?.user || null
