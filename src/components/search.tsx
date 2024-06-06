@@ -33,7 +33,7 @@ export default function Search({
   return (
           <div className="flex flex-col items-center w-full space-y-4">
             <Input
-              className="w-full h-10"
+              className="w-full h-10 md:w-96"
               placeholder="Enter a FID, hash, or warpcast url..."
               value={identifier}
               onChange={(e) => {
@@ -41,7 +41,7 @@ export default function Search({
               }}
               onKeyDown={handleKeyPress}
             />
-            <Button className="w-full" onClick={() => router.push(`/${encodeURIComponent(identifier)}`)}>
+            <Button onClick={() => router.push(`/${encodeURIComponent(identifier)}`)}>
               Fetch Identifier
             </Button>
           </div>
