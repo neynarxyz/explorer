@@ -70,7 +70,7 @@ export default function Page({ params }: ResponseProps) {
   const displayName = message?.display_name || message?.displayName
   const bio = message?.bio?.text
  if (!pfp || !displayName || !bio) {
-    return false;
+    return true
   }
 
   return !username || username === expectedUsername;
