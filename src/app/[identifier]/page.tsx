@@ -39,26 +39,71 @@ export default function Page({ params }: ResponseProps) {
   const fetchData = async () => {
     setLoading(true);
     const data = await fetchCastAndFidData(hash, fid) as any;
-    setData(data);
-    setLoading(false);
+    
+  
+    const checkWarning = (message: any) => {
+      //check if author has messages, if so its a hub
+  // Define expected USER_DATA_TYPE values
+  const expectedTypes = [
+    "USER_DATA_TYPE_PFP",
+    "USER_DATA_TYPE_DISPLAY",
+    "USER_DATA_TYPE_BIO",
+    "USER_DATA_TYPE_USERNAME"
+  ];
+
+  // Check if message has messages, indicating it's from a hub
+  if (message?.messages) {
+    const foundTypes = new Set();
+    message.messages.forEach((msg: any) => {
+      if (msg.data?.userDataBody?.type) {
+        foundTypes.add(msg.data.userDataBody.type);
+      }
+    });
+
+    const missingTypes = expectedTypes.filter(type => !foundTypes.has(type));
+    return missingTypes.length > 0;
+  }
+  const authorFid = message?.fid;
+  const expectedUsername = `!${authorFid}`
+  const username = message?.username;
+  const pfp = message?.pfp?.url || message?.pfp_url
+  const displayName = message?.display_name || message?.displayName
+  const bio = message?.bio?.text
+ if (!pfp || !displayName || !bio) {
+    return false;
   }
 
+  return !username || username === expectedUsername;
+  }
+    const showWarpcastAuthorWarning = checkWarning(data.apiData.warpcast?.author);
+    const showNeynarAuthorWarning = checkWarning(data.apiData.neynar?.author?.author);
+    const showWarpcastAuthorHubWarning = checkWarning(data.hubData?.[0]?.author);
+    const showNeynarAuthorHubWarning = checkWarning(data.hubData?.[1]?.author);
+    const showWarpcastCastWarning = checkWarning(data.apiData.warpcast?.cast?.author);
+    const showNeynarCastWarning = checkWarning(data.apiData.neynar?.cast?.cast.author);
+    // const showWarpcastCastHubWarning = checkWarning(data.hubData?.[0]?.cast);
+    // const showNeynarCastHubWarning = checkWarning(data.hubData?.[1]?.cast);
+    setData({ ...data, showWarpcastAuthorWarning, showNeynarAuthorWarning, showWarpcastAuthorHubWarning, showNeynarAuthorHubWarning, showWarpcastCastWarning, showNeynarCastWarning, showWarpcastCastHubWarning: false, showNeynarCastHubWarning: false});
+    setLoading(false);
+  };
+  
   useEffect(() => {
     fetchData();
   }, [hash, fid]);
-
+  
   const openModal = (title: string, response: any) => {
     setModalTitle(title);
     setModalData(response);
     setIsModalOpen(true);
   };
-
+  
   const closeModal = () => {
     setIsModalOpen(false);
     setModalData(null);
   };
-
+  
   const { warpcast, neynar } = data?.apiData ?? {};
+  const {  showWarpcastAuthorWarning, showNeynarAuthorWarning, showWarpcastAuthorHubWarning, showNeynarAuthorHubWarning, showWarpcastCastWarning, showNeynarCastWarning, showWarpcastCastHubWarning, showNeynarCastHubWarning} = data ?? {};
   const hubs = data?.hubData ?? [];
   const nemes = hubs[0] ?? {};
   const neynarHub = hubs[1] ?? {};
@@ -66,22 +111,30 @@ export default function Page({ params }: ResponseProps) {
   const { author: neynarHubAuthor, cast: neynarHubCast } = neynarHub || {};
   const { author: warpcastAuthor, cast: warpcastCast } = warpcast || {};
   const { author: neynarAuthor, cast: neynarCast } = neynar || {};
+  
+  const renderHeader = (label: string, data: any, showWarning: boolean) => {
+    let icon = '✅';
+    if (data?.error) {
+      icon = '❌';
+    } else if (showWarning) {
+      icon = '⚠️';
+    }
 
-  const renderHeader = (label: string, data: any) => (
-    <button onClick={() => openModal(label, data)}>
-    <Card className="hover:bg-slate-100 rounded-lg relative border-black md:p-8 text-xl min-w-40 flex flex-col items-center justify-center">
-
-        <CardHeader className="text-center relative z-10 md:text-lg text-sm w-full">
-          {label}
-        </CardHeader>
-        <hr className="w-full border-t border-black my-2" />
-        <CardContent className="flex items-center justify-center text-6xl w-full">
-          {data?.error ? '❌' : '✅'}
-        </CardContent>
-    </Card>
-    </button>
-  );
-
+    return (
+      <button onClick={() => openModal(label, data)}>
+        <Card className="hover:bg-slate-100 rounded-lg relative border-black md:p-8 text-xl min-w-40 flex flex-col items-center justify-center">
+          <CardHeader className="text-center relative z-10 md:text-lg text-sm w-full">
+            {label}
+          </CardHeader>
+          <hr className="w-full border-t border-black my-2" />
+          <CardContent className="flex items-center justify-center text-6xl w-full">
+            {icon}
+          </CardContent>
+        </Card>
+      </button>
+    );
+  };
+  
   return (
     <>
       <Modal isOpen={isModalOpen} toggleModal={closeModal} response={modalData} title={modalTitle} />
@@ -96,14 +149,14 @@ export default function Page({ params }: ResponseProps) {
             </>
           ) : (
             <>
-              {warpcastAuthor && renderHeader('Warpcast API', warpcastAuthor)}
-              {warpcastCast && renderHeader('Warpcast API', warpcastCast)}
-              {nemesAuthor && renderHeader('Warpcast Hub', nemesAuthor)}
-              {nemesCast && renderHeader('Warpcast Hub', nemesCast)}
-              {neynarHubAuthor && renderHeader('Neynar Hub', neynarHubAuthor)}
-              {neynarHubCast && renderHeader('Neynar Hub', neynarHubCast)}
-              {neynarAuthor && renderHeader('Neynar API', neynarAuthor)}
-              {neynarCast && renderHeader('Neynar API', neynarCast)}
+              {warpcastAuthor && renderHeader('Warpcast API', warpcastAuthor, showWarpcastAuthorWarning)}
+              {warpcastCast && renderHeader('Warpcast API', warpcastCast, showWarpcastCastWarning)}
+              {nemesAuthor && renderHeader('Warpcast Hub', nemesAuthor, showWarpcastAuthorHubWarning)}
+              {nemesCast && renderHeader('Warpcast Hub', nemesCast, showWarpcastCastHubWarning)}
+              {neynarHubAuthor && renderHeader('Neynar Hub', neynarHubAuthor, showNeynarAuthorHubWarning)}
+              {neynarHubCast && renderHeader('Neynar Hub', neynarHubCast, showNeynarCastHubWarning)}
+              {neynarAuthor && renderHeader('Neynar API', neynarAuthor, showNeynarAuthorWarning)}
+              {neynarCast && renderHeader('Neynar API', neynarCast, showNeynarCastWarning)}
             </>
           )}
         </div>
