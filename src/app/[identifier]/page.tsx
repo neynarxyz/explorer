@@ -69,11 +69,9 @@ export default function Page({ params }: ResponseProps) {
   const pfp = message?.pfp?.url || message?.pfp_url
   const displayName = message?.display_name || message?.displayName
   const bio = message?.bio?.text
- if (!pfp || !displayName || !bio) {
-    return true
-  }
+// Check if any of pfp, displayName, or bio are not present
+return(!pfp || !displayName || !bio ||(!username || username === expectedUsername))
 
-  return !username || username === expectedUsername;
   }
     const showWarpcastAuthorWarning = checkWarning(data.apiData.warpcast?.author);
     const showNeynarAuthorWarning = checkWarning(data.apiData.neynar?.author?.author);
