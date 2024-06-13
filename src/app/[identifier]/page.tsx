@@ -170,12 +170,15 @@ export default function Page({ params }: ResponseProps) {
       <Modal isOpen={isModalOpen} toggleModal={closeModal} response={modalData} title={modalTitle} />
       <div className="flex flex-col w-full h-full items-center">
 
+{ fid || hash ? (
           <button
             className="mb-10 px-4 py-2 bg-purple-500 text-white hover:bg-purple-700 rounded-lg"
             onClick={handleCopyClick}
           >
             {buttonClicked ? '✔️' : `Copy ${fid ? 'user FID' : 'cast hash'}`}
           </button>
+        ) : null
+}
         
         <div className="w-full flex md:flex-row flex-col justify-center items-center md:space-x-0 ">
           {loading ? (
