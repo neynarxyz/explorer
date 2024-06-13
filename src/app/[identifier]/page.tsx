@@ -26,6 +26,12 @@ const renderSkeletonHeader = () => (
   </Card>
 );
 
+const copyToClipboard = (text: string) => {
+  navigator.clipboard.writeText(text).then(() => {
+  }).catch(err => {
+  });
+};
+
 export default function Page({ params }: ResponseProps) {
   const identifier = decodeURIComponent(params.identifier);
   const fid: number | null = isNumeric(identifier) ? Number(identifier) : null;
@@ -35,6 +41,7 @@ export default function Page({ params }: ResponseProps) {
   const [modalTitle, setModalTitle] = useState<string>("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [buttonClicked, setButtonClicked] = useState(false);
 
   const fetchData = async () => {
     setLoading(true);
@@ -153,10 +160,23 @@ export default function Page({ params }: ResponseProps) {
     );
   };
 
+  const handleCopyClick = () => {
+    copyToClipboard(fid ? fid.toString() as any : hash);
+    setButtonClicked(true);
+  };
+
   return (
     <>
       <Modal isOpen={isModalOpen} toggleModal={closeModal} response={modalData} title={modalTitle} />
-      <div className="flex flex-col w-full items-center justify-center">
+      <div className="flex flex-col w-full h-full items-center">
+
+          <button
+            className="mb-10 px-4 py-2 bg-purple-500 text-white hover:bg-purple-700 rounded-lg"
+            onClick={handleCopyClick}
+          >
+            {buttonClicked ? '✔️' : 'Copy identifier'}
+          </button>
+        
         <div className="w-full flex md:flex-row flex-col justify-center items-center md:space-x-0 ">
           {loading ? (
             <>
