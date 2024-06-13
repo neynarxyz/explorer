@@ -50,8 +50,10 @@ const fetchApiData = async (fid: number | null, identifier: string | null): Prom
     if (identifier && (!isWarpcastURL || identifier.split("/").length >= 5)) {
       try {
        neynarCast = await fetchCastFromNeynarAPI(identifier, isWarpcastURL);
+       if (neynarCast && neynarCast.cast.hash) {
         authorFid = authorFid || neynarCast?.author?.fid || null;
         hash = neynarCast?.cast?.hash || hash;
+       }
       } catch (error) {
         neynarCast = formatError(error);
       }
@@ -60,7 +62,7 @@ const fetchApiData = async (fid: number | null, identifier: string | null): Prom
         warpcastCastResponseStart = performance.now();
         
         warpcastCast = await fetchWarpcastCast(hash, isWarpcastURL, identifier);
-        if (warpcastCast) {
+        if (warpcastCast && warpcastCast.hash) {
           authorFid = authorFid || warpcastCast?.author?.fid || null;
           hash = warpcastCast?.hash || hash;
         }
@@ -96,13 +98,16 @@ const fetchApiData = async (fid: number | null, identifier: string | null): Prom
 };
 
 const fetchWarpcastCast = async (hash: string | null, isWarpcastURL: boolean, identifier: string | null) => {
-  const start = performance.now();
+  
   let cast = null;
+  try {
+
+  
   if (!isWarpcastURL) {
-    const response = await axios.get(`https://api.warpcast.com/v2/cast?hash=${hash}`, {
+    const response = await axios.get(`https://api.warpcast.com/v2/thread-casts?castHash=${hash}`, {
       headers: { 'Content-Type': 'application/json' }
     });
-    cast = response.data?.result?.cast || null
+    cast = response.data?.result?.casts.find((cast: any) => cast.hash.startsWith(hash)) || null as any;
   } else if (identifier && identifier.split("/").length > 3) {
     const username = identifier.split("/")[3];
     const hashPrefix = identifier.split("/")[4];
@@ -111,11 +116,17 @@ const fetchWarpcastCast = async (hash: string | null, isWarpcastURL: boolean, id
     });
     cast = response.data?.result?.casts.find((cast: any) => cast.hash.startsWith(hashPrefix)) || null as any;
   }
-  return { ...cast, durationInMs: performance.now() - start, error: null };
+  return { ...cast, error: null };
+}
+catch(error) {
+  return {error}
+}
 };
 
 const fetchWarpcastAuthor = async (identifier: string | null) => {
   //its a fid
+try {
+
 
   const isWarpcastURL = isValidWarpcastUrl(identifier);
 
@@ -132,12 +143,16 @@ const fetchWarpcastAuthor = async (identifier: string | null) => {
     return response.data?.result?.user || null
   }
   return null;
+}
+catch(error) {
+  return {error}
+}
 };
 
 const formatResponse = (warpcastAuthor: any, warpcastCast: any, neynarAuthor: any, neynarCast: any, warpcastAuthorApiStart: number, warpcastCastResponseStart: number) => ({
   warpcast: {
-    author: { ...warpcastAuthor, durationInMs: performance.now() - warpcastAuthorApiStart },
-    cast: warpcastCast && Object.keys(warpcastCast).length > 0 ? { ...warpcastCast, durationInMs: performance.now() - warpcastCastResponseStart } : null,
+    author: { ...warpcastAuthor },
+    cast: warpcastCast && Object.keys(warpcastCast).length > 0 ? { ...warpcastCast } : null,
     name: "Warpcast API"
   },
   neynar: {
@@ -204,8 +219,9 @@ export async function fetchCastAndFidData(hash: string | null, fid: number | nul
   if (!hash && !fid) return { apiData: null, hubData: null };
   const apiData = await fetchApiData(fid, hash);
   if (apiData.error || (!apiData.neynar && !apiData.warpcast)) return { apiData, hubData: null };
-  const processedFid = apiData.neynar?.cast?.fid ?? apiData.warpcast?.cast?.author?.fid ?? apiData.warpcast?.author?.fid ?? apiData.neynar?.author?.fid ?? fid;
-  let processedHash = apiData.neynar?.cast?.hash ?? apiData.warpcast?.cast?.hash ?? hash;
+  const processedFid = apiData.neynar?.cast?.cast?.author?.fid ?? apiData.warpcast?.cast?.author?.fid ?? apiData.warpcast?.author?.fid ?? apiData.neynar?.author?.fid ?? fid;
+  let processedHash = apiData.neynar?.cast?.cast?.hash ?? apiData.warpcast?.cast?.hash ?? hash;
+
 if(isValidWarpcastUrl(processedHash)) {
   processedHash = null
 }
@@ -220,14 +236,13 @@ export async function fetchCastFromHub(hash: string | null, fid: number | null, 
   try {
     let headers: { "Content-Type": string, api_key?: string, "x-airstack-hubs"?: string } = { "Content-Type": "application/json" };
     if (hub.shortname === "Neynar hub") {
-      headers.api_key = `${process.env.NEYNAR_API_KEY}`;
+      headers.api_key = `${process.env.NEXT_PUBLIC_NEYNAR_API_KEY}`;
     }
     const response = await axios.get(`${hub.url}/v1/castById?fid=${fid}&hash=${hash}`, { headers });
-    const durationInMs = performance.now() - start;
-    return { data: response.data, durationInMs, error: null };
+    return { data: response.data , error: null };
   } catch (e) {
-    const durationInMs = performance.now() - start;
-    return { durationInMs, error: formatError(e), data: null };
+    
+    return { error: formatError(e), data: null };
   }
 }
 
@@ -237,14 +252,14 @@ export async function fetchCastFromNeynarAPI(identifier: string, isURL: boolean 
     const cast = await axios.get(`https://api.neynar.com/v2/farcaster/cast?identifier=${identifier}&type=${isURL ? 'url' : 'hash'}`, {
       headers: {
         "Content-Type": "application-json",
-        "api_key": `${process.env.NEYNAR_API_KEY}`
+        "api_key": `${process.env.NEXT_PUBLIC_NEYNAR_API_KEY}`
       }
     });
-    const durationInMs = performance.now() - start;
-    return { cast: cast.data.cast, durationInMs, error: null };
+    
+    return { cast: cast.data.cast,  error: null };
   } catch (e) {
-    const durationInMs = performance.now() - start;
-    return { durationInMs, error: formatError(e), cast: null };
+    
+    return {  error: formatError(e), cast: null };
   }
 }
 
@@ -254,16 +269,16 @@ export async function fetchFidFromHub(fid: number | null, hub: HubType,isCast = 
   try {
     let headers: { "Content-Type": string, api_key?: string, "x-airstack-hubs"?: string } = { "Content-Type": "application/json" };
     if (hub.shortname === "Neynar hub") {
-      headers.api_key = `${process.env.NEYNAR_API_KEY}`;
+      headers.api_key = `${process.env.NEXT_PUBLIC_NEYNAR_API_KEY}`;
     }
     const response = await axios.get(`${hub.url}/v1/userDataByFid?fid=${fid}`, { headers });
-    const durationInMs = performance.now() - start;
+    
     const verificationsResponse = await axios.get(`${hub.url}/v1/verificationsByFid?fid=2?fid=${fid}`, { headers });
     
-    return {...response.data,verifications: verificationsResponse.data, durationInMs, error: null };
+    return {...response.data,verifications: verificationsResponse.data, error: null };
   } catch (e) {
-    const durationInMs = performance.now() - start;
-    return { durationInMs, error: formatError(e), data: null };
+    
+    return { error: formatError(e), data: null };
   }
 }
 
@@ -291,7 +306,6 @@ export async function getEmbedType(url: string) {
 }
 
 export async function fetchAuthorFromNeynarAPI(identifier: string) {
-  let durationInMs = 0;
   try {
     const isURL = isValidWarpcastUrl(identifier);
     const start = performance.now();
@@ -299,25 +313,24 @@ export async function fetchAuthorFromNeynarAPI(identifier: string) {
       const authorData = await axios.get(`https://api.neynar.com/v2/farcaster/user/bulk?fids=${identifier}`, {
         headers: {
           "Content-Type": "application-json",
-          "api_key": `${process.env.NEYNAR_API_KEY}`
+          "api_key": `${process.env.NEXT_PUBLIC_NEYNAR_API_KEY}`
         }
       });
       const author = authorData.data.users[0];
-      durationInMs = performance.now() - start;
-      return { author, durationInMs, error: null };
+
+      return { author,  error: null };
     } else {
       const username = identifier.split("/")[3];
       const authorData = await axios.get(`https://api.neynar.com/v1/farcaster/user-by-username?username=${username}`, {
         headers: {
           "Content-Type": "application-json",
-          "api_key": `${process.env.NEYNAR_API_KEY}`
+          "api_key": `${process.env.NEXT_PUBLIC_NEYNAR_API_KEY}`
         }
       });
-      durationInMs = performance.now() - start;
-      return { author: authorData.data.result.user, durationInMs, error: null };
+      return { author: authorData.data.result.user,  error: null };
     }
   } catch (e) {
-    return { error: formatError(e), durationInMs, author: null };
+    return { error: formatError(e), author: null };
   }
 }
 
