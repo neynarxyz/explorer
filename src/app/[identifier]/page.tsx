@@ -147,12 +147,12 @@ export default function Page({ params }: ResponseProps) {
 
     return (
       <button onClick={() => openModal(label, data, missingObjects)}>
-        <Card className="hover:bg-slate-100 rounded-lg relative border-black md:p-8 text-xl min-w-40 flex flex-col items-center justify-center">
+        <Card className="hover:bg-slate-100 rounded-lg relative border-black md:p-8 md:text-xl max-h-32 md:max-h-64 min-w-36 md:min-w-40 flex flex-col items-center justify-center">
           <CardHeader className="text-center relative z-10 md:text-lg text-sm w-full">
             {label}
           </CardHeader>
           <hr className="w-full border-t border-black my-2" />
-          <CardContent className="flex items-center justify-center text-6xl w-full">
+          <CardContent className="flex items-center justify-center md:text-6xl w-full text-4xl">
             {icon}
           </CardContent>
         </Card>
