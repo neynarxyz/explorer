@@ -39,7 +39,7 @@ export default function RootLayout({
           <div className="w-full absolute top-10 justify-center mt-12 max-h-32 max-w-sm md:max-w-md">
             <Search />
       </div>
-          <div className="w-full px-4 md:px-8 mt-24 md:mt-0 flex flex-col ">
+          <div className="w-full px-4 md:px-8 mt-24 md:mt-0 flex flex-col min-h-screen pt-52">
             {children}
           </div>
         </Providers>
