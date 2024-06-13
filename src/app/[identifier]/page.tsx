@@ -39,68 +39,88 @@ export default function Page({ params }: ResponseProps) {
   const fetchData = async () => {
     setLoading(true);
     const data = await fetchCastAndFidData(hash, fid) as any;
-    
-  
-    const checkWarning = (message: any) => {
-      //check if author has messages, if so its a hub
-  // Define expected USER_DATA_TYPE values
-  const expectedTypes = [
-    "USER_DATA_TYPE_PFP",
-    "USER_DATA_TYPE_DISPLAY",
-    "USER_DATA_TYPE_BIO",
-    "USER_DATA_TYPE_USERNAME"
-  ];
 
-  // Check if message has messages, indicating it's from a hub
-  if (message?.messages) {
-    const foundTypes = new Set();
-    message.messages.forEach((msg: any) => {
-      if (msg.data?.userDataBody?.type) {
-        foundTypes.add(msg.data.userDataBody.type);
+    const checkWarning = (message: any) => {
+      const expectedTypes = [
+        "USER_DATA_TYPE_PFP",
+        "USER_DATA_TYPE_DISPLAY",
+        "USER_DATA_TYPE_BIO",
+        "USER_DATA_TYPE_USERNAME"
+      ];
+
+      if (message?.messages) {
+        const foundTypes = new Set();
+        message.messages.forEach((msg: any) => {
+          if (msg.data?.userDataBody?.type) {
+            foundTypes.add(msg.data.userDataBody.type);
+          }
+        });
+
+        const missingTypes = expectedTypes.filter(type => !foundTypes.has(type));
+        return missingTypes;
       }
+
+      const missingObjects = [];
+      const authorFid = message?.fid;
+      const expectedUsername = `!${authorFid}`;
+      const username = message?.username;
+      const pfp = message?.pfp?.url || message?.pfp_url;
+      const displayName = message?.display_name || message?.displayName;
+      const bio = message?.profile?.bio?.text;
+
+      if (!pfp) missingObjects.push("PFP");
+      if (!displayName) missingObjects.push("Display Name");
+      if (!bio) missingObjects.push("Bio");
+      if (!username || username === expectedUsername) missingObjects.push("Username");
+
+      return missingObjects;
+    }
+
+    const warpcastAuthorMissing = checkWarning(data.apiData.warpcast?.author);
+    const neynarAuthorMissing = checkWarning(data.apiData.neynar?.author?.author);
+    const warpcastAuthorHubMissing = checkWarning(data.hubData?.[0]?.author);
+    const neynarAuthorHubMissing = checkWarning(data.hubData?.[1]?.author);
+    const warpcastCastMissing = checkWarning(data.apiData.warpcast?.cast?.author);
+    const neynarCastMissing = checkWarning(data.apiData.neynar?.cast?.cast.author);
+
+    setData({
+      ...data,
+      warpcastAuthorMissing,
+      neynarAuthorMissing,
+      warpcastAuthorHubMissing,
+      neynarAuthorHubMissing,
+      warpcastCastMissing,
+      neynarCastMissing,
+      warpcastCastHubMissing: [],
+      neynarCastHubMissing: []
     });
 
-    const missingTypes = expectedTypes.filter(type => !foundTypes.has(type));
-    return missingTypes.length > 0;
-  }
-  const authorFid = message?.fid;
-  const expectedUsername = `!${authorFid}`
-  const username = message?.username;
-  const pfp = message?.pfp?.url || message?.pfp_url
-  const displayName = message?.display_name || message?.displayName
-  const bio = message?.profile.bio?.text
-// Check if any of pfp, displayName, or bio or username are not present
-return(!pfp || !displayName || !bio ||(!username || username === expectedUsername))
-  }
-    const showWarpcastAuthorWarning = checkWarning(data.apiData.warpcast?.author);
-    const showNeynarAuthorWarning = checkWarning(data.apiData.neynar?.author?.author);
-    const showWarpcastAuthorHubWarning = checkWarning(data.hubData?.[0]?.author);
-    const showNeynarAuthorHubWarning = checkWarning(data.hubData?.[1]?.author);
-    const showWarpcastCastWarning = checkWarning(data.apiData.warpcast?.cast?.author);
-    const showNeynarCastWarning = checkWarning(data.apiData.neynar?.cast?.cast.author);
-    // const showWarpcastCastHubWarning = checkWarning(data.hubData?.[0]?.cast);
-    // const showNeynarCastHubWarning = checkWarning(data.hubData?.[1]?.cast);
-    setData({ ...data, showWarpcastAuthorWarning, showNeynarAuthorWarning, showWarpcastAuthorHubWarning, showNeynarAuthorHubWarning, showWarpcastCastWarning, showNeynarCastWarning, showWarpcastCastHubWarning: false, showNeynarCastHubWarning: false});
     setLoading(false);
   };
-  
+
   useEffect(() => {
     fetchData();
   }, [hash, fid]);
-  
-  const openModal = (title: string, response: any) => {
+
+  const openModal = (title: string, response: any, missingObjects: string[]) => {
     setModalTitle(title);
-    setModalData(response);
+    setModalData({ ...response, missingObjects });
     setIsModalOpen(true);
   };
-  
+
   const closeModal = () => {
     setIsModalOpen(false);
     setModalData(null);
   };
-  
+
   const { warpcast, neynar } = data?.apiData ?? {};
-  const {  showWarpcastAuthorWarning, showNeynarAuthorWarning, showWarpcastAuthorHubWarning, showNeynarAuthorHubWarning, showWarpcastCastWarning, showNeynarCastWarning, showWarpcastCastHubWarning, showNeynarCastHubWarning} = data ?? {};
+  const {
+    warpcastAuthorMissing, neynarAuthorMissing,
+    warpcastAuthorHubMissing, neynarAuthorHubMissing,
+    warpcastCastMissing, neynarCastMissing,
+    warpcastCastHubMissing, neynarCastHubMissing
+  } = data ?? {};
+
   const hubs = data?.hubData ?? [];
   const nemes = hubs[0] ?? {};
   const neynarHub = hubs[1] ?? {};
@@ -108,17 +128,18 @@ return(!pfp || !displayName || !bio ||(!username || username === expectedUsernam
   const { author: neynarHubAuthor, cast: neynarHubCast } = neynarHub || {};
   const { author: warpcastAuthor, cast: warpcastCast } = warpcast || {};
   const { author: neynarAuthor, cast: neynarCast } = neynar || {};
-  
-  const renderHeader = (label: string, data: any, showWarning: boolean) => {
+
+  const renderHeader = (label: string, data: any, missingObjects: string[]) => {
     let icon = '✅';
+
     if (data?.error) {
       icon = '❌';
-    } else if (showWarning) {
+    } else if (missingObjects.length > 0) {
       icon = '⚠️';
     }
 
     return (
-      <button onClick={() => openModal(label, data)}>
+      <button onClick={() => openModal(label, data, missingObjects)}>
         <Card className="hover:bg-slate-100 rounded-lg relative border-black md:p-8 text-xl min-w-40 flex flex-col items-center justify-center">
           <CardHeader className="text-center relative z-10 md:text-lg text-sm w-full">
             {label}
@@ -131,7 +152,7 @@ return(!pfp || !displayName || !bio ||(!username || username === expectedUsernam
       </button>
     );
   };
-  
+
   return (
     <>
       <Modal isOpen={isModalOpen} toggleModal={closeModal} response={modalData} title={modalTitle} />
@@ -146,14 +167,14 @@ return(!pfp || !displayName || !bio ||(!username || username === expectedUsernam
             </>
           ) : (
             <>
-              {warpcastAuthor && renderHeader('Warpcast API', warpcastAuthor, showWarpcastAuthorWarning)}
-              {warpcastCast && renderHeader('Warpcast API', warpcastCast, showWarpcastCastWarning)}
-              {nemesAuthor && renderHeader('Warpcast Hub', nemesAuthor, showWarpcastAuthorHubWarning)}
-              {nemesCast && renderHeader('Warpcast Hub', nemesCast, showWarpcastCastHubWarning)}
-              {neynarHubAuthor && renderHeader('Neynar Hub', neynarHubAuthor, showNeynarAuthorHubWarning)}
-              {neynarHubCast && renderHeader('Neynar Hub', neynarHubCast, showNeynarCastHubWarning)}
-              {neynarAuthor && renderHeader('Neynar API', neynarAuthor, showNeynarAuthorWarning)}
-              {neynarCast && renderHeader('Neynar API', neynarCast, showNeynarCastWarning)}
+              {warpcastAuthor && renderHeader('Warpcast API', warpcastAuthor, warpcastAuthorMissing)}
+              {warpcastCast && renderHeader('Warpcast API', warpcastCast, warpcastCastMissing)}
+              {nemesAuthor && renderHeader('Warpcast Hub', nemesAuthor, warpcastAuthorHubMissing)}
+              {nemesCast && renderHeader('Warpcast Hub', nemesCast, warpcastCastHubMissing)}
+              {neynarHubAuthor && renderHeader('Neynar Hub', neynarHubAuthor, neynarAuthorHubMissing)}
+              {neynarHubCast && renderHeader('Neynar Hub', neynarHubCast, neynarCastHubMissing)}
+              {neynarAuthor && renderHeader('Neynar API', neynarAuthor, neynarAuthorMissing)}
+              {neynarCast && renderHeader('Neynar API', neynarCast, neynarCastMissing)}
             </>
           )}
         </div>
@@ -161,3 +182,4 @@ return(!pfp || !displayName || !bio ||(!username || username === expectedUsernam
     </>
   );
 }
+
