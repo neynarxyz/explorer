@@ -1,8 +1,8 @@
+'use client'
 import { CastComponent } from '@/components/cast-component';
 import { ProfileComponent } from '@/components/profile-component';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { FIDPFP, exampleCast, warpcastURLCast, warpcastURLCastURL, warpcastURLPFP, warpcastURLProfile } from '@/constants';
-import Link from 'next/link';
+
 
 export default function Home() {
 
@@ -16,7 +16,7 @@ export default function Home() {
         <CastComponent cast={exampleCast} />
         </div>
         <div className='flex flex-col space-y-2 w-full items-center justify-center '>
-       <p className='text-center'>Example Warpcast Cast</p>
+       <p className='text-center'>Example Warpcast cast url</p>
        <CastComponent cast={warpcastURLCast} warpcastUrl={warpcastURLCastURL} />
         </div>
         </div>
@@ -26,7 +26,7 @@ export default function Home() {
         <ProfileComponent pfp={FIDPFP} url={"3"} />
         </div>
         <div className='flex flex-col space-y-2 w-full items-center justify-center '>
-       <p className='text-center'>Example Warpcast Profile</p>
+       <p className='text-center'>Example Warpcast profile url</p>
        <ProfileComponent pfp={warpcastURLPFP} url={warpcastURLProfile} />
        
         </div>
