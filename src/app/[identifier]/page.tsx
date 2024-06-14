@@ -88,7 +88,7 @@ export default function Page({ params }: ResponseProps) {
     const warpcastAuthorHubMissing = checkWarning(data.hubData?.[0]?.author);
     const neynarAuthorHubMissing = checkWarning(data.hubData?.[1]?.author);
     const warpcastCastMissing = checkWarning(data.apiData.warpcast?.cast?.author);
-    const neynarCastMissing = checkWarning(data.apiData.neynar?.cast?.cast.author);
+    const neynarCastMissing = checkWarning(data.apiData.neynar?.cast?.cast?.author);
 
     setData({
       ...data,
