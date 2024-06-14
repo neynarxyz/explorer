@@ -2,6 +2,8 @@
 import Modal from "@/components/modal-component";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { fetchCastAndFidData } from "@/lib/utils";
+import Link from "next/link";
+
 import { useEffect, useState } from "react";
 
 interface ResponseProps {
@@ -87,8 +89,8 @@ export default function Page({ params }: ResponseProps) {
     const neynarAuthorMissing = checkWarning(data.apiData.neynar?.author?.author);
     const warpcastAuthorHubMissing = checkWarning(data.hubData?.[0]?.author);
     const neynarAuthorHubMissing = checkWarning(data.hubData?.[1]?.author);
-    const warpcastCastMissing = checkWarning(data.apiData.warpcast?.cast?.author);
-    const neynarCastMissing = checkWarning(data.apiData.neynar?.cast?.cast?.author);
+    const warpcastCastMissing = [] as any
+    const neynarCastMissing = [] as any
 
     setData({
       ...data,
@@ -136,6 +138,8 @@ export default function Page({ params }: ResponseProps) {
   const { author: warpcastAuthor, cast: warpcastCast } = warpcast || {};
   const { author: neynarAuthor, cast: neynarCast } = neynar || {};
 
+  const authorFid = warpcastCast?.author?.fid || neynarCast?.cast?.author?.fid
+
   const renderHeader = (label: string, data: any, missingObjects: string[]) => {
     let icon = '✅';
 
@@ -165,20 +169,37 @@ export default function Page({ params }: ResponseProps) {
     setButtonClicked(true);
   };
 
+  const handleCopyAuthorClick = () => {
+    copyToClipboard(authorFid.toString() as any);
+    setButtonClicked(true);
+  };
+
   return (
     <>
       <Modal isOpen={isModalOpen} toggleModal={closeModal} response={modalData} title={modalTitle} />
       <div className="flex flex-col w-full h-full items-center">
-
+<div className="space-x-5 flex">
 { fid || hash ? (
           <button
-            className="mb-10 px-4 py-2 bg-purple-500 text-white hover:bg-purple-700 rounded-lg"
+            className="mb-10 min-h-10 px-4 py-2 bg-purple-500 text-white hover:bg-purple-700 rounded-lg"
             onClick={handleCopyClick}
           >
             {buttonClicked ? '✔️' : `Copy ${fid ? 'user FID' : 'cast hash'}`}
           </button>
         ) : null
 }
+
+{ authorFid ? (
+          <Link href={`/${authorFid}`} >
+            <div className="min-h-10 px-4 py-2 items-center flex justify-center text-white bg-purple-500 text-white hover:bg-purple-700 text-md rounded-lg">
+            View Author Profile
+            </div>
+          </Link>
+        ) : null
+}
+</div>
+
+
         
         <div className="w-full flex md:flex-row flex-col justify-center items-center md:space-x-0 ">
           {loading ? (
