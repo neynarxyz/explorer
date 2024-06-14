@@ -43,9 +43,9 @@ const fetchApiData = async (fid: number | null, identifier: string | null): Prom
   let warpcastCast: any = null;
   let authorFid = fid;
   const isWarpcastURL = isValidWarpcastUrl(identifier);
-  let hash = isWarpcastURL ? identifier : null;
+  let hash = identifier
   let warpcastCastResponseStart = null;
-
+  
   try {
     if (identifier && (!isWarpcastURL || identifier.split("/").length >= 5)) {
       try {
