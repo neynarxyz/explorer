@@ -16,13 +16,24 @@ export default function Page() {
   const router = useRouter()
 
   const handleSubmit = ( useGrpc: boolean) => {
-    const fIdNumber = parseInt(fID)
-    if (fIdNumber) {
-      setError(null)
-      router.push(`/hub/${fID}?hub1=${hubUrl1}&hub2=${hubUrl2}&useGrpc=${useGrpc}`)
-    } else {
-      setError("fID must be a number")
+    if (hubUrl1.length == 0 || hubUrl2.length == 0) {
+      setError("Please choose 2 hubs")
+      return
     }
+
+    if (hubUrl1 === hubUrl2) {
+      setError("Hubs should be different")
+      return
+    }
+
+    const fIdNumber = parseInt(fID)
+    if (!fIdNumber) {
+      setError("fID must be a number")
+      return
+    }
+
+    setError(null)
+    router.push(`/hub/${fID}?hub1=${hubUrl1}&hub2=${hubUrl2}&useGrpc=${useGrpc}`)
   }
 
   const handleOption1Select = (e: any) => {
