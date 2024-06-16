@@ -14,10 +14,12 @@ export default function Page(props: Props) {
   const [resp1, setResp1] = useState<JSON>();
   const [resp2, setResp2] = useState<JSON>();
 
+  const baseUrl = process.env.VERCEL_URL || 'http://localhost:3000'
+
   useEffect(() => {
     const fetchData1 = async () => {
       try {
-        const response = await axios.get(`http://localhost:3000/api/get_user_data/${props.params.fid}/${props.searchParams.hub1}?useGrpc=${props.searchParams.useGrpc}`)
+        const response = await axios.get(`${baseUrl}/api/get_user_data/${props.params.fid}/${props.searchParams.hub1}?useGrpc=${props.searchParams.useGrpc}`)
         setResp1(response.data)
       } catch (error) {
         setResp1(error as JSON)
@@ -26,7 +28,7 @@ export default function Page(props: Props) {
 
     const fetchData2 = async () => {
       try {
-        const response = await axios.get(`http://localhost:3000/api/get_user_data/${props.params.fid}/${props.searchParams.hub2}?useGrpc=${props.searchParams.useGrpc}`)
+        const response = await axios.get(`${baseUrl}/api/get_user_data/${props.params.fid}/${props.searchParams.hub2}?useGrpc=${props.searchParams.useGrpc}`)
         setResp2(response.data)
       } catch (error) {
         setResp2(error as JSON)
