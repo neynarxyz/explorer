@@ -45,9 +45,13 @@ export default function Page(props: Props) {
   return (
     <div className="flex flex-col justify-center w-full flex-grow">
       {resp1 === undefined ? (
-        <div>Loading...</div>
+        <div className="flex justify-center w-full">Loading...</div>
       ) : (
         <div className="overflow-auto w-full">
+          <div className="flex justify-between w-full px-8">
+            <div>{props.searchParams.hub1}</div>
+            <div>{props.searchParams.hub2}</div>
+          </div>
           <pre className="bg-gray-800 text-white p-2 rounded w-full font-mono text-sm overflow-auto whitespace-pre-wrap">
             <ReactDiffViewer oldValue={JSON.stringify(resp1, null, 2)} newValue={JSON.stringify(resp2, null, 2)} splitView={true} />
           </pre>
