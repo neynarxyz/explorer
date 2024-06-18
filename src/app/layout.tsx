@@ -6,6 +6,7 @@ import Search from "@/components/search";
 import { usePathname } from 'next/navigation'
 import { useEffect } from "react";
 import { seo } from "@/constants";
+import { Card, CardContent } from "@/components/ui/card";
 
 export default function RootLayout({
   children,
@@ -40,8 +41,20 @@ export default function RootLayout({
           <div className="w-full absolute top-10 justify-center mt-12 max-h-32 max-w-sm md:max-w-md">
             <Search />
       </div>
-          <div className="w-full px-4 md:px-8 mt-72 md:mb-64 flex flex-col ">
+          <div className="w-full px-4 md:px-8 mt-60 md:mb-64 flex flex-col ">
             {children}
+          </div>
+          {//open in new page
+          }
+          <div className="absolute md:bottom-10 bottom-2 left-1/2 transform -translate-x-1/2 p-2 ">
+          <Link target="_blank" href="https://warpcast.com/~/add-cast-action?url=https://explorer.neynar.com/frames/actions/view-on-explorer"  >
+          
+          <Card className="w-full hover:bg-slate-100 rounded-lg max-w-md md:min-w-24 md:min-h-12 flex items-center justify-center">
+      <CardContent className="p-4 w-full font-bold flex flex-col justify-center items-center space-y-2">
+          Download cast action
+          </CardContent>
+          </Card>
+          </Link>
           </div>
         </Providers>
       </body>
