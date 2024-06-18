@@ -8,8 +8,8 @@ export const GET = async (req: NextRequest) => {
     action: {
       type: "post",
     },
-    icon: "link-external",
-    name: "View on Explorer",
+    icon: "info",
+    name: "View on Neynar Explorer",
     aboutUrl: `${seo.url}`,
     description: "View the details of a cast on Neynar Explorer",
   };
