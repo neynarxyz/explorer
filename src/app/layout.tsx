@@ -5,6 +5,7 @@ import Providers from "./providers";
 import Search from "@/components/search";
 import { usePathname } from 'next/navigation'
 import { useEffect } from "react";
+import { seo } from "@/constants";
 
 export default function RootLayout({
   children,
@@ -14,15 +15,15 @@ export default function RootLayout({
   return (
     <html lang="en">
          <head>
-        <meta property="og:title" content="Farcaster Explorer" />
-        <meta property="og:description" content="Explore event propogation on farcaster." />
-        <meta property="og:image" content="/neynar.png" />
-        <meta property="og:url" content="https://www.neynar.com" />
+        <meta property="og:title" content={seo.title} />
+        <meta property="og:description" content={seo.description} />
+        <meta property="og:image" content={seo.ogImage} />
+        <meta property="og:url" content={seo.url} />
         <meta property="og:type" content="website" />
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="Farcaster Explorer" />
-        <meta name="twitter:description" content="Explore event propogation on farcaster." />
-        <meta name="twitter:image" content="/neynar.png" />
+        <meta name="twitter:title" content={seo.title} />
+        <meta name="twitter:description" content={seo.description} />
+        <meta name="twitter:image" content={seo.ogImage} />
       </head>
       <body className="relative h-screen flex flex-col items-center justify-center min-h-screen">
         <Providers>
