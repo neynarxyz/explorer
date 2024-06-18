@@ -12,10 +12,10 @@ export const GET = frames(async (ctx) => {
         aspectRatio: '1:1'
       },
       buttons: [
-        <Button action="link" target={`${seo.url}/${hash}`}>
+        <Button key={"view"} action="link" target={`${seo.url}/${hash}`}>
           View on Neynar Explorer
         </Button>,
-        <Button action="link" target={`https://warpcast.com/~/add-cast-action?url=${seo.url}/frames/actions/view-on-explorer`}>
+        <Button key="install" action="link" target={`https://warpcast.com/~/add-cast-action?url=${seo.url}/frames/actions/view-on-explorer`}>
         Install Cast Action
       </Button>
       ],
