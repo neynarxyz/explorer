@@ -41,7 +41,7 @@ export default function RootLayout({
           <div className="w-full absolute top-10 justify-center mt-12 max-h-32 max-w-sm md:max-w-md">
             <Search />
       </div>
-          <div className="w-full px-4 md:px-8 mt-60 md:mb-64 flex flex-col ">
+      <div className="w-full px-4 md:px-8 mt-72 md:mb-64 flex flex-col ">
             {children}
             <div className="w-full flex justify-center items-center py-3 my-5">
             <Link target="_blank" href="https://warpcast.com/~/add-cast-action?url=https://explorer.neynar.com/frames/actions/view-on-explorer"  >
