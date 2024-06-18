@@ -38,12 +38,12 @@ export default function RootLayout({
               <p className="text-md md:text-">Farcaster Explorer</p>
             </Link>
           </div>
-          <div className="w-full absolute top-10 justify-center mt-12 max-h-32 max-w-sm md:max-w-md">
+          <div className="w-full absolute top-10 justify-center mt-16 max-h-32 max-w-sm md:max-w-md">
             <Search />
       </div>
       <div className="w-full px-4 md:px-8 mt-72 md:mb-64 flex flex-col ">
             {children}
-            <div className="w-full flex justify-center items-center py-3 my-5">
+            <div className="w-full flex justify-center items-center py-3 my-2">
             <Link target="_blank" href="https://warpcast.com/~/add-cast-action?url=https://explorer.neynar.com/frames/actions/view-on-explorer"  >
           
 
