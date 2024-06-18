@@ -114,9 +114,13 @@ const fetchWarpcastCast = async (hash: string | null, isWarpcastURL: boolean, id
     const response = await axios.get(`https://api.warpcast.com/v2/user-thread-casts?castHashPrefix=${hashPrefix}&username=${username}&limit=15`, {
       headers: { 'Content-Type': 'application/json' }
     });
-    cast = response.data?.result?.casts.find((cast: any) => cast.hash.startsWith(hashPrefix)) || null as any;
+    cast = response.data?.result?.casts.find((cast: any) => cast.hash.startsWith(hashPrefix)) || null
+  }
+  if (!cast) {
+    return { error: "Cast not found" };
   }
   return { ...cast, error: null };
+  
 }
 catch(error) {
   return {error}
