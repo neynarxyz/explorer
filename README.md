@@ -4,10 +4,10 @@ This is a simple website to track event propagation across Farcaster. In some ca
 
 ## Getting Started
 
-First, get your NEYNAR_API_KEY from https://www.neynar.com, then run the following command:
-```bash
-npm i && npm run dev
-```
+1. First, get you `NEYNAR_API_KEY` from the [Neynar dev portal](https://dev.neynar.com)
+2. Copy `.env.example` to a new `.env.local` file and add your Neynar API key
+3. Install local dependencies with `npm i`
+4. Run the app locally with `npm run dev`
 
 ## Contributing
 
