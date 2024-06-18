@@ -1,3 +1,10 @@
+export const seo = {
+  title: 'Farcaster Explorer',
+  description: 'Explore event propogation on farcaster.',
+  ogImage: 'https://i.imgur.com/RMI9pRh.png',
+  url: 'https://explorer.neynar.com'
+};
+
 export const hubs = [
   // {"shortname": "nemes", "url": "https://nemes.farcaster.xyz:2281"},
    
