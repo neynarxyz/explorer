@@ -169,11 +169,6 @@ export default function Page({ params }: ResponseProps) {
     setButtonClicked(true);
   };
 
-  const handleCopyAuthorClick = () => {
-    copyToClipboard(authorFid.toString() as any);
-    setButtonClicked(true);
-  };
-
   return (
     <>
       <Modal isOpen={isModalOpen} toggleModal={closeModal} response={modalData} title={modalTitle} />
@@ -213,8 +208,8 @@ export default function Page({ params }: ResponseProps) {
             <>
               {warpcastAuthor && renderHeader('Warpcast API', warpcastAuthor, warpcastAuthorMissing)}
               {warpcastCast && renderHeader('Warpcast API', warpcastCast, warpcastCastMissing)}
-              {nemesAuthor && renderHeader('Warpcast Hub', nemesAuthor, warpcastAuthorHubMissing)}
-              {nemesCast && renderHeader('Warpcast Hub', nemesCast, warpcastCastHubMissing)}
+              {nemesAuthor && renderHeader('Warpcast Hub (Hoyt)', nemesAuthor, warpcastAuthorHubMissing)}
+              {nemesCast && renderHeader('Warpcast Hub (Hoyt)', nemesCast, warpcastCastHubMissing)}
               {neynarHubAuthor && renderHeader('Neynar Hub', neynarHubAuthor, neynarAuthorHubMissing)}
               {neynarHubCast && renderHeader('Neynar Hub', neynarHubCast, neynarCastHubMissing)}
               {neynarAuthor && renderHeader('Neynar API', neynarAuthor, neynarAuthorMissing)}

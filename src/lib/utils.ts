@@ -239,7 +239,6 @@ if(isValidWarpcastUrl(processedHash)) {
 
 export async function fetchCastFromHub(hash: string | null, fid: number | null, hub: HubType, isCast = true) {
   if (!fid || !hash || !isCast) return null;
-  const start = performance.now();
   try {
     let headers: { "Content-Type": string, api_key?: string, "x-airstack-hubs"?: string } = { "Content-Type": "application/json" };
     if (hub.shortname === "Neynar hub") {
@@ -254,7 +253,6 @@ export async function fetchCastFromHub(hash: string | null, fid: number | null, 
 }
 
 export async function fetchCastFromNeynarAPI(identifier: string, isURL: boolean = false) {
-  const start = performance.now();
   try {
     const cast = await axios.get(`https://api.neynar.com/v2/farcaster/cast?identifier=${identifier}&type=${isURL ? 'url' : 'hash'}`, {
       headers: {
@@ -272,7 +270,6 @@ export async function fetchCastFromNeynarAPI(identifier: string, isURL: boolean 
 
 export async function fetchFidFromHub(fid: number | null, hub: HubType,isCast = true) {
   if (!fid || isCast) return null
-  const start = performance.now();
   try {
     let headers: { "Content-Type": string, api_key?: string, "x-airstack-hubs"?: string } = { "Content-Type": "application/json" };
     if (hub.shortname === "Neynar hub") {
@@ -315,7 +312,6 @@ export async function getEmbedType(url: string) {
 export async function fetchAuthorFromNeynarAPI(identifier: string) {
   try {
     const isURL = isValidWarpcastUrl(identifier);
-    const start = performance.now();
     if (!isURL) {
       const authorData = await axios.get(`https://api.neynar.com/v2/farcaster/user/bulk?fids=${identifier}`, {
         headers: {
