@@ -48,15 +48,7 @@ const fetchApiData = async (fid: number | null, identifier: string | null): Prom
   
   try {
     if (identifier && (!isWarpcastURL || identifier.split("/").length >= 5)) {
-      try {
-       neynarCast = await fetchCastFromNeynarAPI(identifier, isWarpcastURL);
-       if (neynarCast && neynarCast.cast.hash) {
-        authorFid = authorFid || neynarCast?.author?.fid || null;
-        hash = neynarCast?.cast?.hash || hash;
-       }
-      } catch (error) {
-        neynarCast = formatError(error);
-      }
+   
 
       try {
         warpcastCastResponseStart = performance.now();
@@ -69,21 +61,32 @@ const fetchApiData = async (fid: number | null, identifier: string | null): Prom
       } catch (error) {
         warpcastCast = formatError(error);
       }
+
+      try {
+        neynarCast = await fetchCastFromNeynarAPI(identifier, isWarpcastURL);
+        if (neynarCast && neynarCast.cast.hash) {
+         authorFid = authorFid || neynarCast?.author?.fid || null;
+         hash = neynarCast?.cast?.hash || hash;
+        }
+       } catch (error) {
+         neynarCast = formatError(error);
+       }
     }
 
     if (fid || (isWarpcastURL && identifier && identifier.split("/").length === 4)) {
-      try {
-        neynarAuthor = await fetchAuthorFromNeynarAPI(authorFid?.toString() ?? identifier as any);
-      } catch (error) {
-        neynarAuthor = formatError(error);
-      }
-
+     
       const warpcastAuthorApiStart = performance.now();
       try {
 
         warpcastAuthor = await fetchWarpcastAuthor(authorFid?.toString() ?? identifier as any);
       } catch (error) {
         warpcastAuthor = formatError(error);
+      }
+
+      try {
+        neynarAuthor = await fetchAuthorFromNeynarAPI(authorFid?.toString() ?? identifier as any);
+      } catch (error) {
+        neynarAuthor = formatError(error);
       }
 
       return formatResponse(warpcastAuthor, warpcastCast, neynarAuthor, neynarCast, warpcastAuthorApiStart, warpcastCastResponseStart ?? 0);
