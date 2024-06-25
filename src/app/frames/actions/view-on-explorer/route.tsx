@@ -22,6 +22,6 @@ export const POST = frames(async (ctx) => {
   return Response.json({
     message: `View on Neynar Explorer`,
     link: `${seo.url}/${hash}`,
-    type: 'message'
+    type: "message",
   });
 });

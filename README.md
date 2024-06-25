@@ -12,5 +12,6 @@ This is a simple website to track event propagation across Farcaster. In some ca
 ## Contributing
 
 You can contribute in many ways:
+
 - reporting a bug in [Issues](https://github.com/neynarxyz/explorer/issues)
 - submitting a [pull request](https://github.com/neynarxyz/explorer/pulls)

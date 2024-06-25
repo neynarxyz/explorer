@@ -64,7 +64,9 @@ export default function Page({ params }: ResponseProps) {
           }
         });
 
-        const missingTypes = expectedTypes.filter((type) => !foundTypes.has(type));
+        const missingTypes = expectedTypes.filter(
+          (type) => !foundTypes.has(type),
+        );
         return missingTypes;
       }
 
@@ -79,13 +81,16 @@ export default function Page({ params }: ResponseProps) {
       if (!pfp) missingObjects.push("PFP");
       if (!displayName) missingObjects.push("Display Name");
       if (!bio) missingObjects.push("Bio");
-      if (!username || username === expectedUsername) missingObjects.push("Username");
+      if (!username || username === expectedUsername)
+        missingObjects.push("Username");
 
       return missingObjects;
     };
 
     const warpcastAuthorMissing = checkWarning(data.apiData.warpcast?.author);
-    const neynarAuthorMissing = checkWarning(data.apiData.neynar?.author?.author);
+    const neynarAuthorMissing = checkWarning(
+      data.apiData.neynar?.author?.author,
+    );
     const warpcastAuthorHubMissing = checkWarning(data.hubData?.[0]?.author);
     const neynarAuthorHubMissing = checkWarning(data.hubData?.[1]?.author);
     const warpcastCastMissing = [] as any;
@@ -110,7 +115,11 @@ export default function Page({ params }: ResponseProps) {
     fetchData();
   }, [hash, fid]);
 
-  const openModal = (title: string, response: any, missingObjects: string[]) => {
+  const openModal = (
+    title: string,
+    response: any,
+    missingObjects: string[],
+  ) => {
     setModalTitle(title);
     setModalData({ ...response, missingObjects });
     setIsModalOpen(true);
@@ -143,7 +152,11 @@ export default function Page({ params }: ResponseProps) {
 
   const authorFid = warpcastCast?.author?.fid || neynarCast?.cast?.author?.fid;
 
-  const renderHeader = (label: string, data: any | null, missingObjects: string[]) => {
+  const renderHeader = (
+    label: string,
+    data: any | null,
+    missingObjects: string[],
+  ) => {
     if (!data) {
       return null;
     }
@@ -159,7 +172,9 @@ export default function Page({ params }: ResponseProps) {
     return (
       <button onClick={() => openModal(label, data, missingObjects)}>
         <Card className="hover:bg-slate-100 rounded-lg relative border-black flex flex-col items-center justify-center">
-          <CardHeader className="text-center relative w-full">{label}</CardHeader>
+          <CardHeader className="text-center relative w-full">
+            {label}
+          </CardHeader>
           <hr className="w-full border-t border-black my-2" />
           <CardContent className="flex items-center justify-center w-full text-4xl">
             {icon}
@@ -169,10 +184,14 @@ export default function Page({ params }: ResponseProps) {
     );
   };
 
-
   return (
     <>
-      <Modal isOpen={isModalOpen} toggleModal={closeModal} response={modalData} title={modalTitle} />
+      <Modal
+        isOpen={isModalOpen}
+        toggleModal={closeModal}
+        response={modalData}
+        title={modalTitle}
+      />
       <div className="flex flex-col items-center">
         <div className="gap-5 flex">
           {fid || hash ? (
@@ -180,16 +199,26 @@ export default function Page({ params }: ResponseProps) {
               className="mb-10 min-h-10 px-4 py-2 bg-purple-500 text-white hover:bg-purple-700 rounded-lg"
               onClick={() => copy(fid ? fid.toString() : hash || "")}
             >
-              {copied ? <><CopyCheckIcon className="w-4 h-4 mr-2" /> Copied</>: <><CopyIcon className="w-4 h-4 mr-2" /> Copy {fid ? "User FID" : "Cast Hash"}</>}
+              {copied ? (
+                <>
+                  <CopyCheckIcon className="w-4 h-4 mr-2" /> Copied
+                </>
+              ) : (
+                <>
+                  <CopyIcon className="w-4 h-4 mr-2" /> Copy{" "}
+                  {fid ? "User FID" : "Cast Hash"}
+                </>
+              )}
             </Button>
           ) : null}
 
           {authorFid ? (
-            <Button asChild
-            className="mb-10 min-h-10 px-4 py-2 bg-purple-500 text-white hover:bg-purple-700 rounded-lg"
+            <Button
+              asChild
+              className="mb-10 min-h-10 px-4 py-2 bg-purple-500 text-white hover:bg-purple-700 rounded-lg"
             >
               <Link href={`/${authorFid}`}>
-                 <UserIcon className="w-4 h-4 mr-1" /> View Author Profile
+                <UserIcon className="w-4 h-4 mr-1" /> View Author Profile
               </Link>
             </Button>
           ) : null}
@@ -205,11 +234,27 @@ export default function Page({ params }: ResponseProps) {
             </>
           ) : (
             <>
-              {renderHeader("Warpcast API", warpcastAuthor, warpcastAuthorMissing)}
+              {renderHeader(
+                "Warpcast API",
+                warpcastAuthor,
+                warpcastAuthorMissing,
+              )}
               {renderHeader("Warpcast API", warpcastCast, warpcastCastMissing)}
-              {renderHeader("Warpcast Hub (Hoyt)", nemesAuthor, warpcastAuthorHubMissing)}
-              {renderHeader("Warpcast Hub (Hoyt)", nemesCast, warpcastCastHubMissing)}
-              {renderHeader("Neynar Hub", neynarHubAuthor, neynarAuthorHubMissing)}
+              {renderHeader(
+                "Warpcast Hub (Hoyt)",
+                nemesAuthor,
+                warpcastAuthorHubMissing,
+              )}
+              {renderHeader(
+                "Warpcast Hub (Hoyt)",
+                nemesCast,
+                warpcastCastHubMissing,
+              )}
+              {renderHeader(
+                "Neynar Hub",
+                neynarHubAuthor,
+                neynarAuthorHubMissing,
+              )}
               {renderHeader("Neynar Hub", neynarHubCast, neynarCastHubMissing)}
               {renderHeader("Neynar API", neynarAuthor, neynarAuthorMissing)}
               {renderHeader("Neynar API", neynarCast, neynarCastMissing)}
