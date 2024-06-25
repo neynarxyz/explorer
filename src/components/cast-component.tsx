@@ -9,7 +9,7 @@ export function CastComponent({cast,warpcastUrl}: any) {
   const avatarImg = cast.author.pfp_url ? cast.author.pfp_url : null  
   return (
     <Link href={`/${warpcastUrl ? encodeURIComponent(warpcastUrl) :cast.hash}`}>
-    <Card className="w-full hover:bg-slate-100 rounded-lg max-w-md md:min-w-64">
+    <Card className="w-full hover:bg-slate-100 rounded-lg sm:max-w-md md:min-w-64 h-[150px]">
     <CardHeader className="flex flex-row items-center space-x-2">
   <Avatar >
     <AvatarImage alt={`@${cast.author.username}`} src={avatarImg} />
