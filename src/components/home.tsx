@@ -6,29 +6,27 @@ import { FIDPFP, exampleCast, warpcastURLCast, warpcastURLCastURL, warpcastURLPF
 
 export default function Home() {
   return (
-    <div className="flex flex-col items-center justify-center space-y-4 p-2">
-      <div className='flex flex-col items-center space-y-4 p-5 m-5'>
-        <div className='flex flex-row space-x-2'>
-          <div className='flex flex-col space-y-2 items-center justify-center'>
+    <div className="max-w-3xl mx-auto grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className='space-y-4'>
+          <div className='space-y-2'>
             <p className='text-center'>Example hash</p>
-            <CastComponent cast={exampleCast} />
+            <div><CastComponent cast={exampleCast} /></div>
           </div>
-          <div className='flex flex-col space-y-2 w-full items-center justify-center'>
-            <p className='text-center'>Example Warpcast cast url</p>
-            <CastComponent cast={warpcastURLCast} warpcastUrl={warpcastURLCastURL} />
+          <div className='space-y-2'>
+            <p className='text-center'>Example FID</p>
+            <div><ProfileComponent pfp={FIDPFP} url={"3"} /></div>
           </div>
         </div>
-        <div className='flex flex-row space-x-2'>
-          <div className='flex flex-col space-y-2 w-full items-center justify-center'>
-            <p className='text-center'>Example FID</p>
-            <ProfileComponent pfp={FIDPFP} url={"3"} />
+        <div className='space-y-4'>
+          <div className='space-y-2'>
+            <p className='text-center'>Example Warpcast cast url</p>
+            <div><CastComponent cast={warpcastURLCast} warpcastUrl={warpcastURLCastURL} /></div>
           </div>
-          <div className='flex flex-col space-y-2 w-full items-center justify-center'>
+          <div className='space-y-2'>
             <p className='text-center'>Example Warpcast profile url</p>
-            <ProfileComponent pfp={warpcastURLPFP} url={warpcastURLProfile} />
+            <div><ProfileComponent pfp={warpcastURLPFP} url={warpcastURLProfile} /></div>
           </div>
         </div>
       </div>
-    </div>
   );
 }
