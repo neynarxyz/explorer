@@ -1,10 +1,10 @@
-"use client";
+'use client';
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
-} from "@/components/ui/collapsible";
-import { useState } from "react";
+} from '@/components/ui/collapsible';
+import { useState } from 'react';
 
 interface CollapsibleCodeComponentProps {
   triggerContent: React.ReactNode;
@@ -28,7 +28,7 @@ export function CollapsibleCodeComponent({
           <div className="flex items-center">
             {triggerContent}
             <span className="ml-2">
-              {isOpen ? "▼" : "▶"} {/* Indicator: ▼ for open, ▶ for closed */}
+              {isOpen ? '▼' : '▶'} {/* Indicator: ▼ for open, ▶ for closed */}
             </span>
           </div>
         </CollapsibleTrigger>

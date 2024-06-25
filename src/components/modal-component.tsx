@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef } from 'react';
 
 interface ModalProps {
   isOpen: boolean;
@@ -26,13 +26,13 @@ const Modal: React.FC<ModalProps> = ({
     };
 
     if (isOpen) {
-      document.addEventListener("mousedown", handleOutsideClick);
+      document.addEventListener('mousedown', handleOutsideClick);
     } else {
-      document.removeEventListener("mousedown", handleOutsideClick);
+      document.removeEventListener('mousedown', handleOutsideClick);
     }
 
     return () => {
-      document.removeEventListener("mousedown", handleOutsideClick);
+      document.removeEventListener('mousedown', handleOutsideClick);
     };
   }, [isOpen, toggleModal]);
 
@@ -50,7 +50,7 @@ const Modal: React.FC<ModalProps> = ({
         <h2 className="text-lg font-semibold mb-4">{title}</h2>
         {missingObjects && missingObjects.length > 0 && (
           <div className="text-red-500 mb-4">
-            <strong>Missing:</strong> {missingObjects.join(", ")}
+            <strong>Missing:</strong> {missingObjects.join(', ')}
           </div>
         )}
         <div className="bg-gray-800 text-white p-4 rounded font-mono text-sm overflow-y-auto max-h-56 md:max-h-96 md:max-w-6xl max-w-lg">

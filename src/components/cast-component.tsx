@@ -1,12 +1,12 @@
-import { AvatarImage, AvatarFallback, Avatar } from "@/components/ui/avatar";
+import { AvatarImage, AvatarFallback, Avatar } from '@/components/ui/avatar';
 import {
   CardHeader,
   CardContent,
   CardFooter,
   Card,
-} from "@/components/ui/card";
+} from '@/components/ui/card';
 //note: not using this in favor of https://github.com/pugson/react-farcaster-embed, but this is a good example of how to render a cast.
-import Link from "next/link";
+import Link from 'next/link';
 
 export function CastComponent({ cast, warpcastUrl }: any) {
   if (!cast) return null;

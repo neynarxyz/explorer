@@ -1,7 +1,7 @@
-import Home from "@/components/home";
-import { seo } from "@/constants";
-import { fetchMetadata } from "frames.js/next";
-import { Metadata } from "next";
+import Home from '@/components/home';
+import { seo } from '@/constants';
+import { fetchMetadata } from 'frames.js/next';
+import { Metadata } from 'next';
 
 export async function generateMetadata() {
   return {
@@ -17,8 +17,8 @@ export async function generateMetadata() {
       images: [seo.ogImage],
       url: seo.url,
       siteName: seo.title,
-      locale: "en_US",
-      type: "website",
+      locale: 'en_US',
+      type: 'website',
     },
     robots: {
       index: true,
@@ -26,19 +26,19 @@ export async function generateMetadata() {
       googleBot: {
         index: true,
         follow: true,
-        "max-video-preview": -1,
-        "max-image-preview": "large",
-        "max-snippet": -1,
+        'max-video-preview': -1,
+        'max-image-preview': 'large',
+        'max-snippet': -1,
       },
     },
     other: {
       ...(await fetchMetadata(
         new URL(
-          "/frames",
+          '/frames',
           process.env.VERCEL_URL
             ? `https://${process.env.VERCEL_URL}`
-            : "http://localhost:3000",
-        ),
+            : 'http://localhost:3000'
+        )
       )),
     },
   } as Metadata;

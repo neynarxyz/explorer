@@ -1,15 +1,15 @@
 /* eslint-disable @next/next/no-img-element */
-"use client";
-import "./globals.css";
-import Link from "next/link";
-import Providers from "./providers";
-import Search from "@/components/search";
-import { usePathname } from "next/navigation";
-import { useEffect } from "react";
-import { seo } from "@/constants";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { DownloadIcon } from "lucide-react";
+'use client';
+import './globals.css';
+import Link from 'next/link';
+import Providers from './providers';
+import Search from '@/components/search';
+import { usePathname } from 'next/navigation';
+import { useEffect } from 'react';
+import { seo } from '@/constants';
+import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { DownloadIcon } from 'lucide-react';
 
 export default function RootLayout({
   children,
@@ -39,7 +39,7 @@ export default function RootLayout({
                   href="https://www.neynar.com"
                   target="_blank"
                 >
-                  <img className="w-32" src={"/neynar.png"} alt="Neynar logo" />
+                  <img className="w-32" src={'/neynar.png'} alt="Neynar logo" />
                 </Link>
               </div>
 
@@ -57,7 +57,7 @@ export default function RootLayout({
             </div>
 
             <div className="sticky bottom-0 p-4 text-center bg-white">
-              <Button asChild variant={"secondary"}>
+              <Button asChild variant={'secondary'}>
                 <Link
                   target="_blank"
                   href="https://warpcast.com/~/add-cast-action?url=https://explorer.neynar.com/frames/actions/view-on-explorer"
