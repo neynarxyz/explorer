@@ -1,49 +1,38 @@
-'use client'
+"use client";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next13-progressbar";
 import { usePathname } from "next/navigation";
+import { SearchIcon } from "lucide-react";
 
-export default function Search({
-}: Readonly<{
-
-}>) {  
-    const searchParams = usePathname()
-
-  
-  const [identifier, setIdentifier] = useState("");
+export default function Search() {
   const router = useRouter();
-
-  const handleKeyPress = (e: any) => {
-    if (e.key === "Enter") {
-      router.push(`/${encodeURIComponent(identifier)}`);
-    }
-  };
+  const path = usePathname();
+  const [identifier, setIdentifier] = useState<string>(decodeURIComponent(path.slice(1)));
 
   useEffect(() => {
-    if(searchParams === "/") {
-        setIdentifier("")
-    } 
-    else {
-        setIdentifier(decodeURIComponent(searchParams.split("/")[1]))
-    }
-  }, [searchParams])
+    const identifier = decodeURIComponent(path.slice(1));
+    setIdentifier(identifier);
+  }, [path]);
 
   return (
-          <div className="flex flex-col items-center w-full space-y-4">
-            <Input
-              className="w-full h-10 md:w-96"
-              placeholder="Enter a FID, hash, or warpcast url..."
-              value={identifier}
-              onChange={(e) => {
-                setIdentifier(e.target.value);
-              }}
-              onKeyDown={handleKeyPress}
-            />
-            <Button onClick={() => router.push(`/${encodeURIComponent(identifier)}`)}>
-              Fetch Identifier
-            </Button>
-          </div>
+    <form
+      className="flex gap-2 items-center w-full"
+      onSubmit={(e) => {
+        e.preventDefault();
+        router.push(`/${encodeURIComponent(identifier)}`);
+      }}
+    >
+      <Input
+        className="flex-auto min-w-[100px]"
+        placeholder="Enter a FID, hash, or warpcast url..."
+        value={identifier}
+        onChange={(e) => setIdentifier(e.currentTarget.value)}
+      />
+      <Button>
+        <SearchIcon className="w-5 h-5" />
+      </Button>
+    </form>
   );
 }

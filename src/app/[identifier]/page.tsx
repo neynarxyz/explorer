@@ -1,7 +1,10 @@
-'use client'
+"use client";
 import Modal from "@/components/modal-component";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { useClipboard } from "@/hooks/useClipboard";
 import { fetchCastAndFidData } from "@/lib/utils";
+import { CopyCheckIcon, CopyIcon, UserIcon } from "lucide-react";
 import Link from "next/link";
 
 import { useEffect, useState } from "react";
@@ -12,12 +15,12 @@ interface ResponseProps {
 
 const isNumeric = (str: string): boolean => {
   return !isNaN(Number(str)) && !isNaN(parseFloat(str)) && !/^0x/.test(str);
-}
+};
 
 const renderSkeletonHeader = () => (
-  <Card className="rounded-lg relative border-black md:p-8 text-xl min-w-40 flex flex-col items-center justify-center">
+  <Card className="rounded-lg relative border-black flex flex-col items-center justify-center">
     <div className="w-full flex flex-col items-center animate-pulse">
-      <CardHeader className="text-center relative z-10 md:text-lg text-sm w-full">
+      <CardHeader className="text-center relative md:text-lg text-sm w-full">
         <div className="h-6 bg-gray-300 rounded w-24 mb-2"></div>
       </CardHeader>
       <hr className="w-full border-t border-gray-300 my-2" />
@@ -28,16 +31,12 @@ const renderSkeletonHeader = () => (
   </Card>
 );
 
-const copyToClipboard = (text: string) => {
-  navigator.clipboard.writeText(text).then(() => {
-  }).catch(err => {
-  });
-};
-
 export default function Page({ params }: ResponseProps) {
   const identifier = decodeURIComponent(params.identifier);
   const fid: number | null = isNumeric(identifier) ? Number(identifier) : null;
   const hash = fid ? null : identifier;
+
+  const { copied, copy } = useClipboard();
   const [data, setData] = useState<any>(null);
   const [modalData, setModalData] = useState<any>(null);
   const [modalTitle, setModalTitle] = useState<string>("");
@@ -47,14 +46,14 @@ export default function Page({ params }: ResponseProps) {
 
   const fetchData = async () => {
     setLoading(true);
-    const data = await fetchCastAndFidData(hash, fid) as any;
+    const data = (await fetchCastAndFidData(hash, fid)) as any;
 
     const checkWarning = (message: any) => {
       const expectedTypes = [
         "USER_DATA_TYPE_PFP",
         "USER_DATA_TYPE_DISPLAY",
         "USER_DATA_TYPE_BIO",
-        "USER_DATA_TYPE_USERNAME"
+        "USER_DATA_TYPE_USERNAME",
       ];
 
       if (message?.messages) {
@@ -65,7 +64,7 @@ export default function Page({ params }: ResponseProps) {
           }
         });
 
-        const missingTypes = expectedTypes.filter(type => !foundTypes.has(type));
+        const missingTypes = expectedTypes.filter((type) => !foundTypes.has(type));
         return missingTypes;
       }
 
@@ -83,14 +82,14 @@ export default function Page({ params }: ResponseProps) {
       if (!username || username === expectedUsername) missingObjects.push("Username");
 
       return missingObjects;
-    }
+    };
 
     const warpcastAuthorMissing = checkWarning(data.apiData.warpcast?.author);
     const neynarAuthorMissing = checkWarning(data.apiData.neynar?.author?.author);
     const warpcastAuthorHubMissing = checkWarning(data.hubData?.[0]?.author);
     const neynarAuthorHubMissing = checkWarning(data.hubData?.[1]?.author);
-    const warpcastCastMissing = [] as any
-    const neynarCastMissing = [] as any
+    const warpcastCastMissing = [] as any;
+    const neynarCastMissing = [] as any;
 
     setData({
       ...data,
@@ -101,7 +100,7 @@ export default function Page({ params }: ResponseProps) {
       warpcastCastMissing,
       neynarCastMissing,
       warpcastCastHubMissing: [],
-      neynarCastHubMissing: []
+      neynarCastHubMissing: [],
     });
 
     setLoading(false);
@@ -124,10 +123,14 @@ export default function Page({ params }: ResponseProps) {
 
   const { warpcast, neynar } = data?.apiData ?? {};
   const {
-    warpcastAuthorMissing, neynarAuthorMissing,
-    warpcastAuthorHubMissing, neynarAuthorHubMissing,
-    warpcastCastMissing, neynarCastMissing,
-    warpcastCastHubMissing, neynarCastHubMissing
+    warpcastAuthorMissing,
+    neynarAuthorMissing,
+    warpcastAuthorHubMissing,
+    neynarAuthorHubMissing,
+    warpcastCastMissing,
+    neynarCastMissing,
+    warpcastCastHubMissing,
+    neynarCastHubMissing,
   } = data ?? {};
 
   const hubs = data?.hubData ?? [];
@@ -138,25 +141,27 @@ export default function Page({ params }: ResponseProps) {
   const { author: warpcastAuthor, cast: warpcastCast } = warpcast || {};
   const { author: neynarAuthor, cast: neynarCast } = neynar || {};
 
-  const authorFid = warpcastCast?.author?.fid || neynarCast?.cast?.author?.fid
+  const authorFid = warpcastCast?.author?.fid || neynarCast?.cast?.author?.fid;
 
-  const renderHeader = (label: string, data: any, missingObjects: string[]) => {
-    let icon = '✅';
+  const renderHeader = (label: string, data: any | null, missingObjects: string[]) => {
+    if (!data) {
+      return null;
+    }
+
+    let icon = "✅";
 
     if (data?.error) {
-      icon = '❌';
+      icon = "❌";
     } else if (missingObjects.length > 0) {
-      icon = '⚠️';
+      icon = "⚠️";
     }
 
     return (
       <button onClick={() => openModal(label, data, missingObjects)}>
-        <Card className="hover:bg-slate-100 rounded-lg relative border-black md:p-8 md:text-xl max-h-32 md:max-h-64 min-w-36 md:min-w-40 flex flex-col items-center justify-center">
-          <CardHeader className="text-center relative z-10 md:text-lg text-sm w-full">
-            {label}
-          </CardHeader>
+        <Card className="hover:bg-slate-100 rounded-lg relative border-black flex flex-col items-center justify-center">
+          <CardHeader className="text-center relative w-full">{label}</CardHeader>
           <hr className="w-full border-t border-black my-2" />
-          <CardContent className="flex items-center justify-center md:text-6xl w-full text-4xl">
+          <CardContent className="flex items-center justify-center w-full text-4xl">
             {icon}
           </CardContent>
         </Card>
@@ -164,39 +169,33 @@ export default function Page({ params }: ResponseProps) {
     );
   };
 
-  const handleCopyClick = () => {
-    copyToClipboard(fid ? fid.toString() as any : hash);
-    setButtonClicked(true);
-  };
 
   return (
     <>
       <Modal isOpen={isModalOpen} toggleModal={closeModal} response={modalData} title={modalTitle} />
-      <div className="flex flex-col w-full h-full items-center">
-<div className="space-x-5 flex">
-{ fid || hash ? (
-          <button
+      <div className="flex flex-col items-center">
+        <div className="gap-5 flex">
+          {fid || hash ? (
+            <Button
+              className="mb-10 min-h-10 px-4 py-2 bg-purple-500 text-white hover:bg-purple-700 rounded-lg"
+              onClick={() => copy(fid ? fid.toString() : hash || "")}
+            >
+              {copied ? <><CopyCheckIcon className="w-4 h-4 mr-2" /> Copied</>: <><CopyIcon className="w-4 h-4 mr-2" /> Copy {fid ? "User FID" : "Cast Hash"}</>}
+            </Button>
+          ) : null}
+
+          {authorFid ? (
+            <Button asChild
             className="mb-10 min-h-10 px-4 py-2 bg-purple-500 text-white hover:bg-purple-700 rounded-lg"
-            onClick={handleCopyClick}
-          >
-            {buttonClicked ? '✔️' : `Copy ${fid ? 'user FID' : 'cast hash'}`}
-          </button>
-        ) : null
-}
+            >
+              <Link href={`/${authorFid}`}>
+                 <UserIcon className="w-4 h-4 mr-1" /> View Author Profile
+              </Link>
+            </Button>
+          ) : null}
+        </div>
 
-{ authorFid ? (
-          <Link href={`/${authorFid}`} >
-            <div className="min-h-10 px-4 py-2 items-center flex justify-center text-white bg-purple-500 text-white hover:bg-purple-700 text-md rounded-lg">
-            View Author Profile
-            </div>
-          </Link>
-        ) : null
-}
-</div>
-
-
-        
-        <div className="w-full flex md:flex-row flex-col justify-center items-center md:space-x-0 ">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {loading ? (
             <>
               {renderSkeletonHeader()}
@@ -206,14 +205,14 @@ export default function Page({ params }: ResponseProps) {
             </>
           ) : (
             <>
-              {warpcastAuthor && renderHeader('Warpcast API', warpcastAuthor, warpcastAuthorMissing)}
-              {warpcastCast && renderHeader('Warpcast API', warpcastCast, warpcastCastMissing)}
-              {nemesAuthor && renderHeader('Warpcast Hub (Hoyt)', nemesAuthor, warpcastAuthorHubMissing)}
-              {nemesCast && renderHeader('Warpcast Hub (Hoyt)', nemesCast, warpcastCastHubMissing)}
-              {neynarHubAuthor && renderHeader('Neynar Hub', neynarHubAuthor, neynarAuthorHubMissing)}
-              {neynarHubCast && renderHeader('Neynar Hub', neynarHubCast, neynarCastHubMissing)}
-              {neynarAuthor && renderHeader('Neynar API', neynarAuthor, neynarAuthorMissing)}
-              {neynarCast && renderHeader('Neynar API', neynarCast, neynarCastMissing)}
+              {renderHeader("Warpcast API", warpcastAuthor, warpcastAuthorMissing)}
+              {renderHeader("Warpcast API", warpcastCast, warpcastCastMissing)}
+              {renderHeader("Warpcast Hub (Hoyt)", nemesAuthor, warpcastAuthorHubMissing)}
+              {renderHeader("Warpcast Hub (Hoyt)", nemesCast, warpcastCastHubMissing)}
+              {renderHeader("Neynar Hub", neynarHubAuthor, neynarAuthorHubMissing)}
+              {renderHeader("Neynar Hub", neynarHubCast, neynarCastHubMissing)}
+              {renderHeader("Neynar API", neynarAuthor, neynarAuthorMissing)}
+              {renderHeader("Neynar API", neynarCast, neynarCastMissing)}
             </>
           )}
         </div>
@@ -221,4 +220,3 @@ export default function Page({ params }: ResponseProps) {
     </>
   );
 }
-

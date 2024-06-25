@@ -7,7 +7,7 @@ export function ProfileComponent({pfp,url}: any) {
   if(!pfp) return null;
   return (
     <Link href={`/${encodeURIComponent(url)}`}>
-    <Card className="w-full hover:bg-slate-100 rounded-lg max-w-md md:min-w-64 md:min-h-32 flex items-center justify-center">
+    <Card className="w-full hover:bg-slate-100 rounded-lg sm:max-w-md h-[150px] aspect-square flex items-center justify-center">
       <CardContent className="p-4 w-full flex flex-col justify-center items-center space-y-10">
       <Avatar >
     <AvatarImage alt={`${url} PFP`} src={pfp} />
