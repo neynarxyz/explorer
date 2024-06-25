@@ -1,10 +1,10 @@
 /* eslint-disable react/jsx-key */
-import { Button } from "frames.js/next";
-import { frames } from "./frames";
-import { seo } from "@/constants";
+import { Button } from 'frames.js/next';
+import { frames } from './frames';
+import { seo } from '@/constants';
 
 function constructCastActionUrl(params: { url: string }): string {
-  const baseUrl = "https://warpcast.com/~/add-cast-action";
+  const baseUrl = 'https://warpcast.com/~/add-cast-action';
   const urlParams = new URLSearchParams({
     url: params.url,
   });
