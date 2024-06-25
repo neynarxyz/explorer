@@ -109,7 +109,7 @@ export default function Page({ params }: ResponseProps) {
 
   useEffect(() => {
     void fetchData();
-  }, [hash, fid, fetchData]);
+  }, [hash, fid]);
 
   const openModal = (
     title: string,
