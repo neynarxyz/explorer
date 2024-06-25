@@ -1,15 +1,17 @@
-"use client";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { useEffect, useRef, useState } from "react";
-import { useRouter } from "next13-progressbar";
-import { usePathname } from "next/navigation";
-import { SearchIcon } from "lucide-react";
+'use client';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { useEffect, useRef, useState } from 'react';
+import { useRouter } from 'next13-progressbar';
+import { usePathname } from 'next/navigation';
+import { SearchIcon } from 'lucide-react';
 
 export default function Search() {
   const router = useRouter();
   const path = usePathname();
-  const [identifier, setIdentifier] = useState<string>(decodeURIComponent(path.slice(1)));
+  const [identifier, setIdentifier] = useState<string>(
+    decodeURIComponent(path.slice(1))
+  );
 
   useEffect(() => {
     const identifier = decodeURIComponent(path.slice(1));

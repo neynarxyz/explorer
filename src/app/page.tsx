@@ -3,8 +3,8 @@ import { seo } from '@/constants';
 import { fetchMetadata } from 'frames.js/next';
 import { Metadata } from 'next';
 
-export async function generateMetadata(){
-  return{
+export async function generateMetadata() {
+  return {
     metadataBase: new URL(seo.url),
     title: {
       default: seo.title,
@@ -34,16 +34,16 @@ export async function generateMetadata(){
     other: {
       ...(await fetchMetadata(
         new URL(
-          "/frames",
+          '/frames',
           process.env.VERCEL_URL
             ? `https://${process.env.VERCEL_URL}`
-            : "http://localhost:3000"
+            : 'http://localhost:3000'
         )
       )),
     },
-  } as Metadata
+  } as Metadata;
 }
 
-export default function Page(){
-  return <Home />
+export default function Page() {
+  return <Home />;
 }

@@ -1,15 +1,15 @@
 /* eslint-disable @next/next/no-img-element */
-"use client";
-import "./globals.css";
-import Link from "next/link";
-import Providers from "./providers";
-import Search from "@/components/search";
-import { usePathname } from "next/navigation";
-import { useEffect } from "react";
-import { seo } from "@/constants";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { DownloadIcon } from "lucide-react";
+'use client';
+import './globals.css';
+import Link from 'next/link';
+import Providers from './providers';
+import Search from '@/components/search';
+import { usePathname } from 'next/navigation';
+import { useEffect } from 'react';
+import { seo } from '@/constants';
+import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { DownloadIcon } from 'lucide-react';
 
 export default function RootLayout({
   children,
@@ -34,8 +34,12 @@ export default function RootLayout({
           <Providers>
             <div className="sticky top-0 z-10 w-full flex flex-col sm:flex-row justify-between bg-white p-4">
               <div className="flex-1 min-w-32 mx-auto">
-                <Link className="block flex-shrink-0" href="https://www.neynar.com" target="_blank">
-                  <img className="w-32" src={"/neynar.png"} />
+                <Link
+                  className="block flex-shrink-0"
+                  href="https://www.neynar.com"
+                  target="_blank"
+                >
+                  <img className="w-32" src={'/neynar.png'} alt="Neynar logo" />
                 </Link>
               </div>
 
@@ -48,10 +52,12 @@ export default function RootLayout({
               <div className="flex-1"></div>
             </div>
 
-            <div className="flex-auto w-full p-4 md:p-8 bg-gray-50">{children}</div>
+            <div className="flex-auto w-full p-4 md:p-8 bg-gray-50">
+              {children}
+            </div>
 
             <div className="sticky bottom-0 p-4 text-center bg-white">
-              <Button asChild variant={"secondary"}>
+              <Button asChild variant={'secondary'}>
                 <Link
                   target="_blank"
                   href="https://warpcast.com/~/add-cast-action?url=https://explorer.neynar.com/frames/actions/view-on-explorer"
