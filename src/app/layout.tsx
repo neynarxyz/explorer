@@ -34,7 +34,11 @@ export default function RootLayout({
           <Providers>
             <div className="sticky top-0 z-10 w-full flex flex-col sm:flex-row justify-between bg-white p-4">
               <div className="flex-1 min-w-32 mx-auto">
-                <Link className="block flex-shrink-0" href="https://www.neynar.com" target="_blank">
+                <Link
+                  className="block flex-shrink-0"
+                  href="https://www.neynar.com"
+                  target="_blank"
+                >
                   <img className="w-32" src={"/neynar.png"} />
                 </Link>
               </div>
@@ -48,7 +52,9 @@ export default function RootLayout({
               <div className="flex-1"></div>
             </div>
 
-            <div className="flex-auto w-full p-4 md:p-8 bg-gray-50">{children}</div>
+            <div className="flex-auto w-full p-4 md:p-8 bg-gray-50">
+              {children}
+            </div>
 
             <div className="sticky bottom-0 p-4 text-center bg-white">
               <Button asChild variant={"secondary"}>
