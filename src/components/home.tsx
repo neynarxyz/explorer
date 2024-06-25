@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import { CastComponent } from "@/components/cast-component";
-import { ProfileComponent } from "@/components/profile-component";
+import { CastComponent } from '@/components/cast-component';
+import { ProfileComponent } from '@/components/profile-component';
 import {
   FIDPFP,
   exampleCast,
@@ -9,7 +9,7 @@ import {
   warpcastURLCastURL,
   warpcastURLPFP,
   warpcastURLProfile,
-} from "@/constants";
+} from '@/constants';
 
 export default function Home() {
   return (
@@ -24,7 +24,7 @@ export default function Home() {
         <div className="space-y-2">
           <p className="text-center">Example FID</p>
           <div>
-            <ProfileComponent pfp={FIDPFP} url={"3"} />
+            <ProfileComponent pfp={FIDPFP} url={'3'} />
           </div>
         </div>
       </div>

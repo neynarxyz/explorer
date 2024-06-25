@@ -1,13 +1,13 @@
-"use client";
-import Modal from "@/components/modal-component";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { useClipboard } from "@/hooks/useClipboard";
-import { fetchCastAndFidData } from "@/lib/utils";
-import { CopyCheckIcon, CopyIcon, UserIcon } from "lucide-react";
-import Link from "next/link";
+'use client';
+import Modal from '@/components/modal-component';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { useClipboard } from '@/hooks/useClipboard';
+import { fetchCastAndFidData } from '@/lib/utils';
+import { CopyCheckIcon, CopyIcon, UserIcon } from 'lucide-react';
+import Link from 'next/link';
 
-import { useEffect, useState } from "react";
+import { useEffect, useState } from 'react';
 
 interface ResponseProps {
   params: { identifier: string };
@@ -39,7 +39,7 @@ export default function Page({ params }: ResponseProps) {
   const { copied, copy } = useClipboard();
   const [data, setData] = useState<any>(null);
   const [modalData, setModalData] = useState<any>(null);
-  const [modalTitle, setModalTitle] = useState<string>("");
+  const [modalTitle, setModalTitle] = useState<string>('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [loading, setLoading] = useState(true);
 
@@ -49,10 +49,10 @@ export default function Page({ params }: ResponseProps) {
 
     const checkWarning = (message: any) => {
       const expectedTypes = [
-        "USER_DATA_TYPE_PFP",
-        "USER_DATA_TYPE_DISPLAY",
-        "USER_DATA_TYPE_BIO",
-        "USER_DATA_TYPE_USERNAME",
+        'USER_DATA_TYPE_PFP',
+        'USER_DATA_TYPE_DISPLAY',
+        'USER_DATA_TYPE_BIO',
+        'USER_DATA_TYPE_USERNAME',
       ];
 
       if (message?.messages) {
@@ -74,18 +74,18 @@ export default function Page({ params }: ResponseProps) {
       const displayName = message?.display_name || message?.displayName;
       const bio = message?.profile?.bio?.text;
 
-      if (!pfp) missingObjects.push("PFP");
-      if (!displayName) missingObjects.push("Display Name");
-      if (!bio) missingObjects.push("Bio");
+      if (!pfp) missingObjects.push('PFP');
+      if (!displayName) missingObjects.push('Display Name');
+      if (!bio) missingObjects.push('Bio');
       if (!username || username === expectedUsername)
-        missingObjects.push("Username");
+        missingObjects.push('Username');
 
       return missingObjects;
     };
 
     const warpcastAuthorMissing = checkWarning(data.apiData.warpcast?.author);
     const neynarAuthorMissing = checkWarning(
-      data.apiData.neynar?.author?.author,
+      data.apiData.neynar?.author?.author
     );
     const warpcastAuthorHubMissing = checkWarning(data.hubData?.[0]?.author);
     const neynarAuthorHubMissing = checkWarning(data.hubData?.[1]?.author);
@@ -114,7 +114,7 @@ export default function Page({ params }: ResponseProps) {
   const openModal = (
     title: string,
     response: any,
-    missingObjects: string[],
+    missingObjects: string[]
   ) => {
     setModalTitle(title);
     setModalData({ ...response, missingObjects });
@@ -151,18 +151,18 @@ export default function Page({ params }: ResponseProps) {
   const renderHeader = (
     label: string,
     data: any | null,
-    missingObjects: string[],
+    missingObjects: string[]
   ) => {
     if (!data) {
       return null;
     }
 
-    let icon = "✅";
+    let icon = '✅';
 
     if (data?.error) {
-      icon = "❌";
+      icon = '❌';
     } else if (missingObjects.length > 0) {
-      icon = "⚠️";
+      icon = '⚠️';
     }
 
     return (
@@ -193,7 +193,7 @@ export default function Page({ params }: ResponseProps) {
           {fid || hash ? (
             <Button
               className="mb-10 min-h-10 px-4 py-2 bg-purple-500 text-white hover:bg-purple-700 rounded-lg"
-              onClick={() => copy(fid ? fid.toString() : hash || "")}
+              onClick={() => copy(fid ? fid.toString() : hash || '')}
             >
               {copied ? (
                 <>
@@ -201,8 +201,8 @@ export default function Page({ params }: ResponseProps) {
                 </>
               ) : (
                 <>
-                  <CopyIcon className="w-4 h-4 mr-2" /> Copy{" "}
-                  {fid ? "User FID" : "Cast Hash"}
+                  <CopyIcon className="w-4 h-4 mr-2" /> Copy{' '}
+                  {fid ? 'User FID' : 'Cast Hash'}
                 </>
               )}
             </Button>
@@ -231,29 +231,29 @@ export default function Page({ params }: ResponseProps) {
           ) : (
             <>
               {renderHeader(
-                "Warpcast API",
+                'Warpcast API',
                 warpcastAuthor,
-                warpcastAuthorMissing,
+                warpcastAuthorMissing
               )}
-              {renderHeader("Warpcast API", warpcastCast, warpcastCastMissing)}
+              {renderHeader('Warpcast API', warpcastCast, warpcastCastMissing)}
               {renderHeader(
-                "Warpcast Hub (Hoyt)",
+                'Warpcast Hub (Hoyt)',
                 nemesAuthor,
-                warpcastAuthorHubMissing,
+                warpcastAuthorHubMissing
               )}
               {renderHeader(
-                "Warpcast Hub (Hoyt)",
+                'Warpcast Hub (Hoyt)',
                 nemesCast,
-                warpcastCastHubMissing,
+                warpcastCastHubMissing
               )}
               {renderHeader(
-                "Neynar Hub",
+                'Neynar Hub',
                 neynarHubAuthor,
-                neynarAuthorHubMissing,
+                neynarAuthorHubMissing
               )}
-              {renderHeader("Neynar Hub", neynarHubCast, neynarCastHubMissing)}
-              {renderHeader("Neynar API", neynarAuthor, neynarAuthorMissing)}
-              {renderHeader("Neynar API", neynarCast, neynarCastMissing)}
+              {renderHeader('Neynar Hub', neynarHubCast, neynarCastHubMissing)}
+              {renderHeader('Neynar API', neynarAuthor, neynarAuthorMissing)}
+              {renderHeader('Neynar API', neynarCast, neynarCastMissing)}
             </>
           )}
         </div>
