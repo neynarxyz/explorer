@@ -39,7 +39,7 @@ export default function RootLayout({
                   href="https://www.neynar.com"
                   target="_blank"
                 >
-                  <img className="w-32" src={"/neynar.png"} />
+                  <img className="w-32" src={"/neynar.png"} alt="Neynar logo" />
                 </Link>
               </div>
 

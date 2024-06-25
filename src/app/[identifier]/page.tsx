@@ -42,7 +42,6 @@ export default function Page({ params }: ResponseProps) {
   const [modalTitle, setModalTitle] = useState<string>("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [buttonClicked, setButtonClicked] = useState(false);
 
   const fetchData = async () => {
     setLoading(true);
@@ -64,10 +63,7 @@ export default function Page({ params }: ResponseProps) {
           }
         });
 
-        const missingTypes = expectedTypes.filter(
-          (type) => !foundTypes.has(type),
-        );
-        return missingTypes;
+        return expectedTypes.filter((type) => !foundTypes.has(type));
       }
 
       const missingObjects = [];
@@ -112,8 +108,8 @@ export default function Page({ params }: ResponseProps) {
   };
 
   useEffect(() => {
-    fetchData();
-  }, [hash, fid]);
+    void fetchData();
+  }, [hash, fid, fetchData]);
 
   const openModal = (
     title: string,
