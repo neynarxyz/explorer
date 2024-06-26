@@ -3,9 +3,14 @@ import Modal from '@/components/modal-component';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { useClipboard } from '@/hooks/useClipboard';
-import { fetchCastAndFidData } from '@/lib/utils';
+import { fetchCastAndFidData, isValidWarpcastUrl } from '@/lib/utils';
 import { CopyCheckIcon, CopyIcon, UserIcon } from 'lucide-react';
 import Link from 'next/link';
+import {
+  NeynarProfileCard,
+  useNeynarContext,
+  NeynarCastCard,
+} from '@neynar/react';
 
 import { useEffect, useState } from 'react';
 
@@ -256,6 +261,17 @@ export default function Page({ params }: ResponseProps) {
               {renderHeader('Neynar API', neynarCast, neynarCastMissing)}
             </>
           )}
+        </div>
+        <div className="my-4 hidden md:block">
+          {hash ? (
+            <NeynarCastCard
+              hash={hash}
+              identifier={isValidWarpcastUrl(identifier) ? 'url' : 'hash'}
+              viewerFid={3}
+            />
+          ) : fid ? (
+            <NeynarProfileCard fid={fid} />
+          ) : null}
         </div>
       </div>
     </>
