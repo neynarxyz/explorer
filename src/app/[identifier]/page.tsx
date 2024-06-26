@@ -263,9 +263,10 @@ export default function Page({ params }: ResponseProps) {
           )}
         </div>
         <div className="my-4 hidden md:block">
-          {hash ? (
+          {hash &&
+          (!isValidWarpcastUrl(hash) || hash.split('/').length >= 5) ? (
             <NeynarCastCard
-              hash={hash}
+              hash={hash || identifier}
               identifier={isValidWarpcastUrl(identifier) ? 'url' : 'hash'}
               viewerFid={3}
             />
