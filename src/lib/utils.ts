@@ -2,16 +2,13 @@ import axios from 'axios';
 import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import { hubs, tokenBearer } from '@/constants';
-
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
-
 interface HubType {
   shortname: string;
   url: string;
 }
-
 const fetchHubData = async (
   fid: number | null,
   hash: string | null,
@@ -22,10 +19,8 @@ const fetchHubData = async (
     const castData = await fetchCastFromHub(hash, fid, hub, isCast);
     return { name: hub.shortname, author: authorData, cast: castData };
   });
-
   return Promise.all(promises);
 };
-
 interface ApiResponse {
   warpcast: {
     author: any;
@@ -39,7 +34,6 @@ interface ApiResponse {
   };
   error?: any;
 }
-
 const fetchApiData = async (
   fid: number | null,
   identifier: string | null
@@ -52,12 +46,10 @@ const fetchApiData = async (
   const isWarpcastURL = isValidWarpcastUrl(identifier);
   let hash = identifier;
   let warpcastCastResponseStart = null;
-
   try {
     if (identifier && (!isWarpcastURL || identifier.split('/').length >= 5)) {
       try {
         warpcastCastResponseStart = performance.now();
-
         warpcastCast = await fetchWarpcastCast(hash, isWarpcastURL, identifier);
         if (warpcastCast && warpcastCast.hash) {
           authorFid = authorFid || warpcastCast?.author?.fid || null;
@@ -66,7 +58,6 @@ const fetchApiData = async (
       } catch (error) {
         warpcastCast = formatError(error);
       }
-
       try {
         neynarCast = await fetchCastFromNeynarAPI(identifier, isWarpcastURL);
         if (neynarCast && neynarCast.cast.hash) {
@@ -77,7 +68,6 @@ const fetchApiData = async (
         neynarCast = formatError(error);
       }
     }
-
     if (
       fid ||
       (isWarpcastURL && identifier && identifier.split('/').length === 4)
@@ -90,7 +80,6 @@ const fetchApiData = async (
       } catch (error) {
         warpcastAuthor = formatError(error);
       }
-
       try {
         neynarAuthor = await fetchAuthorFromNeynarAPI(
           authorFid?.toString() ?? (identifier as any)
@@ -98,7 +87,6 @@ const fetchApiData = async (
       } catch (error) {
         neynarAuthor = formatError(error);
       }
-
       return formatResponse(
         warpcastAuthor,
         warpcastCast,
@@ -108,14 +96,12 @@ const fetchApiData = async (
         warpcastCastResponseStart ?? 0
       );
     }
-
     return formatEmptyResponse(warpcastCast, neynarCast);
   } catch (error) {
     console.error('Error in fetchApiData', error);
     return formatErrorResponse(error, warpcastCast, neynarCast);
   }
 };
-
 const fetchWarpcastCast = async (
   hash: string | null,
   isWarpcastURL: boolean,
@@ -156,12 +142,10 @@ const fetchWarpcastCast = async (
     return { error };
   }
 };
-
 const fetchWarpcastAuthor = async (identifier: string | null) => {
   //its a fid
   try {
     const isWarpcastURL = isValidWarpcastUrl(identifier);
-
     if (!isWarpcastURL) {
       const response = await axios.get(
         `https://api.warpcast.com/v2/user?fid=${identifier}`,
@@ -185,7 +169,6 @@ const fetchWarpcastAuthor = async (identifier: string | null) => {
     return { error };
   }
 };
-
 const formatResponse = (
   warpcastAuthor: any,
   warpcastCast: any,
@@ -208,7 +191,6 @@ const formatResponse = (
     name: 'Neynar API',
   },
 });
-
 const formatEmptyResponse = (warpcastCast: any, neynarCast: any) => ({
   warpcast: {
     cast: warpcastCast,
@@ -221,7 +203,6 @@ const formatEmptyResponse = (warpcastCast: any, neynarCast: any) => ({
     author: null,
   },
 });
-
 const formatErrorResponse = (
   error: any,
   warpcastCast: any = null,
@@ -239,7 +220,6 @@ const formatErrorResponse = (
         }
       : null,
   };
-
   return {
     warpcast: {
       cast: warpcastCast,
@@ -254,7 +234,6 @@ const formatErrorResponse = (
     error: errorInfo,
   };
 };
-
 const formatError = (error: any) => ({
   error: {
     message: error.message,
@@ -269,7 +248,6 @@ const formatError = (error: any) => ({
       : null,
   },
 });
-
 export async function fetchCastAndFidData(
   hash: string | null,
   fid: number | null
@@ -286,7 +264,6 @@ export async function fetchCastAndFidData(
     fid;
   let processedHash =
     apiData.neynar?.cast?.cast?.hash ?? apiData.warpcast?.cast?.hash ?? hash;
-
   if (isValidWarpcastUrl(processedHash)) {
     processedHash = null;
   }
@@ -298,7 +275,6 @@ export async function fetchCastAndFidData(
   );
   return { apiData, hubData };
 }
-
 export async function fetchCastFromHub(
   hash: string | null,
   fid: number | null,
@@ -324,7 +300,6 @@ export async function fetchCastFromHub(
     return { error: formatError(e), data: null };
   }
 }
-
 export async function fetchCastFromNeynarAPI(
   identifier: string,
   isURL: boolean = false
@@ -339,13 +314,11 @@ export async function fetchCastFromNeynarAPI(
         },
       }
     );
-
     return { cast: cast.data.cast, error: null };
   } catch (e) {
     return { error: formatError(e), cast: null };
   }
 }
-
 export async function fetchFidFromHub(
   fid: number | null,
   hub: HubType,
@@ -364,12 +337,10 @@ export async function fetchFidFromHub(
     const response = await axios.get(`${hub.url}/v1/userDataByFid?fid=${fid}`, {
       headers,
     });
-
     const verificationsResponse = await axios.get(
       `${hub.url}/v1/verificationsByFid?fid=2?fid=${fid}`,
       { headers }
     );
-
     return {
       ...response.data,
       verifications: verificationsResponse.data,
@@ -379,7 +350,6 @@ export async function fetchFidFromHub(
     return { error: formatError(e), data: null };
   }
 }
-
 async function isEmbedImageValid(url: string): Promise<boolean> {
   return new Promise((resolve) => {
     const img = new Image();
@@ -388,21 +358,16 @@ async function isEmbedImageValid(url: string): Promise<boolean> {
     img.src = url;
   });
 }
-
 function isEmbedVideoValid(url: string): boolean {
   return /\.(mp4|webm|ogg)$/.test(url);
 }
-
 export async function getEmbedType(url: string) {
   const isImage = await isEmbedImageValid(url);
   if (isImage) return { type: 'image', url };
-
   const isVideo = isEmbedVideoValid(url);
   if (isVideo) return { type: 'video', url };
-
   return null;
 }
-
 export async function fetchAuthorFromNeynarAPI(identifier: string) {
   try {
     const isURL = isValidWarpcastUrl(identifier);
@@ -417,7 +382,6 @@ export async function fetchAuthorFromNeynarAPI(identifier: string) {
         }
       );
       const author = authorData.data.users[0];
-
       return { author, error: null };
     } else {
       const username = identifier.split('/')[3];
@@ -435,6 +399,45 @@ export async function fetchAuthorFromNeynarAPI(identifier: string) {
   } catch (e) {
     return { error: formatError(e), author: null };
   }
+}
+
+async function getNeynarHubInfo() {
+  const url = `https://hub-api.neynar.com/v1/info?dbstats=1&api_key=${process.env.NEXT_PUBLIC_NEYNAR_API_KEY}`;
+
+  try {
+    const response = await axios.get(url);
+    return { ...response.data, nickname: 'Neynar' };
+  } catch (error) {
+    console.error('Error fetching API info:', error);
+    return {
+      dbStats: {
+        numMessages: 0,
+      },
+      nickname: 'Neynar',
+    };
+  }
+}
+
+export async function getHubsInfo() {
+  const promises = hubs.map(async (hub: any) => {
+    if (hub.shortname === 'Neynar hub') return await getNeynarHubInfo();
+    const url = `${hub.url}/v1/info?dbstats=1`;
+
+    try {
+      let response = await axios.get(url);
+      // Set the nickname to the shortname
+      return { ...response.data, nickname: hub.shortname };
+    } catch (error) {
+      console.error('Error fetching API info:', error);
+      return {
+        dbStats: {
+          numMessages: 0,
+        },
+        nickname: hub.shortname,
+      };
+    }
+  });
+  return Promise.all(promises);
 }
 
 export const isValidWarpcastUrl = (url: string | null) => {
