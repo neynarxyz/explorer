@@ -29,7 +29,7 @@ const HubsDataComponent = () => {
             <div>
               {hub.dbStats.numMessages !== null ? (
                 <p className="text-center font-bold">
-                  {hub?.dbStats?.numMessages}
+                  {hub?.dbStats?.numMessages.toLocaleString()}
                 </p>
               ) : (
                 <p className="text-center">Loading...</p>
