@@ -2,6 +2,7 @@
 import Modal from '@/components/modal-component';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { hubs } from '@/constants';
 import { useClipboard } from '@/hooks/useClipboard';
 import { capitalizeNickname } from '@/lib/helpers';
 import { fetchCastAndFidData } from '@/lib/utils';
@@ -13,12 +14,6 @@ import { useEffect, useState } from 'react';
 interface ResponseProps {
   params: { identifier: string };
 }
-
-const hubs = [
-  { shortname: 'hoyt', url: 'https://hoyt.farcaster.xyz:2281' },
-  { shortname: 'Neynar hub', url: 'https://hub-api.neynar.com' },
-  { shortname: 'lamia', url: 'https://lamia.farcaster.xyz:2281' },
-];
 
 const isNumeric = (str: string): boolean => {
   return !isNaN(Number(str)) && !isNaN(parseFloat(str)) && !/^0x/.test(str);
