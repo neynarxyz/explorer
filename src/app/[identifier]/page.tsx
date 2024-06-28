@@ -46,45 +46,46 @@ export default function Page({ params }: ResponseProps) {
   const [loading, setLoading] = useState(true);
   const [showOtherHubs, setShowOtherHubs] = useState(false);
 
+  const checkWarning = (message: any) => {
+    if (!message) return [];
+    const expectedTypes = [
+      'USER_DATA_TYPE_PFP',
+      'USER_DATA_TYPE_DISPLAY',
+      'USER_DATA_TYPE_BIO',
+      'USER_DATA_TYPE_USERNAME',
+    ];
+
+    if (message?.messages) {
+      const foundTypes = new Set();
+      message.messages.forEach((msg: any) => {
+        if (msg.data?.userDataBody?.type) {
+          foundTypes.add(msg.data.userDataBody.type);
+        }
+      });
+
+      return expectedTypes.filter((type) => !foundTypes.has(type));
+    }
+
+    const missingObjects = [];
+    const authorFid = message?.fid;
+    const expectedUsername = `!${authorFid}`;
+    const username = message?.username;
+    const pfp = message?.pfp?.url || message?.pfp_url;
+    const displayName = message?.display_name || message?.displayName;
+    const bio = message?.profile?.bio?.text;
+
+    if (!pfp) missingObjects.push('PFP');
+    if (!displayName) missingObjects.push('Display Name');
+    if (!bio) missingObjects.push('Bio');
+    if (!username || username === expectedUsername)
+      missingObjects.push('Username');
+
+    return missingObjects;
+  };
+
   const fetchData = async () => {
     setLoading(true);
     const data = (await fetchCastAndFidData(hash, fid)) as any;
-
-    const checkWarning = (message: any) => {
-      const expectedTypes = [
-        'USER_DATA_TYPE_PFP',
-        'USER_DATA_TYPE_DISPLAY',
-        'USER_DATA_TYPE_BIO',
-        'USER_DATA_TYPE_USERNAME',
-      ];
-
-      if (message?.messages) {
-        const foundTypes = new Set();
-        message.messages.forEach((msg: any) => {
-          if (msg.data?.userDataBody?.type) {
-            foundTypes.add(msg.data.userDataBody.type);
-          }
-        });
-
-        return expectedTypes.filter((type) => !foundTypes.has(type));
-      }
-
-      const missingObjects = [];
-      const authorFid = message?.fid;
-      const expectedUsername = `!${authorFid}`;
-      const username = message?.username;
-      const pfp = message?.pfp?.url || message?.pfp_url;
-      const displayName = message?.display_name || message?.displayName;
-      const bio = message?.profile?.bio?.text;
-
-      if (!pfp) missingObjects.push('PFP');
-      if (!displayName) missingObjects.push('Display Name');
-      if (!bio) missingObjects.push('Bio');
-      if (!username || username === expectedUsername)
-        missingObjects.push('Username');
-
-      return missingObjects;
-    };
 
     const warpcastAuthorMissing = checkWarning(data.apiData.warpcast?.author);
     const neynarAuthorMissing = checkWarning(
@@ -272,15 +273,20 @@ export default function Page({ params }: ResponseProps) {
 
         {showOtherHubs && (
           <div className="flex md:flex-row flex-col items-center my-5">
-            {hubs.slice(2).map((hub, index) => (
-              <div key={index}>
-                {renderHeader(
-                  `${capitalizeNickname(hub.shortname)}`,
-                  data?.hubData?.[index + 2],
-                  []
-                )}
-              </div>
-            ))}
+            {hubs.slice(2).map((hub, index) => {
+              const hubData = data?.hubData?.[index + 2];
+              const authorData = hubData?.author?.fid || null;
+              const missingObjects = checkWarning(authorData);
+              return (
+                <div key={index}>
+                  {renderHeader(
+                    `${capitalizeNickname(hub.shortname)}`,
+                    hubData,
+                    missingObjects
+                  )}
+                </div>
+              );
+            })}
           </div>
         )}
       </div>
