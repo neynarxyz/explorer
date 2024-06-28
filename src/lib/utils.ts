@@ -5,7 +5,7 @@ import { hubs, tokenBearer } from '@/constants';
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
-interface HubType {
+export interface HubType {
   shortname: string;
   url: string;
 }
