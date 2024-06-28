@@ -268,7 +268,7 @@ export default function Page({ params }: ResponseProps) {
 
         {!showOtherHubs && (
           <Button
-            className="mt-10 min-h-10 px-4 py-2 bg-blue-500 text-white hover:bg-blue-700 rounded-lg"
+            className="mt-10 min-h-10 px-4 py-2 bg-purple-500 text-white hover:bg-purple-700 rounded-lg"
             onClick={() => setShowOtherHubs(true)}
           >
             Check other hubs
