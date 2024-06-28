@@ -275,8 +275,7 @@ export default function Page({ params }: ResponseProps) {
           <div className="flex md:flex-row flex-col items-center my-5">
             {hubs.slice(2).map((hub, index) => {
               const hubData = data?.hubData?.[index + 2];
-              const authorData = hubData?.author?.fid || null;
-              const missingObjects = checkWarning(authorData);
+              const missingObjects = checkWarning(hubData?.author);
               return (
                 <div key={index}>
                   {renderHeader(
