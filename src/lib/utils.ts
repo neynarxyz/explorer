@@ -419,7 +419,7 @@ async function getNeynarHubInfo() {
 }
 
 export async function getHubsInfo() {
-  const promises = hubs.map(async (hub: any) => {
+  const promises = hubs.slice(0, 3).map(async (hub: any) => {
     if (hub.shortname === 'Neynar hub') return await getNeynarHubInfo();
     const url = `${hub.url}/v1/info?dbstats=1`;
 
