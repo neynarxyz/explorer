@@ -40,6 +40,37 @@ const Modal: React.FC<ModalProps> = ({
 
   const { missingObjects, ...restResponse } = response;
 
+  const linkify = (text: string) => {
+    const urlPattern = /https?:\/\/[^\s/$.?#].[^\s]*/g;
+    const fidPattern = /"fid":\s?(\d+)/g;
+    const hashPatterns = [
+      /"hash":\s?"([^"]+)"/g,
+      /"parentHash":\s?"([^"]+)"/g,
+      /"parent_hash":\s?"([^"]+)"/g,
+      /"threadHash":\s?"([^"]+)"/g,
+      /"thread_hash":\s?"([^"]+)"/g,
+    ];
+
+    let linkedText = text.replace(
+      urlPattern,
+      (url) =>
+        `<a href="${url}" target="_blank" class="text-blue-500">${url}</a>`
+    );
+    linkedText = linkedText.replace(
+      fidPattern,
+      (match, fid) =>
+        `"fid": <a href="/${fid}" class="text-blue-500">${fid}</a>`
+    );
+    hashPatterns.forEach((pattern) => {
+      linkedText = linkedText.replace(pattern, (match, hash) => {
+        const key = match.split(':')[0].replace(/"/g, '');
+        return `"${key}": "<a href="/${hash}" class="text-blue-500">${hash}</a>"`;
+      });
+    });
+
+    return linkedText;
+  };
+
   return (
     <div className="fixed inset-0 flex items-center justify-center z-50">
       <div className="fixed inset-0 bg-black opacity-50"></div>
@@ -54,7 +85,11 @@ const Modal: React.FC<ModalProps> = ({
           </div>
         )}
         <div className="bg-gray-800 text-white p-4 rounded font-mono text-sm overflow-y-auto max-h-56 md:max-h-96 md:max-w-6xl max-w-lg">
-          <pre>{JSON.stringify(restResponse, null, 2)}</pre>
+          <pre
+            dangerouslySetInnerHTML={{
+              __html: linkify(JSON.stringify(restResponse, null, 2)),
+            }}
+          ></pre>
         </div>
       </div>
     </div>
