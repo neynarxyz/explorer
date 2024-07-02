@@ -41,7 +41,7 @@ export default function Home() {
           <p className="text-center">Example Warpcast profile url</p>
           <div className="h-30 w-full flex justify-center items-center">
             <Link
-              href={`/${warpcastURLProfile}`}
+              href={`/${encodeURIComponent(warpcastURLProfile)}`}
               className="w-full h-full flex justify-center items-center"
             >
               <NeynarProfileCard fid={616} />

@@ -155,7 +155,13 @@ export default function Page({ params }: ResponseProps) {
   const { author: warpcastAuthor, cast: warpcastCast } = warpcast || {};
   const { author: neynarAuthor, cast: neynarCast } = neynar || {};
 
-  const authorFid = warpcastCast?.author?.fid || neynarCast?.cast?.author?.fid;
+  const authorFidCast =
+    warpcastCast?.author?.fid || neynarCast?.cast?.author?.fid;
+  const authorFid =
+    warpcastCast?.author?.fid ||
+    neynarCast?.cast?.author?.fid ||
+    neynarAuthor?.author?.fid ||
+    warpcastAuthor?.author?.fid;
 
   const renderHeader = (
     label: string,
@@ -222,12 +228,12 @@ export default function Page({ params }: ResponseProps) {
             </Button>
           ) : null}
 
-          {authorFid ? (
+          {authorFidCast ? (
             <Button
               asChild
               className="mb-10 min-h-10 px-4 py-2 bg-purple-500 text-white hover:bg-purple-700 rounded-lg"
             >
-              <Link href={`/${authorFid}`}>
+              <Link href={`/${authorFidCast}`}>
                 <UserIcon className="w-4 h-4 mr-1" /> View Author Profile
               </Link>
             </Button>
@@ -278,8 +284,8 @@ export default function Page({ params }: ResponseProps) {
               type={isValidWarpcastUrl(identifier) ? 'url' : 'hash'}
               identifier={identifier}
             />
-          ) : fid ? (
-            <NeynarProfileCard fid={fid} />
+          ) : authorFid ? (
+            <NeynarProfileCard fid={authorFid} />
           ) : null}
         </div>
 
