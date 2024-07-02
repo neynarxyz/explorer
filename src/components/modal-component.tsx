@@ -39,8 +39,7 @@ const Modal: React.FC<ModalProps> = ({
   if (!isOpen) return null;
 
   const { missingObjects, ...restResponse } = response;
-
-  const linkify = (text: string) => {
+  const linkify = (text: any) => {
     const urlPattern = /https?:\/\/[^\s/$.?#].[^\s]*/g;
     const fidPattern = /"fid":\s?(\d+)/g;
     const hashPatterns = [
@@ -51,22 +50,31 @@ const Modal: React.FC<ModalProps> = ({
       /"thread_hash":\s?"([^"]+)"/g,
     ];
 
+    const shouldLinkifyHashes = !(
+      text.includes('MESSAGE_TYPE_USER_DATA') ||
+      text.includes('MESSAGE_TYPE_VERIFICATION')
+    );
+
     let linkedText = text.replace(
       urlPattern,
-      (url) =>
+      (url: any) =>
         `<a href="${url}" target="_blank" class="text-blue-500">${url}</a>`
     );
+
     linkedText = linkedText.replace(
       fidPattern,
-      (match, fid) =>
+      (match: any, fid: any) =>
         `"fid": <a href="/${fid}" class="text-blue-500">${fid}</a>`
     );
-    hashPatterns.forEach((pattern) => {
-      linkedText = linkedText.replace(pattern, (match, hash) => {
-        const key = match.split(':')[0].replace(/"/g, '');
-        return `"${key}": "<a href="/${hash}" class="text-blue-500">${hash}</a>"`;
+
+    if (shouldLinkifyHashes) {
+      hashPatterns.forEach((pattern) => {
+        linkedText = linkedText.replace(pattern, (match: any, hash: any) => {
+          const key = match.split(':')[0].replace(/"/g, '');
+          return `"${key}": "<a href="/${hash}" class="text-blue-500">${hash}</a>"`;
+        });
       });
-    });
+    }
 
     return linkedText;
   };
