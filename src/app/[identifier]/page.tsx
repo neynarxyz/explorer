@@ -2,16 +2,18 @@
 import Modal from '@/components/modal-component';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { hubs } from '@/constants';
 import { useClipboard } from '@/hooks/useClipboard';
 import { fetchCastAndFidData, isValidWarpcastUrl } from '@/lib/utils';
-import { CopyCheckIcon, CopyIcon, UserIcon } from 'lucide-react';
-import Link from 'next/link';
 import {
   NeynarProfileCard,
   useNeynarContext,
   NeynarCastCard,
 } from '@neynar/react';
-
+import { capitalizeNickname } from '@/lib/helpers';
+import { CopyCheckIcon, CopyIcon, UserIcon } from 'lucide-react';
+import Link from 'next/link';
+import * as amplitude from '@amplitude/analytics-browser';
 import { useEffect, useState } from 'react';
 
 interface ResponseProps {
@@ -47,46 +49,48 @@ export default function Page({ params }: ResponseProps) {
   const [modalTitle, setModalTitle] = useState<string>('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [showOtherHubs, setShowOtherHubs] = useState(false);
+
+  const checkWarning = (message: any) => {
+    if (!message) return [];
+    const expectedTypes = [
+      'USER_DATA_TYPE_PFP',
+      'USER_DATA_TYPE_DISPLAY',
+      'USER_DATA_TYPE_BIO',
+      'USER_DATA_TYPE_USERNAME',
+    ];
+
+    if (message?.messages) {
+      const foundTypes = new Set();
+      message.messages.forEach((msg: any) => {
+        if (msg.data?.userDataBody?.type) {
+          foundTypes.add(msg.data.userDataBody.type);
+        }
+      });
+
+      return expectedTypes.filter((type) => !foundTypes.has(type));
+    }
+
+    const missingObjects = [];
+    const authorFid = message?.fid;
+    const expectedUsername = `!${authorFid}`;
+    const username = message?.username;
+    const pfp = message?.pfp?.url || message?.pfp_url;
+    const displayName = message?.display_name || message?.displayName;
+    const bio = message?.profile?.bio?.text;
+
+    if (!pfp) missingObjects.push('PFP');
+    if (!displayName) missingObjects.push('Display Name');
+    if (!bio) missingObjects.push('Bio');
+    if (!username || username === expectedUsername)
+      missingObjects.push('Username');
+
+    return missingObjects;
+  };
 
   const fetchData = async () => {
     setLoading(true);
     const data = (await fetchCastAndFidData(hash, fid)) as any;
-
-    const checkWarning = (message: any) => {
-      const expectedTypes = [
-        'USER_DATA_TYPE_PFP',
-        'USER_DATA_TYPE_DISPLAY',
-        'USER_DATA_TYPE_BIO',
-        'USER_DATA_TYPE_USERNAME',
-      ];
-
-      if (message?.messages) {
-        const foundTypes = new Set();
-        message.messages.forEach((msg: any) => {
-          if (msg.data?.userDataBody?.type) {
-            foundTypes.add(msg.data.userDataBody.type);
-          }
-        });
-
-        return expectedTypes.filter((type) => !foundTypes.has(type));
-      }
-
-      const missingObjects = [];
-      const authorFid = message?.fid;
-      const expectedUsername = `!${authorFid}`;
-      const username = message?.username;
-      const pfp = message?.pfp?.url || message?.pfp_url;
-      const displayName = message?.display_name || message?.displayName;
-      const bio = message?.profile?.bio?.text;
-
-      if (!pfp) missingObjects.push('PFP');
-      if (!displayName) missingObjects.push('Display Name');
-      if (!bio) missingObjects.push('Bio');
-      if (!username || username === expectedUsername)
-        missingObjects.push('Username');
-
-      return missingObjects;
-    };
 
     const warpcastAuthorMissing = checkWarning(data.apiData.warpcast?.author);
     const neynarAuthorMissing = checkWarning(
@@ -143,10 +147,10 @@ export default function Page({ params }: ResponseProps) {
     neynarCastHubMissing,
   } = data ?? {};
 
-  const hubs = data?.hubData ?? [];
-  const nemes = hubs[0] ?? {};
-  const neynarHub = hubs[1] ?? {};
-  const { author: nemesAuthor, cast: nemesCast } = nemes || {};
+  const hubsData = data?.hubData ?? [];
+  const hoyt = hubsData[0] ?? {};
+  const neynarHub = hubsData[1] ?? {};
+  const { author: hoytAuthor, cast: hoytCast } = hoyt || {};
   const { author: neynarHubAuthor, cast: neynarHubCast } = neynarHub || {};
   const { author: warpcastAuthor, cast: warpcastCast } = warpcast || {};
   const { author: neynarAuthor, cast: neynarCast } = neynar || {};
@@ -172,7 +176,7 @@ export default function Page({ params }: ResponseProps) {
 
     return (
       <button onClick={() => openModal(label, data, missingObjects)}>
-        <Card className="hover:bg-slate-100 rounded-lg relative border-black flex flex-col items-center justify-center">
+        <Card className="min-w-36 hover:bg-slate-100 rounded-lg relative border-black flex flex-col items-center justify-center">
           <CardHeader className="text-center relative w-full">
             {label}
           </CardHeader>
@@ -198,7 +202,12 @@ export default function Page({ params }: ResponseProps) {
           {fid || hash ? (
             <Button
               className="mb-10 min-h-10 px-4 py-2 bg-purple-500 text-white hover:bg-purple-700 rounded-lg"
-              onClick={() => copy(fid ? fid.toString() : hash || '')}
+              onClick={() => {
+                amplitude.track('Click on identifier', {
+                  identifier,
+                });
+                copy(fid ? fid.toString() : hash || '');
+              }}
             >
               {copied ? (
                 <>
@@ -242,13 +251,13 @@ export default function Page({ params }: ResponseProps) {
               )}
               {renderHeader('Warpcast API', warpcastCast, warpcastCastMissing)}
               {renderHeader(
-                'Warpcast Hub (Hoyt)',
-                nemesAuthor,
+                capitalizeNickname(hoyt.name),
+                hoytAuthor,
                 warpcastAuthorHubMissing
               )}
               {renderHeader(
-                'Warpcast Hub (Hoyt)',
-                nemesCast,
+                capitalizeNickname(hoyt.name),
+                hoytCast,
                 warpcastCastHubMissing
               )}
               {renderHeader(
@@ -273,6 +282,38 @@ export default function Page({ params }: ResponseProps) {
             <NeynarProfileCard fid={fid} />
           ) : null}
         </div>
+
+        {!showOtherHubs && (
+          <Button
+            className="mt-10 min-h-10 px-4 py-2 bg-purple-500 text-white hover:bg-purple-700 rounded-lg"
+            onClick={() => {
+              amplitude.track('See more hubs', {
+                identifier,
+              });
+              setShowOtherHubs(true);
+            }}
+          >
+            Check other hubs
+          </Button>
+        )}
+
+        {showOtherHubs && (
+          <div className="flex md:flex-row flex-col items-center my-5">
+            {hubs.slice(2).map((hub, index) => {
+              const hubData = data?.hubData?.[index + 2];
+              const missingObjects = checkWarning(hubData?.author);
+              return (
+                <div key={index}>
+                  {renderHeader(
+                    `${capitalizeNickname(hub.shortname)}`,
+                    hubData,
+                    missingObjects
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
     </>
   );

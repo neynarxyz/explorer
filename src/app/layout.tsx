@@ -13,12 +13,23 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { DownloadIcon } from 'lucide-react';
 import { NeynarContextProvider, Theme } from '@neynar/react';
+import * as amplitude from '@amplitude/analytics-browser';
+import { v4 as uuidv4 } from 'uuid';
 
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  useEffect(() => {
+    let userId = localStorage.getItem('user_uuid');
+    if (!userId) {
+      userId = uuidv4();
+      localStorage.setItem('user_uuid', userId);
+    }
+    amplitude.init(process.env.NEXT_PUBLIC_AMPLITUDE_API_KEY as string, userId);
+  }, []);
+
   return (
     <html lang="en">
       <NeynarContextProvider
@@ -41,8 +52,8 @@ export default function RootLayout({
         <body className="relative h-screen min-h-screen">
           <div className="flex flex-col min-h-screen">
             <Providers>
-              <div className="sticky top-0 z-10 w-full flex flex-col sm:flex-row justify-between bg-white p-4">
-                <div className="flex-1 min-w-32 mx-auto">
+              <div className="sticky top-0 z-10 w-full flex flex-col sm:flex-row justify-between bg-white p-4 px-6">
+                <div className="min-w-32">
                   <Link
                     className="block flex-shrink-0"
                     href="https://www.neynar.com"
@@ -58,11 +69,33 @@ export default function RootLayout({
 
                 <div className="flex flex-col items-center gap-2 sm:max-w-[350px] w-full">
                   <Link href="/" className="text-black font-bold">
-                    <p className="text-md md:text-">Farcaster Explorer</p>
+                    <p className="text-md">Farcaster Explorer</p>
                   </Link>
                   <Search />
                 </div>
-                <div className="flex-1"></div>
+                <div className="flex items-center justify-end space-x-4">
+                  <Link
+                    target="_blank"
+                    className="hover:text-purple-900"
+                    href={'https://blog.neynar.com/'}
+                  >
+                    Blog
+                  </Link>
+                  <Link
+                    target="_blank"
+                    className="hover:text-purple-900"
+                    href={'https://github.com/neynarxyz/explorer'}
+                  >
+                    Github
+                  </Link>
+                  <Link
+                    target="_blank"
+                    className="hover:text-purple-900"
+                    href={'https://docs.neynar.com/'}
+                  >
+                    Docs
+                  </Link>
+                </div>
               </div>
 
               <div className="flex-auto w-full p-4 md:p-8 bg-gray-50">

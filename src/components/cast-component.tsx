@@ -1,10 +1,3 @@
-import { AvatarImage, AvatarFallback, Avatar } from '@/components/ui/avatar';
-import {
-  CardHeader,
-  CardContent,
-  CardFooter,
-  Card,
-} from '@/components/ui/card';
 import { NeynarCastCard } from '@neynar/react';
 //note: not using this in favor of https://github.com/pugson/react-farcaster-embed, but this is a good example of how to render a cast.
 import Link from 'next/link';
