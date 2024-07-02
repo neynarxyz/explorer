@@ -10,12 +10,23 @@ import { seo } from '@/constants';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { DownloadIcon } from 'lucide-react';
+import * as amplitude from '@amplitude/analytics-browser';
+import { v4 as uuidv4 } from 'uuid';
 
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  useEffect(() => {
+    let userId = localStorage.getItem('user_uuid');
+    if (!userId) {
+      userId = uuidv4();
+      localStorage.setItem('user_uuid', userId);
+    }
+    amplitude.init(process.env.NEXT_PUBLIC_AMPLITUDE_API_KEY as string, userId);
+  }, []);
+
   return (
     <html lang="en">
       <head>
@@ -35,6 +46,9 @@ export default function RootLayout({
             <div className="sticky top-0 z-10 w-full flex flex-col sm:flex-row justify-between items-center bg-white p-4 px-6">
               <div className="min-w-32">
                 <Link
+                  onClick={() => {
+                    amplitude.track('Click on Neynar');
+                  }}
                   className="block flex-shrink-0"
                   href="https://www.neynar.com"
                   target="_blank"
@@ -51,6 +65,9 @@ export default function RootLayout({
               </div>
               <div className="flex items-center justify-end space-x-4">
                 <Link
+                  onClick={() => {
+                    amplitude.track('Click on Blog');
+                  }}
                   target="_blank"
                   className="hover:text-purple-900"
                   href={'https://blog.neynar.com/'}
@@ -58,6 +75,9 @@ export default function RootLayout({
                   Blog
                 </Link>
                 <Link
+                  onClick={() => {
+                    amplitude.track('Click on Github');
+                  }}
                   target="_blank"
                   className="hover:text-purple-900"
                   href={'https://github.com/neynarxyz/explorer'}
@@ -65,6 +85,9 @@ export default function RootLayout({
                   Github
                 </Link>
                 <Link
+                  onClick={() => {
+                    amplitude.track('Click on Docs');
+                  }}
                   target="_blank"
                   className="hover:text-purple-900"
                   href={'https://docs.neynar.com/'}

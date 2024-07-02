@@ -8,6 +8,7 @@ import { capitalizeNickname } from '@/lib/helpers';
 import { fetchCastAndFidData } from '@/lib/utils';
 import { CopyCheckIcon, CopyIcon, UserIcon } from 'lucide-react';
 import Link from 'next/link';
+import * as amplitude from '@amplitude/analytics-browser';
 
 import { useEffect, useState } from 'react';
 
@@ -197,7 +198,12 @@ export default function Page({ params }: ResponseProps) {
           {fid || hash ? (
             <Button
               className="mb-10 min-h-10 px-4 py-2 bg-purple-500 text-white hover:bg-purple-700 rounded-lg"
-              onClick={() => copy(fid ? fid.toString() : hash || '')}
+              onClick={() => {
+                amplitude.track('Click on identifier', {
+                  identifier,
+                });
+                copy(fid ? fid.toString() : hash || '');
+              }}
             >
               {copied ? (
                 <>
@@ -265,7 +271,12 @@ export default function Page({ params }: ResponseProps) {
         {!showOtherHubs && (
           <Button
             className="mt-10 min-h-10 px-4 py-2 bg-purple-500 text-white hover:bg-purple-700 rounded-lg"
-            onClick={() => setShowOtherHubs(true)}
+            onClick={() => {
+              amplitude.track('See more hubs', {
+                identifier,
+              });
+              setShowOtherHubs(true);
+            }}
           >
             Check other hubs
           </Button>

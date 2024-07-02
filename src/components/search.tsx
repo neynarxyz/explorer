@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next13-progressbar';
 import { usePathname } from 'next/navigation';
 import { SearchIcon } from 'lucide-react';
+import * as amplitude from '@amplitude/analytics-browser';
 
 export default function Search() {
   const router = useRouter();
@@ -23,6 +24,9 @@ export default function Search() {
       className="flex gap-2 items-center w-full"
       onSubmit={(e) => {
         e.preventDefault();
+        amplitude.track('Search made', {
+          identifier,
+        });
         router.push(`/${encodeURIComponent(identifier)}`);
       }}
     >
