@@ -4,12 +4,16 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { hubs } from '@/constants';
 import { useClipboard } from '@/hooks/useClipboard';
+import { fetchCastAndFidData, isValidWarpcastUrl } from '@/lib/utils';
+import {
+  NeynarProfileCard,
+  useNeynarContext,
+  NeynarCastCard,
+} from '@neynar/react';
 import { capitalizeNickname } from '@/lib/helpers';
-import { fetchCastAndFidData } from '@/lib/utils';
 import { CopyCheckIcon, CopyIcon, UserIcon } from 'lucide-react';
 import Link from 'next/link';
 import * as amplitude from '@amplitude/analytics-browser';
-
 import { useEffect, useState } from 'react';
 
 interface ResponseProps {
@@ -193,7 +197,7 @@ export default function Page({ params }: ResponseProps) {
         response={modalData}
         title={modalTitle}
       />
-      <div className="flex flex-col items-center">
+      <div className="flex flex-col items-center space-y-5">
         <div className="gap-5 flex">
           {fid || hash ? (
             <Button
@@ -266,6 +270,17 @@ export default function Page({ params }: ResponseProps) {
               {renderHeader('Neynar API', neynarCast, neynarCastMissing)}
             </>
           )}
+        </div>
+        <div className="hidden md:block">
+          {hash &&
+          (!isValidWarpcastUrl(hash) || hash.split('/').length >= 5) ? (
+            <NeynarCastCard
+              type={isValidWarpcastUrl(identifier) ? 'url' : 'hash'}
+              identifier={identifier}
+            />
+          ) : fid ? (
+            <NeynarProfileCard fid={fid} />
+          ) : null}
         </div>
 
         {!showOtherHubs && (
