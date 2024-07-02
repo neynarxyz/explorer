@@ -10,6 +10,8 @@ import {
   warpcastURLPFP,
   warpcastURLProfile,
 } from '@/constants';
+import { NeynarProfileCard } from '@neynar/react';
+import Link from 'next/link';
 
 export default function Home() {
   return (
@@ -24,7 +26,9 @@ export default function Home() {
         <div className="space-y-2">
           <p className="text-center">Example FID</p>
           <div>
-            <ProfileComponent pfp={FIDPFP} url={'3'} />
+            <Link href="/3">
+              <NeynarProfileCard fid={3} />
+            </Link>
           </div>
         </div>
       </div>
@@ -41,7 +45,11 @@ export default function Home() {
         <div className="space-y-2">
           <p className="text-center">Example Warpcast profile url</p>
           <div>
-            <ProfileComponent pfp={warpcastURLPFP} url={warpcastURLProfile} />
+            {warpcastURLProfile ? (
+              <Link href={`/${warpcastURLProfile}`}>
+                <NeynarProfileCard fid={616} />
+              </Link>
+            ) : null}
           </div>
         </div>
       </div>
