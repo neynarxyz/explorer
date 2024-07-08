@@ -164,8 +164,7 @@ export default function Page({ params }: ResponseProps) {
     warpcastAuthor?.author?.fid;
 
   const username =
-    neynar?.cast?.cast?.author?.username ?? warpcast?.cast?.author?.username;
-  warpcast?.author?.username ?? neynar?.author?.username ?? null;
+    warpcast?.author?.username ?? neynar?.author?.author?.username ?? null;
   const castHash = neynar?.cast?.cast?.hash ?? warpcast?.cast?.hash ?? null;
 
   const renderHeader = (
