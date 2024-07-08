@@ -163,6 +163,11 @@ export default function Page({ params }: ResponseProps) {
     neynarAuthor?.author?.fid ||
     warpcastAuthor?.author?.fid;
 
+  const username =
+    neynar?.cast?.cast?.author?.username ?? warpcast?.cast?.author?.username;
+  warpcast?.author?.username ?? neynar?.author?.username ?? null;
+  const castHash = neynar?.cast?.cast?.hash ?? warpcast?.cast?.hash ?? null;
+
   const renderHeader = (
     label: string,
     data: any | null,
@@ -289,19 +294,65 @@ export default function Page({ params }: ResponseProps) {
           ) : null}
         </div>
 
-        {!showOtherHubs && (
-          <Button
-            className="mt-10 min-h-10 px-4 py-2 bg-purple-500 text-white hover:bg-purple-700 rounded-lg"
-            onClick={() => {
-              amplitude.track('See more hubs', {
-                identifier,
-              });
-              setShowOtherHubs(true);
-            }}
-          >
-            Check other hubs
-          </Button>
-        )}
+        <div className="flex flex-col md:flex-row items-center gap-4 mt-10">
+          {!showOtherHubs ? (
+            <Button
+              className="min-h-10 px-4 py-2 bg-purple-400 text-white hover:bg-purple-800 rounded-lg"
+              onClick={() => {
+                amplitude.track('See more hubs', {
+                  identifier,
+                });
+                setShowOtherHubs(true);
+              }}
+            >
+              Check other hubs
+            </Button>
+          ) : (
+            <Button
+              className="min-h-10 px-4 py-2 bg-purple-400 text-white hover:bg-purple-800 rounded-lg"
+              onClick={() => {
+                amplitude.track('Hide other hubs', {
+                  identifier,
+                });
+                setShowOtherHubs(false);
+              }}
+            >
+              Hide other hubs
+            </Button>
+          )}
+          {loading ? null : castHash || username ? (
+            <>
+              <Button
+                asChild
+                className="px-4 py-2 bg-purple-500 text-white hover:bg-purple-700 rounded-lg"
+              >
+                <Link
+                  href={
+                    authorFidCast
+                      ? `https://warpcast.com/${username}/${castHash.slice(0, 10)}`
+                      : `https://warpcast.com/${username}`
+                  }
+                >
+                  View on Warpcast
+                </Link>
+              </Button>
+              <Button
+                asChild
+                className="px-4 py-2 bg-black text-white hover:bg-gray-700 rounded-lg"
+              >
+                <Link
+                  href={
+                    authorFidCast
+                      ? `https://www.supercast.xyz/c/${castHash}`
+                      : `https://www.supercast.xyz/${username}`
+                  }
+                >
+                  View on Supercast
+                </Link>
+              </Button>
+            </>
+          ) : null}
+        </div>
 
         {showOtherHubs && (
           <div className="flex md:flex-row flex-col items-center my-5">
