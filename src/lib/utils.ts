@@ -275,6 +275,7 @@ export async function fetchCastAndFidData(
   );
   return { apiData, hubData };
 }
+
 export async function fetchCastFromHub(
   hash: string | null,
   fid: number | null,
@@ -293,11 +294,23 @@ export async function fetchCastFromHub(
     }
     const response = await axios.get(
       `${hub.url}/v1/castById?fid=${fid}&hash=${hash}`,
-      { headers }
+      { headers, timeout: 7000 }
     );
-    return { data: response.data, error: null };
-  } catch (e) {
-    return { error: formatError(e), data: null };
+    return { data: response.data, error: null, is_server_dead: false };
+  } catch (e: any) {
+    let is_server_dead = false;
+    let error_message = formatError(e);
+    if (e.code === 'ECONNABORTED') {
+      is_server_dead = true;
+    }
+    if (e.response) {
+      if (e.response.status >= 500) {
+        is_server_dead = true;
+      }
+    } else if (e.request) {
+      is_server_dead = true;
+    }
+    return { error: formatError(e), data: null, is_server_dead };
   }
 }
 export async function fetchCastFromNeynarAPI(
@@ -319,6 +332,7 @@ export async function fetchCastFromNeynarAPI(
     return { error: formatError(e), cast: null };
   }
 }
+
 export async function fetchFidFromHub(
   fid: number | null,
   hub: HubType,
@@ -336,20 +350,35 @@ export async function fetchFidFromHub(
     }
     const response = await axios.get(`${hub.url}/v1/userDataByFid?fid=${fid}`, {
       headers,
+      timeout: 7000,
     });
     const verificationsResponse = await axios.get(
-      `${hub.url}/v1/verificationsByFid?fid=2?fid=${fid}`,
-      { headers }
+      `${hub.url}/v1/verificationsByFid?fid=${fid}`,
+      { headers, timeout: 7000 }
     );
     return {
       ...response.data,
       verifications: verificationsResponse.data,
       error: null,
+      is_server_dead: false,
     };
-  } catch (e) {
-    return { error: formatError(e), data: null };
+  } catch (e: any) {
+    let is_server_dead = false;
+    let error_message = formatError(e);
+    if (e.code === 'ECONNABORTED') {
+      is_server_dead = true;
+    }
+    if (e.response) {
+      if (e.response.status >= 500) {
+        is_server_dead = true;
+      }
+    } else if (e.request) {
+      is_server_dead = true;
+    }
+    return { error: formatError(e), data: null, is_server_dead };
   }
 }
+
 async function isEmbedImageValid(url: string): Promise<boolean> {
   return new Promise((resolve) => {
     const img = new Image();
