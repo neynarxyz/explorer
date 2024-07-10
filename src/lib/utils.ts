@@ -47,6 +47,13 @@ const fetchApiData = async (
   let hash = identifier;
   let warpcastCastResponseStart = null;
   try {
+    if (
+      identifier &&
+      !isValidWarpcastUrl(identifier) &&
+      !identifier.includes('0x')
+    ) {
+      throw new Error('Invalid hash');
+    }
     if (identifier && (!isWarpcastURL || identifier.split('/').length >= 5)) {
       try {
         warpcastCastResponseStart = performance.now();
@@ -211,7 +218,6 @@ const formatErrorResponse = (
   const errorInfo = {
     message: error.message,
     name: error.name,
-    stack: error.stack,
     response: error.response
       ? {
           status: error.response.status,
@@ -222,12 +228,12 @@ const formatErrorResponse = (
   };
   return {
     warpcast: {
-      cast: warpcastCast,
+      cast: { ...warpcastCast, error: errorInfo },
       name: 'Warpcast API',
       author: null,
     },
     neynar: {
-      cast: neynarCast,
+      cast: { ...neynarCast, error: errorInfo },
       name: 'Neynar API',
       author: null,
     },
@@ -253,6 +259,7 @@ export async function fetchCastAndFidData(
   fid: number | null
 ) {
   if (!hash && !fid) return { apiData: null, hubData: null };
+  //if the hash doesnt have 0x return an error
   const apiData = await fetchApiData(fid, hash);
   if (apiData.error || (!apiData.neynar && !apiData.warpcast))
     return { apiData, hubData: null };
