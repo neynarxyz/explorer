@@ -52,7 +52,7 @@ const fetchApiData = async (
       !isValidWarpcastUrl(identifier) &&
       !identifier.includes('0x')
     ) {
-      throw new Error('Invalid hash');
+      throw new Error('Invalid identifier');
     }
     if (identifier && (!isWarpcastURL || identifier.split('/').length >= 5)) {
       try {
