@@ -181,7 +181,6 @@ export default function Page({ params }: ResponseProps) {
     }
 
     let icon = '✅';
-    console.log(data);
     if (data?.is_server_dead) {
       icon = '❓';
     } else if (data?.error) {
