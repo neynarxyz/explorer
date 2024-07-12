@@ -4,17 +4,19 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { hubs } from '@/constants';
 import { useClipboard } from '@/hooks/useClipboard';
-import { fetchCastAndFidData, isValidWarpcastUrl } from '@/lib/utils';
 import {
-  NeynarProfileCard,
-  useNeynarContext,
-  NeynarCastCard,
-} from '@neynar/react';
+  extractIdentifierFromUrl,
+  extractUsernameFromUrl,
+  fetchCastAndFidData,
+  isValidWarpcastUrl,
+} from '@/lib/utils';
+import { NeynarProfileCard, NeynarCastCard } from '@neynar/react';
 import { capitalizeNickname } from '@/lib/helpers';
 import { CopyCheckIcon, CopyIcon, UserIcon } from 'lucide-react';
 import Link from 'next/link';
 import * as amplitude from '@amplitude/analytics-browser';
 import { useEffect, useState } from 'react';
+import SkeletonHeader from '@/components/skeleton-header';
 
 interface ResponseProps {
   params: { identifier: string };
@@ -24,24 +26,20 @@ const isNumeric = (str: string): boolean => {
   return !isNaN(Number(str)) && !isNaN(parseFloat(str)) && !/^0x/.test(str);
 };
 
-const renderSkeletonHeader = () => (
-  <Card className="rounded-lg relative border-black flex flex-col items-center justify-center">
-    <div className="w-full flex flex-col items-center animate-pulse">
-      <CardHeader className="text-center relative md:text-lg text-sm w-full">
-        <div className="h-6 bg-gray-300 rounded w-24 mb-2"></div>
-      </CardHeader>
-      <hr className="w-full border-t border-gray-300 my-2" />
-      <CardContent className="flex items-center justify-center text-6xl w-full">
-        <div className="h-12 bg-gray-300 rounded-full w-12"></div>
-      </CardContent>
-    </div>
-  </Card>
-);
-
 export default function Page({ params }: ResponseProps) {
-  const identifier = decodeURIComponent(params.identifier);
+  let identifier = decodeURIComponent(params.identifier);
   const fid: number | null = isNumeric(identifier) ? Number(identifier) : null;
-  const hash = fid ? null : identifier;
+  let hash = fid ? null : identifier;
+
+  if (identifier.includes('https://www.supercast.xyz/c/')) {
+    const extractedIdentifier = extractIdentifierFromUrl(identifier);
+    if (extractedIdentifier) {
+      identifier = extractedIdentifier;
+      hash = extractedIdentifier;
+    } else {
+      console.error('Invalid URL identifier');
+    }
+  }
 
   const { copied, copy } = useClipboard();
   const [data, setData] = useState<any>(null);
@@ -91,7 +89,6 @@ export default function Page({ params }: ResponseProps) {
   const fetchData = async () => {
     setLoading(true);
     const data = (await fetchCastAndFidData(hash, fid)) as any;
-
     const warpcastAuthorMissing = checkWarning(data.apiData.warpcast?.author);
     const neynarAuthorMissing = checkWarning(
       data.apiData.neynar?.author?.author
@@ -252,10 +249,10 @@ export default function Page({ params }: ResponseProps) {
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {loading ? (
             <>
-              {renderSkeletonHeader()}
-              {renderSkeletonHeader()}
-              {renderSkeletonHeader()}
-              {renderSkeletonHeader()}
+              {<SkeletonHeader />}
+              {<SkeletonHeader />}
+              {<SkeletonHeader />}
+              {<SkeletonHeader />}
             </>
           ) : (
             <>
@@ -287,8 +284,7 @@ export default function Page({ params }: ResponseProps) {
           )}
         </div>
         <div className="hidden md:block">
-          {hash &&
-          (!isValidWarpcastUrl(hash) || hash.split('/').length >= 5) ? (
+          {hash && !extractUsernameFromUrl(hash) ? (
             <NeynarCastCard
               type={isValidWarpcastUrl(identifier) ? 'url' : 'hash'}
               identifier={identifier}
