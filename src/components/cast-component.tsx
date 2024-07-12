@@ -11,6 +11,7 @@ export function CastComponent({ cast, warpcastUrl }: any) {
       <NeynarCastCard
         type={warpcastUrl ? 'url' : 'hash'}
         identifier={warpcastUrl ? warpcastUrl : cast.hash}
+        allowReactions={true}
       />
     </Link>
   );

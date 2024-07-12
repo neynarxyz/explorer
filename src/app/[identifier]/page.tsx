@@ -292,6 +292,7 @@ export default function Page({ params }: ResponseProps) {
             <NeynarCastCard
               type={isValidWarpcastUrl(identifier) ? 'url' : 'hash'}
               identifier={identifier}
+              allowReactions={true}
             />
           ) : authorFid ? (
             <NeynarProfileCard fid={authorFid} />
