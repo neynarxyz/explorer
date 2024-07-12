@@ -15,6 +15,7 @@ import { DownloadIcon } from 'lucide-react';
 import { NeynarContextProvider, Theme } from '@neynar/react';
 import * as amplitude from '@amplitude/analytics-browser';
 import { v4 as uuidv4 } from 'uuid';
+import { NeynarAuthButton } from '@neynar/react';
 
 export default function RootLayout({
   children,
@@ -53,7 +54,7 @@ export default function RootLayout({
           <div className="flex flex-col min-h-screen">
             <Providers>
               <div className="sticky top-0 z-10 w-full flex flex-col sm:flex-row justify-between bg-white p-4 px-6">
-                <div className="min-w-32">
+                <div className="min-w-56 md:min-w-96">
                   <Link
                     className="block flex-shrink-0"
                     href="https://www.neynar.com"
@@ -73,7 +74,7 @@ export default function RootLayout({
                   </Link>
                   <Search />
                 </div>
-                <div className="flex items-center justify-end space-x-4">
+                <div className="flex items-center justify-end space-x-4 py-2 md:py-0">
                   <Link
                     target="_blank"
                     className="hover:text-purple-900"
@@ -95,6 +96,7 @@ export default function RootLayout({
                   >
                     Docs
                   </Link>
+                  <NeynarAuthButton label="Sign In with Neynar" />
                 </div>
               </div>
 
