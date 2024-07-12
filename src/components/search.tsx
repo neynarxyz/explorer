@@ -31,8 +31,8 @@ export default function Search() {
       }}
     >
       <Input
-        className="flex-auto min-w-[100px]"
-        placeholder="Enter a FID, hash, or warpcast url..."
+        className="flex-auto md:min-w-[350px] min-w-[100px] md:text-sm text-xs"
+        placeholder="Enter a FID, hash, warpcast url, or supercast url..."
         value={identifier}
         onChange={(e) => setIdentifier(e.currentTarget.value)}
       />
