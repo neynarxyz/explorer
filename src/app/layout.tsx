@@ -71,7 +71,7 @@ export default function RootLayout({
         >
           <div className="flex flex-col min-h-screen">
             <Providers>
-              <div className="sticky top-0 z-10 w-full flex justify-between items-center p-2 pl-0">
+              <div className="sticky top-0 z-10 w-full flex justify-between items-center px-0 pl-0">
                 <div className="flex items-center space-x-4 h-full">
                   <Link href={'/'}>
                     <img
@@ -81,7 +81,7 @@ export default function RootLayout({
                     />
                   </Link>
                 </div>
-                <div className="flex items-center space-x-2 bg-white px-2 py-1 pr-1">
+                <div className="flex items-center space-x-2 bg-white py-1 pl-1 pr-0.5">
                   <Link
                     target="_blank"
                     className="font-pixelify text-white text-sm bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded"
