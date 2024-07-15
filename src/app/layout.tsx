@@ -6,22 +6,26 @@ import './globals.css';
 import Link from 'next/link';
 import Providers from './providers';
 import Search from '@/components/search';
-import { usePathname } from 'next/navigation';
 import { useEffect } from 'react';
 import { seo } from '@/constants';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { DownloadIcon } from 'lucide-react';
+import { DownloadIcon, Grid2X2 } from 'lucide-react';
 import { NeynarContextProvider, Theme } from '@neynar/react';
 import * as amplitude from '@amplitude/analytics-browser';
 import { v4 as uuidv4 } from 'uuid';
 import { NeynarAuthButton } from '@neynar/react';
+import { usePathname } from 'next/navigation';
+import HubsDataComponent from '@/components/hubs-data';
+import { CiGrid41 } from 'react-icons/ci';
 
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const pathname = usePathname();
+
   useEffect(() => {
     let userId = localStorage.getItem('user_uuid');
     if (!userId) {
@@ -30,6 +34,13 @@ export default function RootLayout({
     }
     amplitude.init(process.env.NEXT_PUBLIC_AMPLITUDE_API_KEY as string, userId);
   }, []);
+
+  const getBackgroundImage = () => {
+    if (pathname === '/') {
+      return 'url(/homebackground.png)';
+    }
+    return 'url(/searchbackground.png)';
+  };
 
   return (
     <html lang="en">
@@ -50,70 +61,64 @@ export default function RootLayout({
           <meta name="twitter:description" content={seo.description} />
           <meta name="twitter:image" content={seo.ogImage} />
         </head>
-        <body className="relative h-screen min-h-screen">
+        <body
+          className="relative h-screen min-h-screen"
+          style={{
+            backgroundImage: getBackgroundImage(),
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+          }}
+        >
           <div className="flex flex-col min-h-screen">
             <Providers>
-              <div className="sticky top-0 z-10 w-full flex flex-col sm:flex-row justify-between bg-white p-4 px-6">
-                <div className="min-w-56 md:min-w-96">
-                  <Link
-                    className="block flex-shrink-0"
-                    href="https://www.neynar.com"
-                    target="_blank"
-                  >
+              <div className="sticky top-0 z-10 w-full flex justify-between items-center p-2 pl-0">
+                <div className="flex items-center space-x-4 h-full">
+                  <Link href={'/'}>
                     <img
-                      className="w-32"
-                      src={'/neynar.png'}
+                      className="w-48"
+                      src={'/neynarexplorer.png'}
                       alt="Neynar logo"
                     />
                   </Link>
                 </div>
-
-                <div className="flex flex-col items-center gap-2 sm:max-w-[350px] w-full">
-                  <Link href="/" className="text-black font-bold">
-                    <p className="text-md">Farcaster Explorer</p>
-                  </Link>
-                  <Search />
-                </div>
-                <div className="flex items-center justify-end space-x-4 py-2 md:py-0">
+                <div className="flex items-center space-x-2 bg-white px-2 py-1 pr-1">
                   <Link
                     target="_blank"
-                    className="hover:text-purple-900"
+                    className="font-pixelify text-white text-sm bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded"
                     href={'https://blog.neynar.com/'}
                   >
-                    Blog
+                    blog
                   </Link>
                   <Link
                     target="_blank"
-                    className="hover:text-purple-900"
+                    className="font-pixelify text-sm text-white bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded"
                     href={'https://github.com/neynarxyz/explorer'}
                   >
-                    Github
+                    github
                   </Link>
                   <Link
                     target="_blank"
-                    className="hover:text-purple-900"
+                    className="font-pixelify text-sm text-white bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded"
                     href={'https://docs.neynar.com/'}
                   >
-                    Docs
+                    docs
                   </Link>
-                  <NeynarAuthButton label="Sign In with Neynar" />
                 </div>
               </div>
-
-              <div className="flex-auto w-full p-4 md:p-8 bg-gray-50">
-                {children}
-              </div>
-
-              <div className="sticky bottom-0 p-4 text-center bg-white">
-                <Button asChild variant={'secondary'}>
-                  <Link
-                    target="_blank"
-                    href="https://warpcast.com/~/add-cast-action?url=https://explorer.neynar.com/frames/actions/view-on-explorer"
-                  >
-                    <DownloadIcon className="w-4 h-4 mr-2" />
-                    Install Cast Action
-                  </Link>
-                </Button>
+              <div className="w-full min-h-screen flex-1">{children}</div>
+              <div className="sticky bottom-0 flex items-center justify-between">
+                <HubsDataComponent />
+                <div className="bg-white px-1 p-[0.5px]">
+                  <Button className="bg-black" asChild>
+                    <Link
+                      target="_blank"
+                      href="https://warpcast.com/~/add-cast-action?url=https://explorer.neynar.com/frames/actions/view-on-explorer"
+                    >
+                      <Grid2X2 className="w-4 h-4 mr-2" />
+                      Install Cast Action
+                    </Link>
+                  </Button>
+                </div>
               </div>
             </Providers>
           </div>
