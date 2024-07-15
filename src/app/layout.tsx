@@ -71,7 +71,7 @@ export default function RootLayout({
         >
           <div className="flex flex-col min-h-screen">
             <Providers>
-              <div className="sticky top-0 z-10 w-full flex justify-between items-center px-0 pl-0">
+              <div className="sticky top-0 z-10 w-full flex justify-between px-0 pl-0">
                 <div className="flex items-center space-x-4 h-full">
                   <Link href={'/'}>
                     <img
@@ -81,24 +81,30 @@ export default function RootLayout({
                     />
                   </Link>
                 </div>
-                <div className="flex items-center space-x-2 bg-white py-1 pl-1 pr-0.5">
+                <div className="flex items-center space-x-1 bg-white py-1 pl-1 pr-0.5">
+                  <Link
+                    className="font-pixelify text-white text-md bg-gray-700 hover:bg-gray-600  p-1.5 px-3 rounded"
+                    href={'/'}
+                  >
+                    home
+                  </Link>
                   <Link
                     target="_blank"
-                    className="font-pixelify text-white text-sm bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded"
+                    className="font-pixelify text-white text-md bg-gray-700 hover:bg-gray-600  p-1.5 px-3 rounded"
                     href={'https://blog.neynar.com/'}
                   >
                     blog
                   </Link>
                   <Link
                     target="_blank"
-                    className="font-pixelify text-sm text-white bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded"
+                    className="font-pixelify text-md text-white bg-gray-700 hover:bg-gray-600  p-1.5 px-3 rounded"
                     href={'https://github.com/neynarxyz/explorer'}
                   >
                     github
                   </Link>
                   <Link
                     target="_blank"
-                    className="font-pixelify text-sm text-white bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded"
+                    className="font-pixelify text-md text-white bg-gray-700 hover:bg-gray-600  p-1.5 px-3 rounded"
                     href={'https://docs.neynar.com/'}
                   >
                     docs
