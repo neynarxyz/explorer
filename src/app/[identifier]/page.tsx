@@ -218,7 +218,7 @@ export default function Page({ params }: ResponseProps) {
                 amplitude.track('Click on identifier', {
                   identifier,
                 });
-                copy(fid ? fid.toString() : hash || '');
+                copy(fid ? fid.toString() : castHash);
               }}
             >
               {copied ? (
