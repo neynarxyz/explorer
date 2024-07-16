@@ -416,7 +416,7 @@ export default function Page({ params }: ResponseProps) {
           </div>
 
           <div className="flex flex-row justify-end">
-            <ActionButtons fid={fid} hash={hash} identifier={identifier} />
+            <ActionButtons fid={fid} hash={castHash} identifier={identifier} />
           </div>
         </div>
       </div>
