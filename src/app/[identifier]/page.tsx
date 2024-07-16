@@ -12,11 +12,14 @@ import {
 } from '@/lib/utils';
 import { NeynarProfileCard, NeynarCastCard } from '@neynar/react';
 import { capitalizeNickname } from '@/lib/helpers';
-import { CopyCheckIcon, CopyIcon, UserIcon } from 'lucide-react';
+import { CopyCheckIcon, CopyIcon, UserIcon, SearchIcon } from 'lucide-react';
 import Link from 'next/link';
 import * as amplitude from '@amplitude/analytics-browser';
 import { useEffect, useState } from 'react';
 import SkeletonHeader from '@/components/skeleton-header';
+import { Input } from '@/components/ui/input';
+import { useRouter } from 'next13-progressbar';
+import { usePathname } from 'next/navigation';
 
 interface ResponseProps {
   params: { identifier: string };
@@ -27,6 +30,8 @@ const isNumeric = (str: string): boolean => {
 };
 
 export default function Page({ params }: ResponseProps) {
+  const router = useRouter();
+  const path = usePathname();
   let identifier = decodeURIComponent(params.identifier);
   const fid: number | null = isNumeric(identifier) ? Number(identifier) : null;
   let hash = fid ? null : identifier;
@@ -48,6 +53,7 @@ export default function Page({ params }: ResponseProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [showOtherHubs, setShowOtherHubs] = useState(false);
+  const [clickedHeader, setClickedHeader] = useState<string | null>(null);
 
   const checkWarning = (message: any) => {
     if (!message) return [];
@@ -125,11 +131,13 @@ export default function Page({ params }: ResponseProps) {
     setModalTitle(title);
     setModalData({ ...response, missingObjects });
     setIsModalOpen(true);
+    setClickedHeader(title); // Set the clicked header
   };
 
   const closeModal = () => {
     setIsModalOpen(false);
     setModalData(null);
+    setClickedHeader(null); // Reset the clicked header
   };
 
   const { warpcast, neynar } = data?.apiData ?? {};
@@ -168,35 +176,51 @@ export default function Page({ params }: ResponseProps) {
     null;
   const castHash = neynar?.cast?.cast?.hash ?? warpcast?.cast?.hash ?? null;
 
-  const renderHeader = (
-    label: string,
-    data: any | null,
-    missingObjects: string[]
-  ) => {
+  const renderHeader = (label: string, data: any, missingObjects: any[]) => {
     if (!data) {
       return null;
     }
 
     let icon = '✅';
+    let backgroundColor = '#03A800';
+    let hoverColor = '#028700'; // Adjust hover color
+
     if (data?.is_server_dead) {
       icon = '❓';
+      backgroundColor = '#FFA500';
+      hoverColor = '#CC8400'; // Adjust hover color
     } else if (data?.error) {
       icon = '❌';
+      backgroundColor = '#C67A7D';
+      hoverColor = '#A66060'; // Adjust hover color
     } else if (missingObjects.length > 0) {
       icon = '⚠️';
+      backgroundColor = '#FFD700';
+      hoverColor = '#CCB300'; // Adjust hover color
     }
 
+    const isClicked = clickedHeader === label;
+    const activeColor = isClicked ? '#03039A' : backgroundColor;
+
     return (
-      <button onClick={() => openModal(label, data, missingObjects)}>
-        <Card className="min-w-36 hover:bg-slate-100 rounded-lg relative border-black flex flex-col items-center justify-center">
-          <CardHeader className="text-center relative w-full">
-            {label}
-          </CardHeader>
-          <hr className="w-full border-t border-black my-2" />
-          <CardContent className="flex items-center justify-center w-full text-4xl">
-            {icon}
-          </CardContent>
-        </Card>
+      <button
+        style={{ backgroundColor: activeColor }}
+        onMouseEnter={(e) =>
+          (e.currentTarget.style.backgroundColor = isClicked
+            ? '#03039A'
+            : hoverColor)
+        }
+        onMouseLeave={(e) =>
+          (e.currentTarget.style.backgroundColor = isClicked
+            ? '#03039A'
+            : backgroundColor)
+        }
+        className="relative border border-white flex flex-col items-center justify-center min-h-6 min-w-40"
+        onClick={() => openModal(label, data, missingObjects)}
+      >
+        <p className="text-center text-sm font-jetbrains">
+          {label} {icon}
+        </p>
       </button>
     );
   };
@@ -246,7 +270,7 @@ export default function Page({ params }: ResponseProps) {
           ) : null}
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-0">
           {loading ? (
             <>
               {<SkeletonHeader />}
@@ -280,6 +304,48 @@ export default function Page({ params }: ResponseProps) {
               {renderHeader('Neynar Hub', neynarHubCast, neynarCastHubMissing)}
               {renderHeader('Neynar API', neynarAuthor, neynarAuthorMissing)}
               {renderHeader('Neynar API', neynarCast, neynarCastMissing)}
+              {!showOtherHubs ? (
+                <button
+                  className="bg-[#4C376C] text-sm px-1 border border-white h-6 text-white hover:bg-purple-800 font-jetbrains"
+                  onClick={() => {
+                    amplitude.track('See more hubs', { identifier });
+                    setShowOtherHubs(true);
+                  }}
+                >
+                  <div className="flex flex-row items-center">
+                    Show other hubs <img src="/eye.png" className="ml-1" />
+                  </div>
+                </button>
+              ) : (
+                <button
+                  className="bg-white text-black px-1 text-sm h-6 border border-white hover:bg-purple-800 font-jetbrains"
+                  onClick={() => {
+                    amplitude.track('Hide other hubs', { identifier });
+                    setShowOtherHubs(false);
+                  }}
+                >
+                  <div className="flex flex-row items-center">
+                    Hide other hubs <img src="/eyecross.png" className="ml-1" />
+                  </div>
+                </button>
+              )}
+              {showOtherHubs && (
+                <div>
+                  {hubs.slice(2).map((hub, index) => {
+                    const hubData = data?.hubData?.[index + 2];
+                    const missingObjects = checkWarning(hubData?.author);
+                    return (
+                      <div key={index}>
+                        {renderHeader(
+                          `${capitalizeNickname(hub.shortname)}`,
+                          hubData,
+                          missingObjects
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </>
           )}
         </div>
@@ -296,31 +362,6 @@ export default function Page({ params }: ResponseProps) {
         </div>
 
         <div className="flex flex-col md:flex-row items-center gap-4 mt-10">
-          {!showOtherHubs ? (
-            <Button
-              className="min-h-10 px-4 py-2 bg-purple-400 text-white hover:bg-purple-800 rounded-lg"
-              onClick={() => {
-                amplitude.track('See more hubs', {
-                  identifier,
-                });
-                setShowOtherHubs(true);
-              }}
-            >
-              Check other hubs
-            </Button>
-          ) : (
-            <Button
-              className="min-h-10 px-4 py-2 bg-purple-400 text-white hover:bg-purple-800 rounded-lg"
-              onClick={() => {
-                amplitude.track('Hide other hubs', {
-                  identifier,
-                });
-                setShowOtherHubs(false);
-              }}
-            >
-              Hide other hubs
-            </Button>
-          )}
           {loading ? null : castHash || username ? (
             <>
               <Button
@@ -354,24 +395,6 @@ export default function Page({ params }: ResponseProps) {
             </>
           ) : null}
         </div>
-
-        {showOtherHubs && (
-          <div className="flex md:flex-row flex-col items-center my-5">
-            {hubs.slice(2).map((hub, index) => {
-              const hubData = data?.hubData?.[index + 2];
-              const missingObjects = checkWarning(hubData?.author);
-              return (
-                <div key={index}>
-                  {renderHeader(
-                    `${capitalizeNickname(hub.shortname)}`,
-                    hubData,
-                    missingObjects
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        )}
       </div>
     </>
   );
