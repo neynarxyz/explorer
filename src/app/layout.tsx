@@ -114,7 +114,7 @@ export default function RootLayout({
               <div className="w-full min-h-screen flex-1">{children}</div>
               <div className="sticky bottom-0 flex items-center justify-between">
                 <HubsDataComponent />
-                <div className="bg-white px-1 p-[0.5px]">
+                <div className="px-1 p-[0.5px]">
                   <Button className="bg-black" asChild>
                     <Link
                       target="_blank"
