@@ -91,7 +91,7 @@ const Modal: React.FC<ModalProps> = ({
             <strong>Missing:</strong> {missingObjects.join(', ')}
           </div>
         )}
-        <div className="bg-[#0000A8] text-white p-4 rounded  overflow-y-auto max-h-56 md:max-h-96 md:max-w-6xl max-w-lg">
+        <div className="bg-[#0000A8] text-white p-4 rounded  overflow-y-auto max-h-64 md:max-h-[27rem] md:max-w-6xl max-w-lg">
           <pre
             className="font-jetbrains text-xs"
             dangerouslySetInnerHTML={{
