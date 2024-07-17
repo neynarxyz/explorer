@@ -15,14 +15,10 @@ import Search from './search';
 
 export default function Home() {
   return (
-    <div className="w-full flex flex-col flex-1 justify-around min-h-screen">
-      <div className="flex-1" />
-      <div className="w-full h-full flex flex-col items-center mb-32">
-        <div>
-          <Search />
-        </div>
+    <div className="w-full flex flex-col flex-1 justify-center items-center min-h-screen">
+      <div className="w-1/3 h-full flex flex-row justify-center bg-green-500  mb-32">
+        <Search />
       </div>
-      <div className="flex-1" />
     </div>
   );
 }

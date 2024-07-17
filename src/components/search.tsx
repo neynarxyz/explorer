@@ -2,9 +2,9 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next13-progressbar';
 import { usePathname } from 'next/navigation';
-import { SearchIcon } from 'lucide-react';
+import { SearchIcon, X } from 'lucide-react';
 import * as amplitude from '@amplitude/analytics-browser';
-import { RxCross1 } from 'react-icons/rx';
+
 export default function Search() {
   const router = useRouter();
   const path = usePathname();
@@ -17,6 +17,10 @@ export default function Search() {
     setIdentifier(identifier);
   }, [path]);
 
+  const handleClearInput = () => {
+    setIdentifier('');
+  };
+
   return (
     <form
       className="flex flex-row items-start p-0 w-full h-[35px]"
@@ -28,16 +32,25 @@ export default function Search() {
         router.push(`/${encodeURIComponent(identifier)}`);
       }}
     >
-      <div className="flex flex-row items-center pl-[7.5px] w-full h-[35px] bg-white border border-white">
+      <div className="flex flex-row items-center pl-[7.5px] w-full h-[35px] bg-white border border-white relative">
         <input
           type="text"
-          className="w-full h-[20px] font-pixelify focus:outline-none text-[15px] text-black flex-none order-0 flex-grow-0"
+          className="w-full font-pixelify focus:outline-none text-[15px] text-black"
           placeholder="Enter FID, hash, warpcast url, or supercast url..."
           value={identifier}
           onChange={(e) => setIdentifier(e.currentTarget.value)}
         />
+        {identifier && (
+          <button
+            type="button"
+            onClick={handleClearInput}
+            className="flex flex-row justify-center items-center w-[35px] h-[30px] rounded-full hover:bg-gray-300 border border-white"
+          >
+            <X className="w-5 h-5 text-black" />
+          </button>
+        )}
       </div>
-      <button className="flex flex-row justify-center items-center w-[42px] h-[35px] bg-[#5F3AB8] border border-white flex-none order-1 align-stretch flex-grow-0">
+      <button className="flex flex-row justify-center items-center w-[42px] h-[35px] bg-[#5F3AB8] border border-white">
         <SearchIcon className="w-5 h-5 text-white" />
       </button>
     </form>
