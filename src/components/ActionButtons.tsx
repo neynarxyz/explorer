@@ -10,7 +10,7 @@ const ActionButtons = ({ fid, hash, identifier }: any) => {
     <div className="gap-0 flex justify-end">
       {fid || hash ? (
         <button
-          className="font-jetbrains bg-white text-black    border border-white hover:bg-purple-800 font-jetbrains"
+          className="font-jetbrains bg-white text-black    border border-white hover:bg-gray-200 font-jetbrains"
           onClick={() => {
             amplitude.track('Click on identifier', {
               identifier,

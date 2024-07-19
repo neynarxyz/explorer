@@ -5,21 +5,30 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { hubs } from '@/constants';
 import { useClipboard } from '@/hooks/useClipboard';
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import {
   extractIdentifierFromUrl,
   extractUsernameFromUrl,
   fetchCastAndFidData,
   isValidWarpcastUrl,
 } from '@/lib/utils';
 import { NeynarProfileCard, NeynarCastCard } from '@neynar/react';
-import { capitalizeNickname } from '@/lib/helpers';
+import { capitalizeNickname, isNumeric } from '@/lib/helpers';
 import { CopyCheckIcon, CopyIcon, UserIcon, SearchIcon } from 'lucide-react';
 import Link from 'next/link';
 import * as amplitude from '@amplitude/analytics-browser';
 import { useEffect, useState } from 'react';
 import SkeletonHeader from '@/components/skeleton-header';
 import { Input } from '@/components/ui/input';
-import { useRouter } from 'next13-progressbar';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import ActionButtons from '@/components/ActionButtons';
 import Search from '@/components/search';
 
@@ -27,13 +36,8 @@ interface ResponseProps {
   params: { identifier: string };
 }
 
-const isNumeric = (str: string): boolean => {
-  return !isNaN(Number(str)) && !isNaN(parseFloat(str)) && !/^0x/.test(str);
-};
-
 export default function Page({ params }: ResponseProps) {
   const router = useRouter();
-  const path = usePathname();
   let identifier = decodeURIComponent(params.identifier);
   const fid: number | null = isNumeric(identifier) ? Number(identifier) : null;
   let hash = fid ? null : identifier;
@@ -160,8 +164,6 @@ export default function Page({ params }: ResponseProps) {
   const { author: warpcastAuthor, cast: warpcastCast } = warpcast || {};
   const { author: neynarAuthor, cast: neynarCast } = neynar || {};
 
-  const authorFidCast =
-    warpcastCast?.author?.fid || neynarCast?.cast?.author?.fid;
   const authorFid =
     warpcastCast?.author?.fid ||
     neynarCast?.cast?.author?.fid ||
@@ -169,11 +171,16 @@ export default function Page({ params }: ResponseProps) {
     warpcastAuthor?.author?.fid;
 
   const username =
-    warpcast?.author?.username ??
-    neynar?.author?.author?.username ??
-    neynar?.cast?.cast?.author?.username ??
-    warpcast?.cast?.author?.username ??
+    warpcastAuthor?.username ??
+    neynarAuthor?.author?.username ??
+    neynarCast?.cast?.author?.username ??
+    warpcastCast?.cast?.author?.username ??
     null;
+  console.log('username', username);
+  console.log('warpcast author', warpcastAuthor);
+  console.log('neynar author', neynarAuthor);
+  console.log('neynar cast', neynarCast);
+  console.log('warpcast cast', warpcastCast);
   const castHash = neynar?.cast?.cast?.hash ?? warpcast?.cast?.hash ?? null;
 
   const renderHeader = (label: string, data: any, missingObjects: any[]) => {
@@ -364,51 +371,42 @@ export default function Page({ params }: ResponseProps) {
             </div>
             <div className="flex flex-col md:flex-row items-center justify-end gap-0 w-full">
               {loading ? null : castHash || username ? (
-                <div className="flex flex-col justify-end px-4">
-                  <div className="flex flex-row items-center">
-                    <p className="text-white font-jetbrains mr-4 text-sm">
-                      View
-                    </p>
-                    <button className="bg-[#333333] text-white px-1 text-sm h-8 border border-white hover:bg-purple-800 font-jetbrains">
-                      <Link
-                        href={
-                          authorFidCast
-                            ? `https://warpcast.com/${username}/${castHash.slice(0, 10)}`
-                            : `https://warpcast.com/${username}`
-                        }
-                      >
-                        <div className="flex flex-row space-x-1">
-                          <p> on Warpcast </p>{' '}
-                          <img src="/arrowright.png" alt="arrow right" />
-                        </div>
-                      </Link>
-                    </button>
-                    <button className="bg-[#333333] text-white px-1 text-sm h-8 border border-white hover:bg-purple-800 font-jetbrains">
-                      <Link
-                        href={
-                          authorFidCast
-                            ? `https://www.supercast.xyz/c/${castHash}`
-                            : `https://www.supercast.xyz/${username}`
-                        }
-                      >
-                        <div className="flex flex-row space-x-1">
-                          <p> on Supercast </p>{' '}
-                          <img src="/arrowright.png" alt="arrow right" />
-                        </div>
-                      </Link>
-                    </button>
-                  </div>
-
-                  {authorFidCast ? (
-                    <div className="flex flex-row justify-end">
-                      <button className="bg-purple-800 text-black px-4 text-sm h-8 border border-white hover:bg-purple-900 font-jetbrains">
-                        <Link href={`/${authorFidCast}`}>
-                          <div className="font-jetbrains flex flex-row items-center space-x-1">
-                            <p>Profile</p> <UserIcon className="w-4 h-4" />
-                          </div>
-                        </Link>
-                      </button>
-                    </div>
+                <div className="flex flex-col justify-end">
+                  {loading ? null : castHash || username ? (
+                    <DropdownMenu>
+                      <DropdownMenuTrigger>
+                        {' '}
+                        <Button className="font-jetbrains bg-white text-black hover:bg-gray-200 text-md p-1 px-3 rounded-none ">
+                          open
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent className="bg-white rounded-none">
+                        <DropdownMenuItem
+                          className="font-jetbrains bg-white"
+                          onClick={(e) => {
+                            router.push(
+                              castHash
+                                ? `https://warpcast.com/${username}/${castHash.slice(0, 10)}`
+                                : `https://warpcast.com/${username}`
+                            );
+                          }}
+                        >
+                          in Warpcast
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          className="font-jetbrains"
+                          onClick={(e) => {
+                            router.push(
+                              castHash
+                                ? `https://www.supercast.xyz/c/${castHash}`
+                                : `https://www.supercast.xyz/${username}`
+                            );
+                          }}
+                        >
+                          in Supercast
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   ) : null}
                 </div>
               ) : null}
