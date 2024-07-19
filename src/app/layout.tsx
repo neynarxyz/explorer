@@ -130,7 +130,7 @@ export default function RootLayout({
                     <DialogTrigger className="font-pixelify text-md text-white bg-gray-700 hover:bg-gray-600  p-1.5 px-3 rounded">
                       {!isAuthenticated ? 'sign in' : 'sign out'}
                     </DialogTrigger>
-                    <DialogContent>
+                    <DialogContent className="max-w-sm">
                       <DialogHeader>
                         <DialogTitle>
                           {isAuthenticated ? 'Sign out' : 'Sign in'}
