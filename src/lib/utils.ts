@@ -2,6 +2,7 @@ import axios from 'axios';
 import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import { hubs, tokenBearer } from '@/constants';
+import { isNumeric } from './helpers';
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
@@ -499,6 +500,16 @@ export async function fetchAuthorFromNeynarAPI(identifier: string) {
 export const fetchWarpcastAuthor = async (identifier: string | null) => {
   try {
     let url, params;
+
+    if (identifier && isNumeric(identifier)) {
+      const response = await axios.get(
+        `https://api.warpcast.com/v2/user?fid=${identifier}`,
+        {
+          headers: { 'Content-Type': 'application/json' },
+        }
+      );
+      return response.data?.result?.user || null;
+    }
 
     // Extract username if identifier is a URL
     if (identifier && identifier.includes('https://www.supercast.xyz/')) {

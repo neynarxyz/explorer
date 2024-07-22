@@ -5,19 +5,16 @@ import '@neynar/react/dist/style.css';
 import './globals.css';
 import Link from 'next/link';
 import Providers from './providers';
-import Search from '@/components/search';
 import { useEffect } from 'react';
 import { seo } from '@/constants';
-import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { DownloadIcon, Grid2X2 } from 'lucide-react';
+import { Grid2X2 } from 'lucide-react';
 import { NeynarContextProvider, Theme } from '@neynar/react';
 import * as amplitude from '@amplitude/analytics-browser';
 import { v4 as uuidv4 } from 'uuid';
-import { NeynarAuthButton } from '@neynar/react';
 import { usePathname } from 'next/navigation';
 import HubsDataComponent from '@/components/hubs-data';
-import { CiGrid41 } from 'react-icons/ci';
+import AuthButton from '@/components/AuthButton';
 
 export default function RootLayout({
   children,
@@ -109,12 +106,13 @@ export default function RootLayout({
                   >
                     docs
                   </Link>
+                  <AuthButton />
                 </div>
               </div>
               <div className="w-full min-h-screen flex-1">{children}</div>
               <div className="sticky bottom-0 flex items-center justify-between">
                 <HubsDataComponent />
-                <div className="bg-white px-1 p-[0.5px]">
+                <div className="px-1 p-[0.5px]">
                   <Button className="bg-black" asChild>
                     <Link
                       target="_blank"
