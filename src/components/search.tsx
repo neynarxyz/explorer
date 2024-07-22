@@ -1,10 +1,8 @@
 'use client';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next13-progressbar';
 import { usePathname } from 'next/navigation';
-import { SearchIcon } from 'lucide-react';
+import { SearchIcon, X } from 'lucide-react';
 import * as amplitude from '@amplitude/analytics-browser';
 
 export default function Search() {
@@ -19,9 +17,13 @@ export default function Search() {
     setIdentifier(identifier);
   }, [path]);
 
+  const handleClearInput = () => {
+    setIdentifier('');
+  };
+
   return (
     <form
-      className="flex gap-2 items-center w-full"
+      className="flex flex-row items-start p-0 w-full h-[35px]"
       onSubmit={(e) => {
         e.preventDefault();
         amplitude.track('Search made', {
@@ -30,15 +32,27 @@ export default function Search() {
         router.push(`/${encodeURIComponent(identifier)}`);
       }}
     >
-      <Input
-        className="flex-auto md:min-w-[350px] min-w-[100px] md:text-sm text-xs"
-        placeholder="Enter a FID, hash, warpcast url, or supercast url..."
-        value={identifier}
-        onChange={(e) => setIdentifier(e.currentTarget.value)}
-      />
-      <Button>
-        <SearchIcon className="w-5 h-5" />
-      </Button>
+      <div className="flex flex-row items-center pl-[7.5px] w-full h-[35px] bg-white border border-white relative">
+        <input
+          type="text"
+          className="w-full font-pixelify focus:outline-none text-[15px] text-black"
+          placeholder="Enter FID, hash, warpcast url, or supercast url..."
+          value={identifier}
+          onChange={(e) => setIdentifier(e.currentTarget.value)}
+        />
+        {identifier && (
+          <button
+            type="button"
+            onClick={handleClearInput}
+            className="flex flex-row justify-center h-[35px] bg-[#333333] items-center w-[40px] hover:bg-gray-600 border border-white"
+          >
+            <X className="w-16 h-7 text-white p-1 font-bold" />
+          </button>
+        )}
+      </div>
+      <button className="flex flex-row justify-center items-center w-[42px] h-[35px] bg-[#5F3AB8] border border-white">
+        <SearchIcon className="w-5 h-5 text-white" />
+      </button>
     </form>
   );
 }

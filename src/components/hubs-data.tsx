@@ -42,18 +42,18 @@ const HubsDataComponent = () => {
   }, []);
 
   return (
-    <div className="flex flex-row md:w-1/2">
-      <div className="flex md:flex-row flex-col md:items-start items-center justify-around w-full md:space-x-16">
+    <div className="flex flex-row md:w-full h-full">
+      <div className="flex flex-row items-center bg-white space-x-1 p-0.5">
         {loading
           ? // Skeleton loaders for loading state
             hubs.slice(0, 3).map((item) => (
-              <div className="space-y-2" key={item.shortname}>
+              <div className="space-y-2 bg-gray-200 p-2" key={item.shortname}>
                 <p className="text-center">
-                  <Skeleton width={200} />
+                  <Skeleton width={100} />
                 </p>
                 <div>
                   <p className="text-center font-bold text-md">
-                    <Skeleton width={100} />
+                    <Skeleton width={50} />
                   </p>
                 </div>
               </div>
@@ -65,26 +65,25 @@ const HubsDataComponent = () => {
               ).toFixed(2);
 
               return (
-                <div className="space-y-2" key={index}>
-                  <p className="text-center">
-                    Number of Messages on {capitalizeNickname(hub?.nickname)}
-                  </p>
+                <div
+                  style={{
+                    backgroundColor:
+                      percentageDifference == 0
+                        ? '#5D5670'
+                        : percentageDifference > 0
+                          ? '#355E2B'
+                          : '#C67A7D',
+                  }}
+                  className="space-y-2 p-2 w-26 md:w-full"
+                  key={index}
+                >
                   <div className="w-full">
                     {hub.dbStats.numMessages !== null ? (
-                      <p className="text-center font-bold text-md">
-                        {hub?.dbStats?.numMessages.toLocaleString()}{' '}
-                        <span
-                          className="text-sm"
-                          style={{
-                            color:
-                              percentageDifference == 0
-                                ? 'gray'
-                                : percentageDifference > 0
-                                  ? 'green'
-                                  : 'red',
-                          }}
-                        >
-                          ({percentageDifference}%)
+                      <p className="text-center font-bold text-xs md:text-sm font-pixelify">
+                        {capitalizeNickname(hub?.nickname)}&nbsp;
+                        <span className="text-sm">
+                          ({percentageDifference > 0 ? '+' : ''}
+                          {percentageDifference}%)
                         </span>
                       </p>
                     ) : (
