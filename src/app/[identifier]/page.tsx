@@ -356,8 +356,6 @@ export default function Page({ params }: ResponseProps) {
                       display: 'flex',
                       flexDirection: 'row',
                       alignItems: 'center',
-                      maxWidth: '480px',
-                      minHeight: '439.25px',
                       background: '#333333',
                       border: '0.915556px solid #FFFFFF',
                       boxSizing: 'border-box',
@@ -365,7 +363,19 @@ export default function Page({ params }: ResponseProps) {
                     }}
                   />
                 ) : authorFid ? (
-                  <NeynarProfileCard fid={authorFid} />
+                  <NeynarProfileCard
+                    fid={authorFid}
+                    customStyles={{
+                      color: 'white',
+                      display: 'flex',
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      background: '#333333',
+                      border: '0.915556px solid #FFFFFF',
+                      boxSizing: 'border-box',
+                      borderRadius: '0px',
+                    }}
+                  />
                 ) : null}
               </div>
             </div>

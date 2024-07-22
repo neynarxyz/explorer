@@ -44,9 +44,9 @@ export default function Search() {
           <button
             type="button"
             onClick={handleClearInput}
-            className="flex flex-row justify-center items-center w-[35px] h-[30px] rounded-full hover:bg-gray-300 border border-white"
+            className="flex flex-row justify-center h-[35px] bg-[#333333] items-center w-[40px] hover:bg-gray-600 border border-white"
           >
-            <X className="w-5 h-5 text-black" />
+            <X className="w-16 h-7 text-white p-1 font-bold" />
           </button>
         )}
       </div>
