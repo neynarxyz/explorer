@@ -5,27 +5,16 @@ import '@neynar/react/dist/style.css';
 import './globals.css';
 import Link from 'next/link';
 import Providers from './providers';
-import Search from '@/components/search';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { seo } from '@/constants';
-import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { DownloadIcon, Grid2X2 } from 'lucide-react';
+import { Grid2X2 } from 'lucide-react';
 import { NeynarContextProvider, Theme } from '@neynar/react';
 import * as amplitude from '@amplitude/analytics-browser';
 import { v4 as uuidv4 } from 'uuid';
-import { NeynarAuthButton } from '@neynar/react';
 import { usePathname } from 'next/navigation';
 import HubsDataComponent from '@/components/hubs-data';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
-import { set } from 'nprogress';
+import AuthButton from '@/components/AuthButton';
 
 export default function RootLayout({
   children,
@@ -33,7 +22,6 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   const pathname = usePathname();
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
     let userId = localStorage.getItem('user_uuid');
@@ -57,14 +45,6 @@ export default function RootLayout({
         settings={{
           clientId: process.env.NEXT_PUBLIC_CLIENT_ID as string,
           defaultTheme: Theme.Light,
-          eventsCallbacks: {
-            onAuthSuccess({ user }) {
-              setIsAuthenticated(true);
-            },
-            onSignout(user) {
-              setIsAuthenticated(false);
-            },
-          },
         }}
       >
         <head>
@@ -126,21 +106,7 @@ export default function RootLayout({
                   >
                     docs
                   </Link>
-                  <Dialog>
-                    <DialogTrigger className="font-pixelify text-md text-white bg-gray-700 hover:bg-gray-600  p-1.5 px-3 rounded">
-                      {!isAuthenticated ? 'sign in' : 'sign out'}
-                    </DialogTrigger>
-                    <DialogContent className="max-w-sm">
-                      <DialogHeader>
-                        <DialogTitle>
-                          {isAuthenticated ? 'Sign out' : 'Sign in'}
-                        </DialogTitle>
-                        <DialogDescription className="flex items-center justify-center">
-                          <NeynarAuthButton />
-                        </DialogDescription>
-                      </DialogHeader>
-                    </DialogContent>
-                  </Dialog>
+                  <AuthButton />
                 </div>
               </div>
               <div className="w-full min-h-screen flex-1">{children}</div>
