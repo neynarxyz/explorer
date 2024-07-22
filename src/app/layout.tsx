@@ -112,14 +112,17 @@ export default function RootLayout({
               <div className="w-full min-h-screen flex-1">{children}</div>
               <div className="sticky bottom-0 flex items-center justify-between">
                 <HubsDataComponent />
-                <div className="px-1 p-[0.5px]">
-                  <Button className="bg-black" asChild>
+                <div className="p-0">
+                  <Button className="bg-black w-full flex flex-row rounded-none">
                     <Link
                       target="_blank"
+                      className="text-sm md:text-md"
                       href="https://warpcast.com/~/add-cast-action?url=https://explorer.neynar.com/frames/actions/view-on-explorer"
                     >
-                      <Grid2X2 className="w-4 h-4 mr-2" />
-                      Install Cast Action
+                      <div className="flex flex-row items-center">
+                        <Grid2X2 className="w-4 h-4 mr-2 hidden md:block" />
+                        <p>Install Cast Action</p>
+                      </div>
                     </Link>
                   </Button>
                 </div>

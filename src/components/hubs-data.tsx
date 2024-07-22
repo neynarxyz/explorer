@@ -74,12 +74,12 @@ const HubsDataComponent = () => {
                           ? '#355E2B'
                           : '#C67A7D',
                   }}
-                  className="space-y-2 p-2"
+                  className="space-y-2 p-2 w-26 md:w-full"
                   key={index}
                 >
                   <div className="w-full">
                     {hub.dbStats.numMessages !== null ? (
-                      <p className="text-center font-bold text-sm font-pixelify">
+                      <p className="text-center font-bold text-xs md:text-sm font-pixelify">
                         {capitalizeNickname(hub?.nickname)}&nbsp;
                         <span className="text-sm">
                           ({percentageDifference > 0 ? '+' : ''}
