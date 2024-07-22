@@ -176,11 +176,6 @@ export default function Page({ params }: ResponseProps) {
     neynarCast?.cast?.author?.username ??
     warpcastCast?.cast?.author?.username ??
     null;
-  console.log('username', username);
-  console.log('warpcast author', warpcastAuthor);
-  console.log('neynar author', neynarAuthor);
-  console.log('neynar cast', neynarCast);
-  console.log('warpcast cast', warpcastCast);
   const castHash = neynar?.cast?.cast?.hash ?? warpcast?.cast?.hash ?? null;
 
   const renderHeader = (label: string, data: any, missingObjects: any[]) => {
