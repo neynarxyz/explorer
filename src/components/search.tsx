@@ -35,7 +35,7 @@ export default function Search() {
       <div className="flex flex-row items-center pl-[7.5px] w-full h-[35px] bg-white border border-white relative">
         <input
           type="text"
-          className="w-full font-pixelify focus:outline-none text-[15px] text-black"
+          className="w-full font-jetbrains focus:outline-none text-[15px] text-black"
           placeholder="Enter FID, hash, warpcast url, or supercast url..."
           value={identifier}
           onChange={(e) => setIdentifier(e.currentTarget.value)}
