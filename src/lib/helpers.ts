@@ -14,3 +14,11 @@ export const calculatePercentageDifference = (
 export const isNumeric = (str: string): boolean => {
   return !isNaN(Number(str)) && !isNaN(parseFloat(str)) && !/^0x/.test(str);
 };
+
+export const isFollowSyntax = (identifier: string | null): any => {
+  if (!identifier) return null;
+  // Check if the identifier matches the format x<>y
+  const regex = /^(\d+)<>(\d+)$/;
+  const match = identifier.match(regex);
+  return match ?? null;
+};

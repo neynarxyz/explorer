@@ -52,7 +52,8 @@ const Modal: React.FC<ModalProps> = ({
 
     const shouldLinkifyHashes = !(
       text.includes('MESSAGE_TYPE_USER_DATA') ||
-      text.includes('MESSAGE_TYPE_VERIFICATION')
+      text.includes('MESSAGE_TYPE_VERIFICATION') ||
+      text.includes('MESSAGE_TYPE_LINK_ADD')
     );
 
     let linkedText = text.replace(
