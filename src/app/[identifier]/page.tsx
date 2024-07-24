@@ -21,7 +21,7 @@ import {
   isValidWarpcastUrl,
 } from '@/lib/utils';
 import { NeynarProfileCard, NeynarCastCard } from '@neynar/react';
-import { capitalizeNickname, isNumeric } from '@/lib/helpers';
+import { capitalizeNickname, isFollowSyntax, isNumeric } from '@/lib/helpers';
 import { CopyCheckIcon, CopyIcon, UserIcon, SearchIcon } from 'lucide-react';
 import Link from 'next/link';
 import * as amplitude from '@amplitude/analytics-browser';
@@ -368,7 +368,8 @@ export default function Page({ params }: ResponseProps) {
                 )}
               </div>
               <div className="hidden md:block">
-                {hash && !extractUsernameFromUrl(hash) ? (
+                {hash && isFollowSyntax(hash) ? null : hash &&
+                  !extractUsernameFromUrl(hash) ? (
                   <NeynarCastCard
                     type={isValidWarpcastUrl(identifier) ? 'url' : 'hash'}
                     identifier={identifier}

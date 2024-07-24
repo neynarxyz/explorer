@@ -2,7 +2,7 @@ import axios from 'axios';
 import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import { hubs, tokenBearer } from '@/constants';
-import { isNumeric } from './helpers';
+import { isFollowSyntax, isNumeric } from './helpers';
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
@@ -535,9 +535,7 @@ export async function fetchAuthorFromNeynarAPI(identifier: string) {
   try {
     let url, params;
 
-    // Check if the identifier matches the format x<>y
-    const regex = /^(\d+)<>(\d+)$/;
-    const match = identifier.match(regex);
+    const match = isFollowSyntax(identifier);
 
     if (match) {
       const x = match[1];
