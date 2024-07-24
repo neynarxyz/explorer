@@ -13,10 +13,16 @@ export interface HubType {
 const fetchHubData = async (
   fid: number | null,
   hash: string | null,
-  isCast = true
+  isCast = true,
+  followRelationship: null | string = null
 ) => {
   const promises = hubs.map(async (hub) => {
-    const authorData = await fetchFidFromHub(fid, hub, isCast);
+    const authorData = await fetchFidFromHub(
+      fid,
+      hub,
+      isCast,
+      followRelationship
+    );
     const castData = await fetchCastFromHub(hash, fid, hub, isCast);
     return { name: hub.shortname, author: authorData, cast: castData };
   });
@@ -93,20 +99,21 @@ const fetchApiData = async (
         hash = null;
       }
     }
-
     if (
       identifier &&
       !isValidWarpcastUrl(identifier) &&
       !identifier.includes('0x') &&
-      !identifier.match(/^[a-zA-Z0-9.]+$/)
+      !identifier.match(/^[a-zA-Z0-9.]+$/) &&
+      !identifier.match(/^(\d+)<>(\d+)$/)
     ) {
       throw new Error('Invalid identifier');
     }
     // Only make author calls if there is a fid or the identifier is a username
     if (
-      (isUsername || authorFid) &&
-      !hash &&
-      (authorFid || (identifier && identifier.match(/^[a-zA-Z0-9.]+$/)))
+      identifier?.match(/^(\d+)<>(\d+)$/) ||
+      ((isUsername || authorFid) &&
+        !hash &&
+        (authorFid || (identifier && identifier.match(/^[a-zA-Z0-9.]+$/))))
     ) {
       const warpcastAuthorApiStart = performance.now();
       try {
@@ -136,7 +143,7 @@ const fetchApiData = async (
 
     // Only make cast calls if there is a hash or the identifier is a URL that you can extract a post from
     if (
-      (!isUsername && hash) ||
+      (!identifier?.match(/^(\d+)<>(\d+)$/) && !isUsername && hash) ||
       (identifier && isWarpcastURL && identifier.split('/').length >= 4)
     ) {
       try {
@@ -327,6 +334,7 @@ export async function fetchCastAndFidData(
     fid;
   let processedHash =
     apiData.neynar?.cast?.cast?.hash ?? apiData.warpcast?.cast?.hash ?? hash;
+  const followRelationship = hash?.match(/^(\d+)<>(\d+)$/) ? hash : null;
   if (isValidWarpcastUrl(processedHash) || isValidSuperCastUrl(processedHash)) {
     processedHash = null;
   }
@@ -334,7 +342,8 @@ export async function fetchCastAndFidData(
   const hubData = await fetchHubData(
     processedFid,
     processedHash,
-    apiData.neynar?.cast || apiData.warpcast?.cast
+    apiData.neynar?.cast || apiData.warpcast?.cast,
+    followRelationship
   );
   return { apiData, hubData };
 }
@@ -396,12 +405,47 @@ export async function fetchCastFromNeynarAPI(
   }
 }
 
+async function fetchLink(hub: HubType, fid: string, target_fid: string) {
+  let headers: {
+    'Content-Type': string;
+    api_key?: string;
+  } = { 'Content-Type': 'application/json' };
+  if (hub.shortname === 'Neynar hub') {
+    headers.api_key = `${process.env.NEXT_PUBLIC_NEYNAR_API_KEY}`;
+  }
+  try {
+    const response = await axios.get(
+      `${hub.url}/v1/linkById?fid=${fid}&target_fid=${target_fid}&link_type=follow`,
+      {
+        headers,
+        timeout: 7000,
+      }
+    );
+    return { ...response.data, error: null };
+  } catch (e: any) {
+    let is_server_dead = false;
+    let error;
+    if (e.code === 'ECONNABORTED') {
+      is_server_dead = true;
+    }
+    if (e.response) {
+      if (e.response.status >= 500) {
+        is_server_dead = true;
+      }
+    } else if (e.request) {
+      is_server_dead = true;
+    }
+    return { error, data: null, is_server_dead };
+  }
+}
+
 export async function fetchFidFromHub(
   fid: number | null,
   hub: HubType,
-  isCast = true
+  isCast = true,
+  followRelationship: null | string = null
 ) {
-  if (!fid || isCast) return null;
+  if ((!fid || isCast) && !followRelationship) return null;
   try {
     let headers: {
       'Content-Type': string;
@@ -411,6 +455,22 @@ export async function fetchFidFromHub(
     if (hub.shortname === 'Neynar hub') {
       headers.api_key = `${process.env.NEXT_PUBLIC_NEYNAR_API_KEY}`;
     }
+    if (followRelationship) {
+      const follow = followRelationship.split('<>');
+      const fid = follow[0];
+      const target_fid = follow[1];
+      const [followResponse, followedByResponse] = await Promise.all([
+        fetchLink(hub, fid, target_fid),
+        fetchLink(hub, target_fid, fid),
+      ]);
+      return {
+        follow: { ...followResponse.data },
+        followedBy: { ...followedByResponse.data },
+        error: null,
+        is_server_dead: false,
+      };
+    }
+
     const response = await axios.get(`${hub.url}/v1/userDataByFid?fid=${fid}`, {
       headers,
       timeout: 7000,
@@ -463,9 +523,32 @@ export async function getEmbedType(url: string) {
 
 export async function fetchAuthorFromNeynarAPI(identifier: string) {
   try {
+    console.log('fetchAuthorFromNeynarAPI', identifier);
     let url, params;
 
-    if (!Number(identifier)) {
+    // Check if the identifier matches the format x<>y
+    const regex = /^(\d+)<>(\d+)$/;
+    const match = identifier.match(regex);
+
+    if (match) {
+      const x = match[1];
+      const y = match[2];
+
+      const authorData = await axios.get(
+        `https://api.neynar.com/v2/farcaster/user/bulk?fids=${y}&viewer_fid=${x}`,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            api_key: `${process.env.NEXT_PUBLIC_NEYNAR_API_KEY}`,
+          },
+        }
+      );
+
+      const author = authorData.data.users[0];
+      //extract viewer_context
+      const viewer_context = author.viewer_context;
+      return { author: viewer_context, error: null };
+    } else if (!Number(identifier)) {
       url = 'https://api.neynar.com/v1/farcaster/user-by-username';
       params = { username: identifier };
     } else {
@@ -473,11 +556,12 @@ export async function fetchAuthorFromNeynarAPI(identifier: string) {
         `https://api.neynar.com/v2/farcaster/user/bulk?fids=${identifier}`,
         {
           headers: {
-            'Content-Type': 'application-json',
+            'Content-Type': 'application/json',
             api_key: `${process.env.NEXT_PUBLIC_NEYNAR_API_KEY}`,
           },
         }
       );
+
       const author = authorData.data.users[0];
       return { author, error: null };
     }
@@ -500,6 +584,9 @@ export async function fetchAuthorFromNeynarAPI(identifier: string) {
 export const fetchWarpcastAuthor = async (identifier: string | null) => {
   try {
     let url, params;
+    if (identifier?.match(/^(\d+)<>(\d+)$/)) {
+      return null;
+    }
 
     if (identifier && isNumeric(identifier)) {
       const response = await axios.get(

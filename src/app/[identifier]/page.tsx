@@ -61,12 +61,31 @@ export default function Page({ params }: ResponseProps) {
 
   const checkWarning = (message: any) => {
     if (!message) return [];
-    const expectedTypes = [
+
+    const missingObjects = [];
+    let expectedUserTypes = [
       'USER_DATA_TYPE_PFP',
       'USER_DATA_TYPE_DISPLAY',
       'USER_DATA_TYPE_BIO',
       'USER_DATA_TYPE_USERNAME',
     ];
+    if (message?.followedBy && message?.follow) {
+      console.log('message', message);
+
+      if (
+        !message?.followedBy.type ||
+        message?.followedBy.type !== 'MESSAGE_TYPE_LINK_ADD'
+      ) {
+        missingObjects.push('Followed By');
+      }
+      if (
+        !message?.follow.type ||
+        message?.follow.type !== 'MESSAGE_TYPE_LINK_ADD'
+      ) {
+        missingObjects.push('Following');
+      }
+      return missingObjects;
+    }
 
     if (message?.messages) {
       const foundTypes = new Set();
@@ -76,10 +95,20 @@ export default function Page({ params }: ResponseProps) {
         }
       });
 
-      return expectedTypes.filter((type) => !foundTypes.has(type));
+      return expectedUserTypes.filter((type) => !foundTypes.has(type));
     }
 
-    const missingObjects = [];
+    const following = message?.following;
+    const followedBy = message?.followed_by;
+
+    if (following !== undefined && following === false)
+      missingObjects.push('Following');
+    if (followedBy !== undefined && followedBy === false)
+      missingObjects.push('Followed By');
+    if (followedBy !== undefined && following !== undefined) {
+      return missingObjects;
+    }
+
     const authorFid = message?.fid;
     const expectedUsername = `!${authorFid}`;
     const username = message?.username;
