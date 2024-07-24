@@ -104,7 +104,7 @@ const fetchApiData = async (
       !isValidWarpcastUrl(identifier) &&
       !identifier.includes('0x') &&
       !identifier.match(/^[a-zA-Z0-9.]+$/) &&
-      !identifier.match(/^(\d+)<>(\d+)$/)
+      !isFollowSyntax(identifier)
     ) {
       throw new Error('Invalid identifier');
     }
@@ -143,7 +143,7 @@ const fetchApiData = async (
 
     // Only make cast calls if there is a hash or the identifier is a URL that you can extract a post from
     if (
-      (!identifier?.match(/^(\d+)<>(\d+)$/) && !isUsername && hash) ||
+      (!isFollowSyntax(identifier) && !isUsername && hash) ||
       (identifier && isWarpcastURL && identifier.split('/').length >= 4)
     ) {
       try {
@@ -334,7 +334,7 @@ export async function fetchCastAndFidData(
     fid;
   let processedHash =
     apiData.neynar?.cast?.cast?.hash ?? apiData.warpcast?.cast?.hash ?? hash;
-  const followRelationship = hash?.match(/^(\d+)<>(\d+)$/) ? hash : null;
+  const followRelationship = isFollowSyntax(hash) ? hash : null;
   if (isValidWarpcastUrl(processedHash) || isValidSuperCastUrl(processedHash)) {
     processedHash = null;
   }
@@ -591,7 +591,7 @@ export async function fetchAuthorFromNeynarAPI(identifier: string) {
 export const fetchWarpcastAuthor = async (identifier: string | null) => {
   try {
     let url, params;
-    if (identifier?.match(/^(\d+)<>(\d+)$/)) {
+    if (isFollowSyntax(identifier)) {
       return null;
     }
 
