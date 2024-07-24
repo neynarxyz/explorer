@@ -70,8 +70,6 @@ export default function Page({ params }: ResponseProps) {
       'USER_DATA_TYPE_USERNAME',
     ];
     if (message?.followedBy && message?.follow) {
-      console.log('message', message);
-
       if (
         !message?.followedBy.type ||
         message?.followedBy.type !== 'MESSAGE_TYPE_LINK_ADD'

@@ -523,7 +523,6 @@ export async function getEmbedType(url: string) {
 
 export async function fetchAuthorFromNeynarAPI(identifier: string) {
   try {
-    console.log('fetchAuthorFromNeynarAPI', identifier);
     let url, params;
 
     // Check if the identifier matches the format x<>y
