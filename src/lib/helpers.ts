@@ -11,7 +11,7 @@ export const calculatePercentageDifference = (
   return ((current - median) / median) * 100;
 };
 
-export const isNumeric = (str: string): any => {
+export const isNumeric = (str: string): boolean => {
   return !isNaN(Number(str)) && !isNaN(parseFloat(str)) && !/^0x/.test(str);
 };
 
