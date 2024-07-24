@@ -421,6 +421,11 @@ async function fetchLink(hub: HubType, fid: string, target_fid: string) {
         timeout: 7000,
       }
     );
+
+    //if status isn't in 200's return error
+    if (response.status < 200 || response.status > 299) {
+      return { error: response.data, data: null };
+    }
     return { ...response.data, error: null };
   } catch (e: any) {
     let is_server_dead = false;
@@ -435,7 +440,7 @@ async function fetchLink(hub: HubType, fid: string, target_fid: string) {
     } else if (e.request) {
       is_server_dead = true;
     }
-    return { error, data: null, is_server_dead };
+    return { error: formatError(e), data: null, is_server_dead };
   }
 }
 
@@ -463,11 +468,16 @@ export async function fetchFidFromHub(
         fetchLink(hub, fid, target_fid),
         fetchLink(hub, target_fid, fid),
       ]);
+
       return {
         follow: { ...followResponse.data },
         followedBy: { ...followedByResponse.data },
-        error: null,
-        is_server_dead: false,
+        is_server_dead:
+          followResponse.is_server_dead || followedByResponse.is_server_dead,
+        error:
+          followResponse?.error && followedByResponse?.error
+            ? { ...followResponse.error, ...followedByResponse.error }
+            : null,
       };
     }
 
