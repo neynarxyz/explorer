@@ -244,7 +244,7 @@ export default function Page({ params }: ResponseProps) {
             ? '#03039A'
             : backgroundColor)
         }
-        className="relative border border-white flex flex-col items-center justify-center min-h-6 min-w-40"
+        className="relative border border-white flex flex-col items-center justify-center min-h-6 min-w-52"
         onClick={() => openModal(label, data, missingObjects)}
       >
         <p className="text-center text-sm font-jetbrains">
