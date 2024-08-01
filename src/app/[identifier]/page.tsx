@@ -305,12 +305,12 @@ export default function Page({ params }: ResponseProps) {
                       warpcastCastHubMissing
                     )}
                     {renderHeader(
-                      'Neynar Hub',
+                      'Neynar hub',
                       neynarHubAuthor,
                       neynarAuthorHubMissing
                     )}
                     {renderHeader(
-                      'Neynar Hub',
+                      'Neynar hub',
                       neynarHubCast,
                       neynarCastHubMissing
                     )}
