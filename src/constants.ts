@@ -6,12 +6,12 @@ export const seo = {
 };
 
 export const hubs = [
-  { shortname: 'Warpcast hub (Hoyt)', url: 'https://hoyt.farcaster.xyz:2281' },
-  { shortname: 'Neynar hub', url: 'https://hub-api.neynar.com' },
   {
     shortname: 'Warpcast hub (Lamia)',
     url: 'https://lamia.farcaster.xyz:2281',
   },
+  { shortname: 'Neynar hub', url: 'https://hub-api.neynar.com' },
+  { shortname: 'Warpcast hub (Hoyt)', url: 'https://hoyt.farcaster.xyz:2281' },
 ];
 
 export const neynarHub = {
