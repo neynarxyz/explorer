@@ -19,19 +19,9 @@ const HubsDataComponent = () => {
       try {
         const data = await getHubsInfo();
         setHubsData(data as any);
-
-        const messageCounts = data.map(
-          (hub: any) => hub?.dbStats?.numMessages || 0
-        );
-        const sortedCounts = messageCounts.sort(
-          (a: number, b: number) => a - b
-        );
-        const middleIndex = Math.floor(sortedCounts.length / 2);
-        const median =
-          sortedCounts.length % 2 === 0
-            ? (sortedCounts[middleIndex - 1] + sortedCounts[middleIndex]) / 2
-            : sortedCounts[middleIndex];
-        setMedianMessages(median);
+        const neynarHub = data.find((hub: any) => hub?.nickname === 'Neynar');
+        const neynarMessageCount = neynarHub?.dbStats?.numMessages || 1; // Default to 1 to avoid division by zero
+        setMedianMessages(neynarMessageCount);
       } catch (error) {
         console.error('Error fetching data:', error);
       } finally {
@@ -74,12 +64,12 @@ const HubsDataComponent = () => {
                           ? '#355E2B'
                           : '#C67A7D',
                   }}
-                  className="space-y-2 p-2 w-26 md:w-full"
+                  className="space-y-2 min-h-14 flex items-center justify-center p-2"
                   key={index}
                 >
                   <div className="w-full">
                     {hub.dbStats.numMessages !== null ? (
-                      <p className="text-center font-bold text-xs md:text-sm font-pixelify">
+                      <p className="text-center font-bold text-xs md:text-sm font-jetbrains">
                         {capitalizeNickname(hub?.nickname)}&nbsp;
                         <span className="text-sm">
                           ({percentageDifference > 0 ? '+' : ''}

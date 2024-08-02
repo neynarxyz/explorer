@@ -80,28 +80,28 @@ export default function RootLayout({
                 </div>
                 <div className="flex items-center space-x-1 bg-white py-1 pl-1 pr-0.5">
                   <Link
-                    className="font-pixelify text-white text-md bg-gray-700 hover:bg-gray-600  p-1.5 px-3 rounded"
+                    className="font-jetbrains text-white text-md bg-gray-700 hover:bg-gray-600  p-1.5 px-3 rounded"
                     href={'/'}
                   >
                     home
                   </Link>
                   <Link
                     target="_blank"
-                    className="font-pixelify text-white text-md bg-gray-700 hover:bg-gray-600  p-1.5 px-3 rounded"
+                    className="font-jetbrains text-white text-md bg-gray-700 hover:bg-gray-600  p-1.5 px-3 rounded"
                     href={'https://blog.neynar.com/'}
                   >
                     blog
                   </Link>
                   <Link
                     target="_blank"
-                    className="font-pixelify text-md text-white bg-gray-700 hover:bg-gray-600  p-1.5 px-3 rounded"
+                    className="font-jetbrains text-md text-white bg-gray-700 hover:bg-gray-600  p-1.5 px-3 rounded"
                     href={'https://github.com/neynarxyz/explorer'}
                   >
                     github
                   </Link>
                   <Link
                     target="_blank"
-                    className="font-pixelify text-md text-white bg-gray-700 hover:bg-gray-600  p-1.5 px-3 rounded"
+                    className="font-jetbrains text-md text-white bg-gray-700 hover:bg-gray-600  p-1.5 px-3 rounded"
                     href={'https://docs.neynar.com/'}
                   >
                     docs

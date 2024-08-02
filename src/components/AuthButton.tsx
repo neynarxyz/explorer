@@ -13,7 +13,7 @@ const AuthButton = () => {
   const { isAuthenticated } = useNeynarContext();
   return (
     <Dialog>
-      <DialogTrigger className="font-pixelify   md:w-full w-16 h-9 md:h-full text text-white bg-gray-700 hover:bg-gray-600  p-1.5 px-2 rounded">
+      <DialogTrigger className="font-jetbrains   md:w-full w-16 h-9 md:h-full text text-white bg-gray-700 hover:bg-gray-600  p-1.5 px-2 rounded">
         <p className="text-sm md:text-md">
           {!isAuthenticated ? 'sign in' : 'sign out'}
         </p>

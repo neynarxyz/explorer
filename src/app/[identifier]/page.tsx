@@ -244,7 +244,7 @@ export default function Page({ params }: ResponseProps) {
             ? '#03039A'
             : backgroundColor)
         }
-        className="relative border border-white flex flex-col items-center justify-center min-h-6 min-w-52"
+        className="relative border border-white flex flex-col items-center justify-center min-h-6 min-w-[11.5rem]"
         onClick={() => openModal(label, data, missingObjects)}
       >
         <p className="text-center text-sm font-jetbrains">
@@ -263,7 +263,7 @@ export default function Page({ params }: ResponseProps) {
         title={modalTitle}
       />
       <div className="w-full flex-1 items-center flex flex-row justify-center">
-        <div className="flex flex-col max-w-2xl space-y-0">
+        <div className="flex flex-col max-w-3xl space-y-0">
           <div className="bg-black flex flex-col">
             <div className="p-1 text-center border border-white w-[40%]">
               <p className="text-white text-[15px] font-jetbrains">
@@ -274,7 +274,7 @@ export default function Page({ params }: ResponseProps) {
               <Search />
             </div>
             <div className="items-center flex flex-col px-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-0">
+              <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-4 gap-0">
                 {loading ? (
                   <>
                     {<SkeletonHeader />}
