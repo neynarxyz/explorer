@@ -553,7 +553,12 @@ export async function fetchAuthorFromNeynarAPI(identifier: string) {
 
       const author = authorData.data.users[0];
       //extract viewer_context
-      const viewer_context = author.viewer_context;
+      const viewer_context = author?.viewer_context;
+
+      if (!viewer_context.following && !viewer_context.followed_by) {
+        return { error: 'No link relationship exists', author: null };
+      }
+
       return { author: viewer_context, error: null };
     } else if (!Number(identifier)) {
       url = 'https://api.neynar.com/v1/farcaster/user-by-username';
