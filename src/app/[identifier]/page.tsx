@@ -352,13 +352,20 @@ export default function Page({ params }: ResponseProps) {
                         {hubs.slice(2).map((hub, index) => {
                           const hubData = data?.hubData?.[index + 2];
                           const hubAuthor = hubData?.author;
-                          const missingObjects = checkWarning(hubAuthor);
+                          const hubCast = hubData?.cast;
+                          const missingObjectsAuthor = checkWarning(hubAuthor);
+                          const missingObjectsCast: any[] = [];
                           return (
                             <div key={index}>
                               {renderHeader(
                                 `${capitalizeNickname(hub.shortname)}`,
                                 hubAuthor,
-                                missingObjects
+                                missingObjectsAuthor
+                              )}
+                              {renderHeader(
+                                `${capitalizeNickname(hub.shortname)}`,
+                                hubCast,
+                                missingObjectsCast
                               )}
                             </div>
                           );
