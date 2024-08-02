@@ -350,7 +350,7 @@ export default function Page({ params }: ResponseProps) {
                     {showOtherHubs && (
                       <div>
                         {hubs.slice(2).map((hub, index) => {
-                          const hubData = data?.hubData?.[index + 2]; // Aligning with the slice offset
+                          const hubData = data?.hubData?.[index + 2];
                           const hubAuthor = hubData?.author;
                           const missingObjects = checkWarning(hubAuthor);
                           return (
