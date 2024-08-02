@@ -476,7 +476,7 @@ export async function fetchFidFromHub(
           followResponse.is_server_dead || followedByResponse.is_server_dead,
         error:
           followResponse?.error && followedByResponse?.error
-            ? { ...followResponse.error, ...followedByResponse.error }
+            ? 'No link relationship exists'
             : null,
       };
     }
