@@ -350,13 +350,14 @@ export default function Page({ params }: ResponseProps) {
                     {showOtherHubs && (
                       <div>
                         {hubs.slice(2).map((hub, index) => {
-                          const hubData = data?.hubData?.[index + 2];
-                          const missingObjects = checkWarning(hubData?.author);
+                          const hubData = data?.hubData?.[index + 2]; // Aligning with the slice offset
+                          const hubAuthor = hubData?.author;
+                          const missingObjects = checkWarning(hubAuthor);
                           return (
                             <div key={index}>
                               {renderHeader(
                                 `${capitalizeNickname(hub.shortname)}`,
-                                hubData,
+                                hubAuthor,
                                 missingObjects
                               )}
                             </div>
