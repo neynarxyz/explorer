@@ -115,29 +115,27 @@ const fetchApiData = async (
         !hash &&
         (authorFid || (identifier && identifier.match(/^[a-zA-Z0-9.]+$/))))
     ) {
-      const warpcastAuthorApiStart = performance.now();
       try {
         warpcastAuthor = await fetchWarpcastAuthor(
           authorFid?.toString() ?? (identifier as any)
         );
       } catch (error) {
-        warpcastAuthor = formatError(error);
+        warpcastAuthor = formatError(
+          authorFid?.toString() ?? (identifier as any),
+          false
+        );
       }
       try {
         neynarAuthor = await fetchAuthorFromNeynarAPI(
           authorFid?.toString() ?? (identifier as any)
         );
-      } catch (error) {
-        neynarAuthor = formatError(error);
-      }
+      } catch (error) {}
 
       return formatResponse(
         warpcastAuthor,
         warpcastCast,
         neynarAuthor,
-        neynarCast,
-        warpcastAuthorApiStart,
-        warpcastCastResponseStart ?? 0
+        neynarCast
       );
     }
 
@@ -154,7 +152,7 @@ const fetchApiData = async (
           hash = warpcastCast?.hash || hash;
         }
       } catch (error) {
-        warpcastCast = formatError(error);
+        warpcastCast = formatError(hash ?? identifier, false);
       }
       try {
         neynarCast = await fetchCastFromNeynarAPI(
@@ -165,18 +163,14 @@ const fetchApiData = async (
           authorFid = authorFid || neynarCast?.author?.fid || null;
           hash = neynarCast?.cast?.hash || hash;
         }
-      } catch (error) {
-        neynarCast = formatError(error);
-      }
+      } catch (error) {}
       warpcastAuthor = null;
       neynarAuthor = null;
       return formatResponse(
         warpcastAuthor,
         warpcastCast,
         neynarAuthor,
-        neynarCast,
-        warpcastCastResponseStart ?? 0,
-        warpcastCastResponseStart ?? 0
+        neynarCast
       );
     }
 
@@ -224,7 +218,7 @@ const fetchWarpcastCast = async (
     }
     return { ...cast, error: null };
   } catch (error) {
-    return { error };
+    return `Couldn't find the info for identifier ${identifier}.`;
   }
 };
 
@@ -232,9 +226,7 @@ const formatResponse = (
   warpcastAuthor: any,
   warpcastCast: any,
   neynarAuthor: any,
-  neynarCast: any,
-  warpcastAuthorApiStart: number,
-  warpcastCastResponseStart: number
+  neynarCast: any
 ) => ({
   warpcast: {
     author:
@@ -298,20 +290,10 @@ const formatErrorResponse = (
     error: errorInfo,
   };
 };
-const formatError = (error: any) => ({
-  error: {
-    message: error.message,
-    name: error.name,
-    stack: error.stack,
-    response: error.response
-      ? {
-          status: error.response.status,
-          statusText: error.response.statusText,
-          data: error.response.data,
-        }
-      : null,
-  },
-});
+const formatError = (identifier: string | null, is_server_dead: boolean) =>
+  is_server_dead
+    ? `The server failed to respond when looking for ${identifier}, please try again.`
+    : `Couldn't find the info for identifier ${identifier}.`;
 
 export function isValidSuperCastUrl(url: string) {
   return url && url.includes('https://www.supercast.xyz');
@@ -368,10 +350,9 @@ export async function fetchCastFromHub(
       `${hub.url}/v1/castById?fid=${fid}&hash=${hash}`,
       { headers, timeout: 7000 }
     );
-    return { data: response.data, error: null, is_server_dead: false };
+    return { data: response?.data };
   } catch (e: any) {
     let is_server_dead = false;
-    let error_message = formatError(e);
     if (e.code === 'ECONNABORTED') {
       is_server_dead = true;
     }
@@ -382,7 +363,7 @@ export async function fetchCastFromHub(
     } else if (e.request) {
       is_server_dead = true;
     }
-    return { error: formatError(e), data: null, is_server_dead };
+    return { error: formatError(hash, is_server_dead) };
   }
 }
 export async function fetchCastFromNeynarAPI(
@@ -399,9 +380,9 @@ export async function fetchCastFromNeynarAPI(
         },
       }
     );
-    return { cast: cast.data.cast, error: null };
+    return { cast: cast.data.cast };
   } catch (e) {
-    return { error: formatError(e), cast: null };
+    return { error: formatError(identifier, false) };
   }
 }
 
@@ -424,7 +405,7 @@ async function fetchLink(hub: HubType, fid: string, target_fid: string) {
 
     //if status isn't in 200's return error
     if (response.status < 200 || response.status > 299) {
-      return { error: response.data, data: null };
+      return { error: response.data };
     }
     return { ...response.data, error: null };
   } catch (e: any) {
@@ -440,7 +421,7 @@ async function fetchLink(hub: HubType, fid: string, target_fid: string) {
     } else if (e.request) {
       is_server_dead = true;
     }
-    return { error: formatError(e), data: null, is_server_dead };
+    return { error: formatError(`${fid}<>${target_fid}`, is_server_dead) };
   }
 }
 
@@ -470,10 +451,16 @@ export async function fetchFidFromHub(
       ]);
 
       return {
-        follow: { ...followResponse.data },
-        followedBy: { ...followedByResponse.data },
+        follow: followResponse?.data ? { ...followResponse.data } : undefined,
+        followedBy: followedByResponse?.data
+          ? { ...followedByResponse.data }
+          : undefined,
         is_server_dead:
-          followResponse.is_server_dead || followedByResponse.is_server_dead,
+          followResponse?.data || followedByResponse?.data
+            ? followResponse.is_server_dead || followedByResponse.is_server_dead
+              ? true
+              : false
+            : undefined,
         error:
           followResponse?.error && followedByResponse?.error
             ? 'No link relationship exists'
@@ -489,15 +476,17 @@ export async function fetchFidFromHub(
       `${hub.url}/v1/verificationsByFid?fid=${fid}`,
       { headers, timeout: 7000 }
     );
-    return {
-      ...response.data,
-      verifications: verificationsResponse.data,
-      error: null,
-      is_server_dead: false,
-    };
+    console.log('response', response.data);
+    return response?.data && response?.data?.messages?.length
+      ? {
+          ...response.data,
+          verifications: verificationsResponse.data,
+          error: null,
+          is_server_dead: false,
+        }
+      : { error: `fid ${fid} not found` };
   } catch (e: any) {
     let is_server_dead = false;
-    let error_message = formatError(e);
     if (e.code === 'ECONNABORTED') {
       is_server_dead = true;
     }
@@ -508,7 +497,7 @@ export async function fetchFidFromHub(
     } else if (e.request) {
       is_server_dead = true;
     }
-    return { error: formatError(e), data: null, is_server_dead };
+    return { error: formatError(e, is_server_dead) };
   }
 }
 
@@ -532,6 +521,7 @@ export async function getEmbedType(url: string) {
 }
 
 export async function fetchAuthorFromNeynarAPI(identifier: string) {
+  let isUsername = false;
   try {
     let url, params;
 
@@ -561,6 +551,7 @@ export async function fetchAuthorFromNeynarAPI(identifier: string) {
 
       return { author: viewer_context, error: null };
     } else if (!Number(identifier)) {
+      isUsername = true;
       url = 'https://api.neynar.com/v1/farcaster/user-by-username';
       params = { username: identifier };
     } else {
@@ -589,13 +580,15 @@ export async function fetchAuthorFromNeynarAPI(identifier: string) {
     const author = authorData.data.result.user;
     return { author, error: null };
   } catch (e) {
-    return { error: formatError(e), author: null };
+    return { error: formatError(identifier, false) };
   }
 }
 
 export const fetchWarpcastAuthor = async (identifier: string | null) => {
+  let isUsername = false;
   try {
     let url, params;
+
     if (isFollowSyntax(identifier)) {
       return null;
     }
@@ -612,6 +605,7 @@ export const fetchWarpcastAuthor = async (identifier: string | null) => {
 
     // Extract username if identifier is a URL
     if (identifier && identifier.includes('https://www.supercast.xyz/')) {
+      isUsername = true;
       const username = identifier.split('/').pop();
       url = 'https://api.warpcast.com/v2/user-by-username';
       params = { username };
@@ -627,7 +621,7 @@ export const fetchWarpcastAuthor = async (identifier: string | null) => {
 
     return response.data?.result?.user || null;
   } catch (error) {
-    return { error };
+    return { error: `Couldn't find the info for identifier ${identifier}.` };
   }
 };
 
