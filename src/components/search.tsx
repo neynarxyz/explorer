@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next13-progressbar';
-import { usePathname, useSearchParams } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import { SearchIcon, X } from 'lucide-react';
 import * as amplitude from '@amplitude/analytics-browser';
 import useSearchParamsWithoutSuspense from '@/hooks/useSearchParamsWithoutSuspense';
@@ -24,13 +24,18 @@ export default function Search() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchParams) {
+      const newParams = new URLSearchParams();
+      const authorFid = searchParams.get('authorFid') || '';
+      const channelId = searchParams.get('channelId') || '';
+      if (authorFid) newParams.append('authorFid', authorFid);
+      if (channelId) newParams.append('channelId', channelId);
+
       amplitude.track('Search made', {
         identifier,
-        ...Object.fromEntries(searchParams.entries()),
+        ...Object.fromEntries(newParams.entries()),
       });
 
-      const url = `/${encodeURIComponent(identifier)}${searchParams.toString() ? `?${searchParams.toString()}` : ''}`;
-      router.push(url);
+      router.push(`/${encodeURIComponent(identifier)}?${newParams.toString()}`);
     }
   };
 

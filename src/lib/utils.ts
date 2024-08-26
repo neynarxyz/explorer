@@ -476,7 +476,6 @@ export async function fetchFidFromHub(
       `${hub.url}/v1/verificationsByFid?fid=${fid}`,
       { headers, timeout: 7000 }
     );
-    console.log('response', response.data);
     return response?.data && response?.data?.messages?.length
       ? {
           ...response.data,
