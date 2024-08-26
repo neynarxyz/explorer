@@ -4,28 +4,24 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { NeynarCastCard } from '@neynar/react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import useSearchParamsWithoutSuspense from '@/hooks/useSearchParamsWithoutSuspense';
 
 const CastSearch = ({ query }: any) => {
-  const params = useSearchParams();
-  const initialAuthorFid = params.get('authorFid');
-  const initialChannelId = params.get('channelId');
+  const params = useSearchParamsWithoutSuspense();
   const router = useRouter();
 
-  const [authorFid, setAuthorFid] = useState(
-    (initialAuthorFid as string) || ''
-  );
-  const [channelId, setChannelId] = useState(
-    (initialChannelId as string) || ''
-  );
+  const [authorFid, setAuthorFid] = useState('');
+  const [channelId, setChannelId] = useState('');
   const [casts, setCasts] = useState<any[]>([]);
   const [cursor, setCursor] = useState('');
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    setAuthorFid((initialAuthorFid as string) || '');
-    setChannelId((initialChannelId as string) || '');
-  }, [initialAuthorFid, initialChannelId]);
-
+    if (params) {
+      setAuthorFid(params.get('authorFid') || '');
+      setChannelId(params.get('channelId') || '');
+    }
+  }, [params]);
   const fetchCasts = useCallback(async () => {
     setLoading(true);
     try {
@@ -53,7 +49,6 @@ const CastSearch = ({ query }: any) => {
       if (!response.ok) throw new Error('Network response was not ok');
 
       const data = await response.json();
-      console.log('data', data);
       setCasts((prevCasts) => [...prevCasts, ...data.result.casts]);
       if (data.result.next) {
         setCursor(data.result.next.cursor);
@@ -65,11 +60,11 @@ const CastSearch = ({ query }: any) => {
     } finally {
       setLoading(false);
     }
-  }, [query, cursor, authorFid, channelId]);
+  }, [query, cursor]);
 
   useEffect(() => {
     if (query || authorFid || channelId) fetchCasts();
-  }, [query, authorFid, channelId, fetchCasts]);
+  }, [query, fetchCasts]);
 
   const handleScroll = useCallback(() => {
     if (

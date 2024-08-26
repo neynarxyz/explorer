@@ -4,14 +4,13 @@ import { useRouter } from 'next13-progressbar';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { SearchIcon, X } from 'lucide-react';
 import * as amplitude from '@amplitude/analytics-browser';
+import useSearchParamsWithoutSuspense from '@/hooks/useSearchParamsWithoutSuspense';
 
 export default function Search() {
   const router = useRouter();
   const path = usePathname();
-  const searchParams = useSearchParams();
-  const [identifier, setIdentifier] = useState<string>(
-    decodeURIComponent(path.slice(1))
-  );
+  const searchParams = useSearchParamsWithoutSuspense();
+  const [identifier, setIdentifier] = useState<string>('');
 
   useEffect(() => {
     const identifier = decodeURIComponent(path.slice(1));
@@ -24,15 +23,15 @@ export default function Search() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    amplitude.track('Search made', {
-      identifier,
-      ...Object.fromEntries(searchParams.entries()),
-    });
+    if (searchParams) {
+      amplitude.track('Search made', {
+        identifier,
+        ...Object.fromEntries(searchParams.entries()),
+      });
 
-    const currentParams = new URLSearchParams(searchParams.toString());
-    const url = `/${encodeURIComponent(identifier)}${currentParams.toString() ? `?${currentParams.toString()}` : ''}`;
-
-    router.push(url);
+      const url = `/${encodeURIComponent(identifier)}${searchParams.toString() ? `?${searchParams.toString()}` : ''}`;
+      router.push(url);
+    }
   };
 
   return (
