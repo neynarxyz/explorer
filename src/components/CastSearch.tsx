@@ -1,20 +1,38 @@
 'use client';
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { NeynarCastCard } from '@neynar/react';
 import { useRouter } from 'next/navigation';
 import useSearchParamsWithoutSuspense from '@/hooks/useSearchParamsWithoutSuspense';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
+
+interface User {
+  fid: number;
+  username: string;
+  display_name: string;
+  pfp_url: string;
+}
 
 const CastSearch = ({ query }: { query: string }) => {
   const params = useSearchParamsWithoutSuspense();
   const router = useRouter();
 
+  const [username, setUsername] = useState('');
   const [authorFid, setAuthorFid] = useState('');
   const [channelId, setChannelId] = useState('');
   const [casts, setCasts] = useState<any[]>([]);
   const [cursor, setCursor] = useState('');
   const [loading, setLoading] = useState(false);
+  const [users, setUsers] = useState<User[]>([]);
+  const [showUserPopover, setShowUserPopover] = useState(false);
+
+  const usernameInputRef = useRef<HTMLInputElement>(null);
+  const popoverRef = useRef<HTMLDivElement>(null);
 
   // Initialize filters from URL params
   useEffect(() => {
@@ -23,6 +41,52 @@ const CastSearch = ({ query }: { query: string }) => {
       setChannelId(params.get('channelId') || '');
     }
   }, [params]);
+
+  const fetchUsers = useCallback(async (username: string) => {
+    if (username.length < 1) {
+      setUsers([]);
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `https://api.neynar.com/v2/farcaster/user/search?q=${username}`,
+        {
+          headers: {
+            Accept: 'application/json',
+            api_key: process.env.NEXT_PUBLIC_NEYNAR_API_KEY || '',
+          },
+        }
+      );
+
+      if (!response.ok) throw new Error('Network response was not ok');
+
+      const data = await response.json();
+      setUsers(data.result.users);
+      setShowUserPopover(true);
+    } catch (error) {
+      console.error('Error fetching users:', error);
+    }
+  }, []);
+
+  const handleUsernameChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const newUsername = e.target.value;
+      setUsername(newUsername);
+      fetchUsers(newUsername);
+    },
+    [fetchUsers]
+  );
+
+  const handleUserSelect = useCallback((user: User) => {
+    setAuthorFid(user.fid.toString());
+    setUsername(user.username);
+    setShowUserPopover(false);
+    const newParams = new URLSearchParams();
+    if (channelId) newParams.append('channelId', channelId);
+    newParams.append('authorFid', user.fid.toString());
+    router.push(`/${query}?${newParams.toString()}`);
+  }, []);
 
   const fetchCasts = useCallback(
     async (newSearch: boolean = false) => {
@@ -79,16 +143,20 @@ const CastSearch = ({ query }: { query: string }) => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, [handleScroll]);
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    const newParams = new URLSearchParams();
-    if (authorFid) newParams.append('authorFid', authorFid);
-    if (channelId) newParams.append('channelId', channelId);
-    router.push(`/${query}?${newParams.toString()}`);
-    setCasts([]);
-    setCursor('');
-    fetchCasts(true);
-  };
+  const handleSearch = useCallback(
+    (e: any) => {
+      e.preventDefault();
+      const newParams = new URLSearchParams();
+
+      if (authorFid) newParams.append('authorFid', authorFid);
+      if (channelId) newParams.append('channelId', channelId);
+      router.push(`/${query}?${newParams.toString()}`);
+      setCasts([]);
+      setCursor('');
+      fetchCasts(true);
+    },
+    [authorFid, channelId, query, router, fetchCasts]
+  );
 
   // Initial fetch when component mounts
   useEffect(() => {
@@ -97,17 +165,61 @@ const CastSearch = ({ query }: { query: string }) => {
     }
   }, []); // Empty dependency array ensures this only runs once on mount
 
+  // Handle click outside of popover
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        popoverRef.current &&
+        !popoverRef.current.contains(event.target as Node)
+      ) {
+        setShowUserPopover(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
   return (
     <div className="w-full flex-1 items-center flex flex-col justify-center">
       <form onSubmit={handleSearch} className="w-full max-w-4xl space-y-4 mb-8">
         <div className="flex flex-row space-x-2">
-          <Input
-            type="number"
-            value={authorFid}
-            onChange={(e) => setAuthorFid(e.target.value)}
-            placeholder="Author FID (optional)"
-            className="w-full"
-          />
+          <div className="relative w-full">
+            <Input
+              type="text"
+              value={username}
+              onChange={handleUsernameChange}
+              placeholder="author username (optional)"
+              className="w-full"
+              ref={usernameInputRef}
+              onFocus={() => setShowUserPopover(true)}
+            />
+            {showUserPopover && (
+              <div
+                ref={popoverRef}
+                className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg"
+              >
+                <ul className="max-h-[300px] overflow-auto">
+                  {users.map((user) => (
+                    <li
+                      key={user.fid}
+                      className="p-2 hover:bg-gray-100 cursor-pointer"
+                      onClick={() => handleUserSelect(user)}
+                    >
+                      <img
+                        src={user.pfp_url}
+                        alt={user.display_name}
+                        className="w-8 h-8 rounded-full inline-block mr-2"
+                      />
+                      {user.display_name} (@{user.username})
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
           <Input
             type="text"
             value={channelId}
