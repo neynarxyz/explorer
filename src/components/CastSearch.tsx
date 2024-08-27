@@ -121,12 +121,13 @@ const CastSearch = ({ query }: { query: string }) => {
         </Button>
       </form>
 
-      <div className="space-y-4 p-4 w-full max-w-4xl">
+      <div className="space-y-4 p-4 w-full max-w-4xl items-center justify-center flex flex-col">
         {loading && casts.length === 0 ? (
           <p className="text-center text-white font-jetbrains">Loading....</p>
         ) : casts && casts.length ? (
           casts.map((cast, index) => (
             <NeynarCastCard
+              className="text-center text-white font-jetbrains"
               key={`${cast.hash}-${index}`}
               type="hash"
               identifier={cast?.hash}
