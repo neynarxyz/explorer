@@ -44,7 +44,7 @@ export default function RootLayout({
       <NeynarContextProvider
         settings={{
           clientId: process.env.NEXT_PUBLIC_CLIENT_ID as string,
-          defaultTheme: Theme.Light,
+          defaultTheme: Theme.Dark,
         }}
       >
         <head>
