@@ -4,13 +4,13 @@ import { useRouter } from 'next13-progressbar';
 import { usePathname } from 'next/navigation';
 import { SearchIcon, X } from 'lucide-react';
 import * as amplitude from '@amplitude/analytics-browser';
+import useSearchParamsWithoutSuspense from '@/hooks/useSearchParamsWithoutSuspense';
 
 export default function Search() {
   const router = useRouter();
   const path = usePathname();
-  const [identifier, setIdentifier] = useState<string>(
-    decodeURIComponent(path.slice(1))
-  );
+  const searchParams = useSearchParamsWithoutSuspense();
+  const [identifier, setIdentifier] = useState<string>('');
 
   useEffect(() => {
     const identifier = decodeURIComponent(path.slice(1));
@@ -21,16 +21,28 @@ export default function Search() {
     setIdentifier('');
   };
 
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchParams) {
+      const newParams = new URLSearchParams();
+      const authorFid = searchParams.get('authorFid') || '';
+      const channelId = searchParams.get('channelId') || '';
+      if (authorFid) newParams.append('authorFid', authorFid);
+      if (channelId) newParams.append('channelId', channelId);
+
+      amplitude.track('Search made', {
+        identifier,
+        ...Object.fromEntries(newParams.entries()),
+      });
+
+      router.push(`/${encodeURIComponent(identifier)}?${newParams.toString()}`);
+    }
+  };
+
   return (
     <form
       className="flex flex-row items-start p-0 w-full h-[35px]"
-      onSubmit={(e) => {
-        e.preventDefault();
-        amplitude.track('Search made', {
-          identifier,
-        });
-        router.push(`/${encodeURIComponent(identifier)}`);
-      }}
+      onSubmit={handleSubmit}
     >
       <div className="flex flex-row items-center pl-[7.5px] w-full h-[35px] bg-white border border-white relative">
         <input
