@@ -401,11 +401,7 @@ const CastSearch = ({ query }: { query: string }) => {
                     key={`${cast.hash}-${index}`}
                     ref={index === casts.length - 1 ? lastCastRef : null}
                   >
-                    <NeynarCastCard
-                      className="text-center text-white font-jetbrains"
-                      type="hash"
-                      identifier={cast.hash}
-                    />
+                    <NeynarCastCard type="hash" identifier={cast.hash} />
                   </div>
                 ))}
               </div>
