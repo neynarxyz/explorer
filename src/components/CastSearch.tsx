@@ -122,8 +122,9 @@ const CastSearch = ({ query }: { query: string }) => {
       </form>
 
       <div className="space-y-4 p-4 w-full max-w-4xl">
-        {loading && casts.length === 0 ? <p>Loading....</p> : null}
-        {casts && casts.length ? (
+        {loading && casts.length === 0 ? (
+          <p className="text-center text-white font-jetbrains">Loading....</p>
+        ) : casts && casts.length ? (
           casts.map((cast, index) => (
             <NeynarCastCard
               key={`${cast.hash}-${index}`}
