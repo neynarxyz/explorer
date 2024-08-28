@@ -73,6 +73,7 @@ const config = {
         'accordion-up': 'accordion-up 0.2s ease-out',
       },
       fontFamily: {
+        pixelify: ['Pixelify Sans', 'sans-serif'],
         jetbrains: ['JetBrains Mono', 'monospace'],
       },
     },
