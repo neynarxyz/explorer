@@ -57,6 +57,10 @@ const CastSearch = ({ query }: { query: string }) => {
     }
   }, [params]);
 
+  const handleShowMore = (identifier: string) => {
+    window.open(`/${identifier}`, '_blank', 'noopener,noreferrer');
+  };
+
   const fetchInputUsers = useCallback(
     async (inputUsername: string) => {
       if (loading.inputUsers || inputUsername.length < 1) return;
@@ -372,17 +376,33 @@ const CastSearch = ({ query }: { query: string }) => {
       casts.length === 0 ? (
         <p className="text-center text-white font-jetbrains">Loading...</p>
       ) : (
-        <div className="w-full justify-center flex flex-row space-x-2">
+        <div className="w-full justify-center flex md:flex-row flex-col space-x-4">
           {searchUsers.length > 0 && (
             <div className="flex flex-col">
               <h2 className="text-xl font-bold text-white">Users</h2>
-              <div className="flex flex-col space-y-2 max-h-[500px] overflow-y-auto">
+              <div className="flex flex-col max-h-[500px] overflow-y-auto">
                 {searchUsers.map((user, index) => (
                   <div
                     key={user.fid}
                     ref={index === searchUsers.length - 1 ? lastUserRef : null}
+                    className="mb-2 flex flex-col items-center border border-gray-200 rounded-none bg-[#333333] p-2"
                   >
-                    <NeynarProfileCard fid={user.fid} />
+                    <NeynarProfileCard
+                      customStyles={{
+                        color: 'white',
+                        display: 'flex',
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        background: '#333333',
+                      }}
+                      fid={user.fid}
+                    />
+                    <button
+                      className="mt-1 flex px-2 py-1 bg-blue-500 text-white items-center rounded hover:bg-blue-600"
+                      onClick={() => handleShowMore(user.fid.toString())}
+                    >
+                      Show More
+                    </button>
                   </div>
                 ))}
               </div>
@@ -400,8 +420,25 @@ const CastSearch = ({ query }: { query: string }) => {
                   <div
                     key={`${cast.hash}-${index}`}
                     ref={index === casts.length - 1 ? lastCastRef : null}
+                    className="mb-2 flex flex-col items-center border border-gray-200 rounded-none bg-[#333333] p-2"
                   >
-                    <NeynarCastCard type="hash" identifier={cast.hash} />
+                    <NeynarCastCard
+                      customStyles={{
+                        color: 'white',
+                        display: 'flex',
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        background: '#333333',
+                      }}
+                      type="hash"
+                      identifier={cast.hash}
+                    />
+                    <button
+                      className="mt-1 px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600"
+                      onClick={() => handleShowMore(cast?.hash)}
+                    >
+                      Show More
+                    </button>
                   </div>
                 ))}
               </div>
@@ -410,7 +447,6 @@ const CastSearch = ({ query }: { query: string }) => {
               )}
             </div>
           )}
-
           {searchUsers.length === 0 && casts.length === 0 && (
             <p className="text-center text-white font-jetbrains">
               No results found
