@@ -330,8 +330,8 @@ const CastSearch = ({ query }: { query: string }) => {
               value={username}
               onChange={handleUsernameChange}
               onKeyDown={handleUsernameKeyDown}
-              placeholder="Username"
-              className="w-full"
+              placeholder="Username (optional)"
+              className="w-full rounded-none"
               ref={usernameInputRef}
               onFocus={() => setShowUserDropdown(true)}
             />
@@ -365,7 +365,7 @@ const CastSearch = ({ query }: { query: string }) => {
             onChange={(e) => setChannelId(e.target.value)}
             onKeyDown={handleChannelIdKeyDown}
             placeholder="Channel ID (optional)"
-            className="w-full"
+            className="w-full rounded-none"
           />
         </div>
       </form>
