@@ -28,15 +28,15 @@ export default function Page({ params }: ResponseProps) {
   return (
     <div className="w-full flex-1 items-center flex flex-row justify-center">
       <div className="flex flex-col max-w-3xl space-y-0">
-        <div className="bg-black">
-          <div className="p-1 text-center border border-white w-[40%]">
-            <p className="text-white text-[15px] font-jetbrains">
+        <div className="">
+          <div className="p-1 text-center bg-black border border-white w-[40%]">
+            <p className="text-white  text-[15px] font-jetbrains">
               showing results for:
             </p>
           </div>
         </div>
 
-        <div className="flex bg-black pb-4">
+        <div className="flex pb-4">
           <Search />
         </div>
         {isSearch ? (
