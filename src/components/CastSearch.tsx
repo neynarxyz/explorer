@@ -398,7 +398,7 @@ const CastSearch = ({ query }: { query: string }) => {
                       fid={user.fid}
                     />
                     <button
-                      className="mt-1 flex px-2 py-1 bg-[#4C376C] text-white items-center rounded hover:bg-purple-800"
+                      className="mt-1 flex px-2 py-1 bg-[#4C376C] text-white items-center rounded hover:bg-purple-800 font-jetbrains"
                       onClick={() => handleShowMore(user.fid.toString())}
                     >
                       Show Network Response
@@ -434,7 +434,7 @@ const CastSearch = ({ query }: { query: string }) => {
                       identifier={cast.hash}
                     />
                     <button
-                      className="mt-1 px-2 py-1 bg-[#4C376C] text-white rounded hover:bg-purple-800"
+                      className="mt-1 px-2 py-1 bg-[#4C376C] text-white rounded hover:bg-purple-800 font-jetbrains"
                       onClick={() => handleShowMore(cast?.hash)}
                     >
                       Show Network Response
