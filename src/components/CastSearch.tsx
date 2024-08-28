@@ -398,10 +398,10 @@ const CastSearch = ({ query }: { query: string }) => {
                       fid={user.fid}
                     />
                     <button
-                      className="mt-1 flex px-2 py-1 bg-blue-500 text-white items-center rounded hover:bg-blue-600"
+                      className="mt-1 flex px-2 py-1 bg-[#4C376C] text-white items-center rounded hover:bg-purple-800"
                       onClick={() => handleShowMore(user.fid.toString())}
                     >
-                      Show More
+                      Show Network Response
                     </button>
                   </div>
                 ))}
@@ -434,10 +434,10 @@ const CastSearch = ({ query }: { query: string }) => {
                       identifier={cast.hash}
                     />
                     <button
-                      className="mt-1 px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600"
+                      className="mt-1 px-2 py-1 bg-[#4C376C] text-white rounded hover:bg-purple-800"
                       onClick={() => handleShowMore(cast?.hash)}
                     >
-                      Show More
+                      Show Network Response
                     </button>
                   </div>
                 ))}
