@@ -406,6 +406,8 @@ const CastSearch = ({ query }: { query: string }) => {
                     <NeynarProfileCard
                       customStyles={{
                         color: 'white',
+                        maxWidth: '100%',
+                        overflowX: 'hidden',
                         display: 'flex',
                         flexDirection: 'row',
                         alignItems: 'center',
@@ -446,6 +448,8 @@ const CastSearch = ({ query }: { query: string }) => {
                     <NeynarCastCard
                       customStyles={{
                         color: 'white',
+                        maxWidth: '100%',
+                        overflowX: 'hidden',
                         display: 'flex',
                         flexDirection: 'row',
                         alignItems: 'center',
