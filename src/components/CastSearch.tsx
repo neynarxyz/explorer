@@ -1,10 +1,11 @@
 'use client';
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
 import { NeynarCastCard, NeynarProfileCard } from '@neynar/react';
 import { useRouter } from 'next/navigation';
 import useSearchParamsWithoutSuspense from '@/hooks/useSearchParamsWithoutSuspense';
+import { Loader2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 interface User {
   fid: number;
@@ -199,7 +200,11 @@ const CastSearch = ({ query }: { query: string }) => {
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const newUsername = e.target.value;
       setUsername(newUsername);
-      setShowUserDropdown(true);
+      if (newUsername.length > 0) {
+        setShowUserDropdown(true);
+      } else {
+        setShowUserDropdown(false);
+      }
       fetchInputUsers(newUsername);
     },
     [fetchInputUsers]
@@ -321,10 +326,10 @@ const CastSearch = ({ query }: { query: string }) => {
   );
 
   return (
-    <div className="w-full flex-1 flex flex-col items-center justify-center">
-      <form onSubmit={handleSearch} className="w-full max-w-4xl space-y-4 mb-8">
-        <div className="flex flex-row space-x-2">
-          <div className="relative w-full">
+    <div className="w-full max-w-6xl mx-auto px-4 py-8">
+      <form onSubmit={handleSearch} className="space-y-4 mb-8">
+        <div className="flex flex-col sm:flex-row gap-4">
+          <div className="relative flex-grow">
             <Input
               type="text"
               value={username}
@@ -333,26 +338,32 @@ const CastSearch = ({ query }: { query: string }) => {
               placeholder="Username (optional)"
               className="w-full rounded-none"
               ref={usernameInputRef}
-              onFocus={() => setShowUserDropdown(true)}
+              onFocus={() => {
+                if (username && username.length > 0) {
+                  setShowUserDropdown(true);
+                }
+              }}
             />
             {showUserDropdown && (
               <div
                 ref={dropdownRef}
-                className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg"
+                className="absolute z-10 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg"
               >
                 <ul className="max-h-[300px] overflow-auto">
                   {inputUsers.map((user) => (
                     <li
                       key={user.fid}
-                      className="p-2 hover:bg-gray-100 cursor-pointer"
+                      className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer flex items-center"
                       onClick={() => handleUserSelect(user)}
                     >
                       <img
                         src={user.pfp_url}
                         alt={user.display_name}
-                        className="w-8 h-8 rounded-full inline-block mr-2"
+                        className="w-8 h-8 rounded-full mr-2"
                       />
-                      {user.display_name} (@{user.username})
+                      <span className="truncate">
+                        {user.display_name} (@{user.username})
+                      </span>
                     </li>
                   ))}
                 </ul>
@@ -365,8 +376,14 @@ const CastSearch = ({ query }: { query: string }) => {
             onChange={(e) => setChannelId(e.target.value)}
             onKeyDown={handleChannelIdKeyDown}
             placeholder="Channel ID (optional)"
-            className="w-full rounded-none"
+            className="w-full sm:w-auto rounded-none"
           />
+          <button
+            type="submit"
+            className="w-full  sm:w-auto bg-[#4C376C] rounded-none"
+          >
+            Search
+          </button>
         </div>
       </form>
 
@@ -374,18 +391,21 @@ const CastSearch = ({ query }: { query: string }) => {
       loading.casts &&
       searchUsers.length === 0 &&
       casts.length === 0 ? (
-        <p className="text-center text-white font-jetbrains">Loading...</p>
+        <div className="flex justify-center items-center">
+          <Loader2 className="h-8 w-8 animate-spin text-purple-600" />
+          <span className="ml-2 text-white font-jetbrains">Loading...</span>
+        </div>
       ) : (
-        <div className="w-full justify-center flex md:flex-row flex-col space-x-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {searchUsers.length > 0 && (
-            <div className="flex flex-col">
-              <h2 className="text-xl font-bold text-white">Users</h2>
-              <div className="flex flex-col max-h-[500px] overflow-y-auto">
+            <div>
+              <h2 className="text-xl font-bold text-white mb-4">Users</h2>
+              <div className="space-y-4 max-h-[600px] overflow-y-auto pr-2">
                 {searchUsers.map((user, index) => (
                   <div
                     key={user.fid}
                     ref={index === searchUsers.length - 1 ? lastUserRef : null}
-                    className="mb-2 flex flex-col items-center border border-gray-200 rounded-none bg-[#333333] p-2"
+                    className=" border items-center flex flex-col border-gray-200 rounded-none bg-[#333333] p-4"
                   >
                     <NeynarProfileCard
                       customStyles={{
@@ -398,29 +418,34 @@ const CastSearch = ({ query }: { query: string }) => {
                       fid={user.fid}
                     />
                     <button
-                      className="mt-1 flex px-2 py-1 bg-[#4C376C] text-white items-center rounded hover:bg-purple-800 font-jetbrains"
+                      className="mt-1 flex px-2 py-1 bg-[#4C376C] text-white items-center rounded-none hover:bg-purple-800 font-jetbrains"
                       onClick={() => handleShowMore(user.fid.toString())}
                     >
                       Show Network Response
                     </button>
                   </div>
                 ))}
+                {loading.users && (
+                  <div className="flex justify-center items-center py-4">
+                    <Loader2 className="h-6 w-6 animate-spin text-purple-600" />
+                    <span className="ml-2 text-white font-jetbrains">
+                      Loading more users...
+                    </span>
+                  </div>
+                )}
               </div>
-              {loading.users && (
-                <p className="text-center text-white">Loading more users...</p>
-              )}
             </div>
           )}
 
           {casts.length > 0 && (
             <div>
-              <h2 className="text-xl font-bold text-white">Casts</h2>
-              <div className="flex flex-col max-h-[500px] overflow-y-auto">
+              <h2 className="text-xl font-bold text-white mb-4">Casts</h2>
+              <div className="space-y-4 max-h-[600px] overflow-y-auto pr-2">
                 {casts.map((cast, index) => (
                   <div
                     key={`${cast.hash}-${index}`}
                     ref={index === casts.length - 1 ? lastCastRef : null}
-                    className="mb-2 flex flex-col items-center border border-gray-200 rounded-none bg-[#333333] p-2"
+                    className=" border items-center flex flex-col border-gray-200 rounded-none bg-[#333333] p-4"
                   >
                     <NeynarCastCard
                       customStyles={{
@@ -434,26 +459,35 @@ const CastSearch = ({ query }: { query: string }) => {
                       identifier={cast.hash}
                     />
                     <button
-                      className="mt-1 px-2 py-1 bg-[#4C376C] text-white rounded hover:bg-purple-800 font-jetbrains"
+                      className="mt-1 flex px-2 py-1 bg-[#4C376C] text-white items-center rounded hover:bg-purple-800 font-jetbrains"
                       onClick={() => handleShowMore(cast?.hash)}
                     >
                       Show Network Response
                     </button>
                   </div>
                 ))}
+                {loading.casts && (
+                  <div className="flex justify-center items-center py-4">
+                    <Loader2 className="h-6 w-6 animate-spin text-purple-600" />
+                    <span className="ml-2 text-white font-jetbrains">
+                      Loading more casts...
+                    </span>
+                  </div>
+                )}
               </div>
-              {loading.casts && (
-                <p className="text-center text-white">Loading more casts...</p>
-              )}
             </div>
-          )}
-          {searchUsers.length === 0 && casts.length === 0 && (
-            <p className="text-center text-white font-jetbrains">
-              No results found
-            </p>
           )}
         </div>
       )}
+
+      {searchUsers.length === 0 &&
+        casts.length === 0 &&
+        !loading.users &&
+        !loading.casts && (
+          <p className="text-center text-white font-jetbrains">
+            No results found
+          </p>
+        )}
     </div>
   );
 };
