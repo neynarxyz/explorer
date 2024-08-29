@@ -326,10 +326,10 @@ const CastSearch = ({ query }: { query: string }) => {
   );
 
   return (
-    <div className="w-full max-w-6xl mx-auto px-4 py-8">
-      <form onSubmit={handleSearch} className="space-y-4 mb-8">
-        <div className="flex flex-col sm:flex-row gap-4">
-          <div className="relative flex-grow">
+    <div className="w-full max-w-6xl mx-auto  pb-8">
+      <form onSubmit={handleSearch} className="space-y-2 mb-4">
+        <div className="flex flex-col items-center sm:items-start sm:flex-row gap-4 w-full justify-between md:space-x-4">
+          <div className="relative w-1/2">
             <Input
               type="text"
               value={username}
@@ -370,20 +370,16 @@ const CastSearch = ({ query }: { query: string }) => {
               </div>
             )}
           </div>
-          <Input
-            type="text"
-            value={channelId}
-            onChange={(e) => setChannelId(e.target.value)}
-            onKeyDown={handleChannelIdKeyDown}
-            placeholder="Channel ID (optional)"
-            className="w-full sm:w-auto rounded-none"
-          />
-          <button
-            type="submit"
-            className="w-full  sm:w-auto bg-[#4C376C] rounded-none"
-          >
-            Search
-          </button>
+          <div className="w-1/2">
+            <Input
+              type="text"
+              value={channelId}
+              onChange={(e) => setChannelId(e.target.value)}
+              onKeyDown={handleChannelIdKeyDown}
+              placeholder="Channel ID (optional)"
+              className="w-full sm:w-auto rounded-none sm:min-w-96"
+            />
+          </div>
         </div>
       </form>
 
