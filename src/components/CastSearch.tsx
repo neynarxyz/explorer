@@ -396,7 +396,7 @@ const CastSearch = ({ query }: { query: string }) => {
           {searchUsers.length > 0 && (
             <div>
               <h2 className="text-xl font-bold text-white mb-4">Users</h2>
-              <div className="space-y-4 max-h-[600px] overflow-y-auto pr-2">
+              <div className="space-y-4 h-full overflow-y-auto pr-2">
                 {searchUsers.map((user, index) => (
                   <div
                     key={user.fid}
@@ -438,7 +438,7 @@ const CastSearch = ({ query }: { query: string }) => {
           {casts.length > 0 && (
             <div>
               <h2 className="text-xl font-bold text-white mb-4">Casts</h2>
-              <div className="space-y-4 max-h-[600px] overflow-y-auto pr-2">
+              <div className="space-y-4 h-full overflow-y-auto pr-2">
                 {casts.map((cast, index) => (
                   <div
                     key={`${cast.hash}-${index}`}
