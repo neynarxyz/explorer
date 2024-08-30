@@ -34,9 +34,9 @@ export default function RootLayout({
 
   const getBackgroundImage = () => {
     if (pathname === '/') {
-      return 'url(/homebackground.png)';
+      return 'url(/background-horizontal.svg)';
     }
-    return 'url(/searchbackground.png)';
+    return 'url(/background-vertical.svg)';
   };
 
   return (
