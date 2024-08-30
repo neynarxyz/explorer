@@ -9,10 +9,10 @@ interface ResponseProps {
 
 const isNetworkResponse = (identifier: string): boolean => {
   const patterns = [
-    /^https:\/\/www\.supercast\.xyz\/[a-zA-Z0-9]+$/,
-    /^https:\/\/www\.supercast\.xyz\/c\/0x[a-fA-F0-9]{40}$/,
-    /^https:\/\/warpcast\.com\/[a-zA-Z0-9]+$/,
-    /^https:\/\/warpcast\.com\/[a-zA-Z0-9]+\/0x[a-fA-F0-9]{8}$/,
+    /^https:\/\/www\.supercast\.xyz\/[^/]+$/,
+    /^https:\/\/www\.supercast\.xyz\/c\/[^/]+$/,
+    /^https:\/\/warpcast\.com\/[^/]+$/,
+    /^https:\/\/warpcast\.com\/[^/]+\/[^/]+$/,
     /^0x[a-fA-F0-9]{40}$/,
     /^\d+$/, // This pattern matches any string consisting only of digits
   ];
