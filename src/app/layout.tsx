@@ -70,21 +70,24 @@ export default function RootLayout({
             <Providers>
               <div className="sticky top-0 z-10 w-full flex justify-between px-0 pl-0">
                 <div className="flex items-center space-x-4 h-full">
-                  <Link href={'/'}>
-                    <div className="flex flex-row w-20 p-0">
-                      <img
-                        className=""
-                        src={'/neynarplanet.png'}
-                        alt="Neynar logo"
-                      />
-                      <div className="bg-[#4C376C] items-center flex px-4">
-                        <p className=" font-pixelify text-white text-xl text-center">
+                  <Link href={'/'} className="h-full">
+                    <div className="flex items-center bg-[#4C376C] border border-white h-full">
+                      <div className="w-20 h-full flex-shrink-0 bg-white flex items-center justify-center">
+                        <img
+                          className="w-full h-auto object-contain"
+                          src={'/neynarplanet.png'}
+                          alt="Neynar logo"
+                        />
+                      </div>
+                      <div className="flex-grow h-full flex items-center justify-center px-4">
+                        <p className="font-pixelify text-white text-xl text-center">
                           explorer
                         </p>
                       </div>
                     </div>
                   </Link>
                 </div>
+
                 <div className="flex items-center space-x-1 bg-white py-1 pl-1 pr-0.5">
                   <Link
                     className="font-jetbrains text-white text-md bg-gray-700 hover:bg-gray-600  p-1.5 px-3 rounded"
