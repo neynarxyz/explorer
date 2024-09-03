@@ -412,6 +412,7 @@ const CastSearch = ({ query }: { query: string }) => {
                         flexDirection: 'row',
                         alignItems: 'center',
                         background: '#333333',
+                        border: 'none',
                       }}
                       fid={user.fid}
                     />
@@ -443,7 +444,7 @@ const CastSearch = ({ query }: { query: string }) => {
                   <div
                     key={`${cast.hash}-${index}`}
                     ref={index === casts.length - 1 ? lastCastRef : null}
-                    className=" border items-center flex flex-col border-gray-200 rounded-none bg-[#333333] p-4"
+                    className=" border items-center flex flex-col border-gray-200 rounded-none bg-[#333333]"
                   >
                     <NeynarCastCard
                       customStyles={{
@@ -452,6 +453,7 @@ const CastSearch = ({ query }: { query: string }) => {
                         overflowX: 'hidden',
                         display: 'flex',
                         flexDirection: 'row',
+                        border: 'none',
                         alignItems: 'center',
                         background: '#333333',
                       }}
