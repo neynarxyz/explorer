@@ -40,7 +40,7 @@ export default function Page({ params }: ResponseProps) {
           <Search />
         </div>
         {isSearch ? (
-          <CastSearch query={encodeURIComponent(identifier)} />
+          <CastSearch initialQuery={encodeURIComponent(identifier)} />
         ) : (
           <NetworkResponse identifier={identifier} />
         )}

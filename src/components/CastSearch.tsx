@@ -2,10 +2,8 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Input } from '@/components/ui/input';
 import { NeynarCastCard, NeynarProfileCard } from '@neynar/react';
-import { useRouter } from 'next/navigation';
-import useSearchParamsWithoutSuspense from '@/hooks/useSearchParamsWithoutSuspense';
 import { Loader2 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import debounce from 'lodash/debounce';
 
 interface User {
   fid: number;
@@ -24,22 +22,39 @@ interface Cast {
   };
 }
 
-const CastSearch = ({ query }: { query: string }) => {
-  const params = useSearchParamsWithoutSuspense();
-  const router = useRouter();
+interface SearchParams {
+  query: string;
+  authorFid: string;
+  channelId: string;
+}
 
+interface Channel {
+  id: string;
+  name: string;
+  description: string;
+  image_url: string;
+}
+
+const CastSearch = ({ initialQuery }: { initialQuery: string }) => {
   const [username, setUsername] = useState('');
-  const [authorFid, setAuthorFid] = useState('');
   const [channelId, setChannelId] = useState('');
+
+  const [searchParams, setSearchParams] = useState<SearchParams>({
+    query: initialQuery,
+    authorFid: '',
+    channelId: '',
+  });
   const [casts, setCasts] = useState<Cast[]>([]);
   const [searchUsers, setSearchUsers] = useState<User[]>([]);
   const [inputUsers, setInputUsers] = useState<User[]>([]);
+  const [inputChannels, setInputChannels] = useState<Channel[]>([]);
   const [userCursor, setUserCursor] = useState('');
   const [castCursor, setCastCursor] = useState('');
   const [loading, setLoading] = useState({
     users: false,
     casts: false,
     inputUsers: false,
+    inputChannels: false,
   });
   const [showUserDropdown, setShowUserDropdown] = useState(false);
 
@@ -49,93 +64,52 @@ const CastSearch = ({ query }: { query: string }) => {
   const castObserverRef = useRef<IntersectionObserver | null>(null);
   const lastUserRef = useRef<HTMLDivElement>(null);
   const lastCastRef = useRef<HTMLDivElement>(null);
-
-  // Initialize filters from URL params
-  useEffect(() => {
-    if (params) {
-      setAuthorFid(params.get('authorFid') || '');
-      setChannelId(params.get('channelId') || '');
-    }
-  }, [params]);
+  const [showChannelDropdown, setShowChannelDropdown] = useState(false);
+  const channelDropdownRef = useRef<HTMLDivElement>(null);
 
   const handleShowMore = (identifier: string) => {
     window.open(`/${identifier}`, '_blank', 'noopener,noreferrer');
   };
 
-  const fetchInputUsers = useCallback(
-    async (inputUsername: string) => {
-      if (loading.inputUsers || inputUsername.length < 1) return;
+  const fetchSearchUsers = useCallback(async (newSearch: boolean = false) => {
+    if (loading.users || (!newSearch && !userCursor)) return;
 
-      setLoading((prev) => ({ ...prev, inputUsers: true }));
-      try {
-        const userUrl = new URL(
-          'https://api.neynar.com/v2/farcaster/user/search'
-        );
-        userUrl.searchParams.append('q', inputUsername);
-        userUrl.searchParams.append('limit', '5');
+    setLoading((prev) => ({ ...prev, users: true }));
+    try {
+      const userUrl = new URL(
+        'https://api.neynar.com/v2/farcaster/user/search'
+      );
+      userUrl.searchParams.append('q', searchParams.query);
+      userUrl.searchParams.append('limit', '10');
+      if (userCursor && !newSearch)
+        userUrl.searchParams.append('cursor', userCursor);
 
-        const userResponse = await fetch(userUrl, {
-          headers: {
-            Accept: 'application/json',
-            api_key: process.env.NEXT_PUBLIC_NEYNAR_API_KEY || '',
-          },
-        });
+      const userResponse = await fetch(userUrl, {
+        headers: {
+          Accept: 'application/json',
+          api_key: process.env.NEXT_PUBLIC_NEYNAR_API_KEY || '',
+        },
+      });
 
-        if (!userResponse.ok)
-          throw new Error('User search network response was not ok');
-        const userData = await userResponse.json();
-        setInputUsers(userData.result.users);
-      } catch (error) {
-        console.error('Error fetching input users:', error);
-      } finally {
-        setLoading((prev) => ({ ...prev, inputUsers: false }));
+      if (!userResponse.ok)
+        throw new Error('User search network response was not ok');
+      const userData = await userResponse.json();
+      setSearchUsers((prevUsers) =>
+        newSearch
+          ? userData.result.users
+          : [...prevUsers, ...userData.result.users]
+      );
+      if (userData.result.next) {
+        setUserCursor(userData.result.next.cursor);
+      } else {
+        setUserCursor('');
       }
-    },
-    [loading.inputUsers]
-  );
-
-  const fetchSearchUsers = useCallback(
-    async (newSearch: boolean = false) => {
-      if (loading.users || (!newSearch && !userCursor)) return;
-
-      setLoading((prev) => ({ ...prev, users: true }));
-      try {
-        const userUrl = new URL(
-          'https://api.neynar.com/v2/farcaster/user/search'
-        );
-        userUrl.searchParams.append('q', query);
-        userUrl.searchParams.append('limit', '10');
-        if (userCursor && !newSearch)
-          userUrl.searchParams.append('cursor', userCursor);
-
-        const userResponse = await fetch(userUrl, {
-          headers: {
-            Accept: 'application/json',
-            api_key: process.env.NEXT_PUBLIC_NEYNAR_API_KEY || '',
-          },
-        });
-
-        if (!userResponse.ok)
-          throw new Error('User search network response was not ok');
-        const userData = await userResponse.json();
-        setSearchUsers((prevUsers) =>
-          newSearch
-            ? userData.result.users
-            : [...prevUsers, ...userData.result.users]
-        );
-        if (userData.result.next) {
-          setUserCursor(userData.result.next.cursor);
-        } else {
-          setUserCursor('');
-        }
-      } catch (error) {
-        console.error('Error fetching search users:', error);
-      } finally {
-        setLoading((prev) => ({ ...prev, users: false }));
-      }
-    },
-    [query, userCursor, loading.users, params]
-  );
+    } catch (error) {
+      console.error('Error fetching search users:', error);
+    } finally {
+      setLoading((prev) => ({ ...prev, users: false }));
+    }
+  }, []);
 
   const fetchCasts = useCallback(
     async (newSearch: boolean = false) => {
@@ -143,15 +117,22 @@ const CastSearch = ({ query }: { query: string }) => {
 
       setLoading((prev) => ({ ...prev, casts: true }));
       try {
-        const castUrl = new URL(
-          'https://api.neynar.com/v2/farcaster/cast/search'
-        );
-        castUrl.searchParams.append('q', query);
-        castUrl.searchParams.append('limit', '20');
-        if (castCursor && !newSearch)
-          castUrl.searchParams.append('cursor', castCursor);
-        if (authorFid) castUrl.searchParams.append('author_fid', authorFid);
-        if (channelId) castUrl.searchParams.append('channel_id', channelId);
+        let castUrl = 'https://api.neynar.com/v2/farcaster/cast/search?';
+
+        // Append query parameters
+        castUrl += `q=${encodeURIComponent(initialQuery)}&limit=20`;
+
+        if (castCursor && !newSearch) {
+          castUrl += `&cursor=${encodeURIComponent(castCursor)}`;
+        }
+
+        if (searchParams.authorFid) {
+          castUrl += `&author_fid=${encodeURIComponent(searchParams.authorFid)}`;
+        }
+
+        if (searchParams.channelId) {
+          castUrl += `&channel_id=${encodeURIComponent(searchParams.channelId)}`;
+        }
 
         const castResponse = await fetch(castUrl, {
           headers: {
@@ -179,22 +160,83 @@ const CastSearch = ({ query }: { query: string }) => {
         setLoading((prev) => ({ ...prev, casts: false }));
       }
     },
-    [query, castCursor, authorFid, channelId, loading.casts, params]
+    [searchParams]
   );
 
-  const performSearch = useCallback(
-    (newSearch: boolean = true) => {
-      if (newSearch) {
-        setSearchUsers([]);
-        setCasts([]);
-        setUserCursor('');
-        setCastCursor('');
-      }
-      fetchSearchUsers(newSearch);
-      fetchCasts(newSearch);
-    },
-    [fetchSearchUsers, fetchCasts]
+  const performSearch = useCallback(() => {
+    setSearchUsers([]);
+    setCasts([]);
+    setUserCursor('');
+    setCastCursor('');
+    fetchSearchUsers(true);
+    fetchCasts(true);
+  }, [fetchSearchUsers, fetchCasts]);
+
+  // Debounced search function
+  const debouncedSearch = useCallback(
+    debounce(() => {
+      performSearch();
+    }, 300),
+    [performSearch]
   );
+
+  const fetchInputUsers = useCallback(async (inputUsername: string) => {
+    if (loading.inputUsers || inputUsername.length < 1) return;
+
+    setLoading((prev) => ({ ...prev, inputUsers: true }));
+    try {
+      const userUrl = new URL(
+        'https://api.neynar.com/v2/farcaster/user/search'
+      );
+      userUrl.searchParams.append('q', inputUsername);
+      userUrl.searchParams.append('limit', '5');
+
+      const userResponse = await fetch(userUrl, {
+        headers: {
+          Accept: 'application/json',
+          api_key: process.env.NEXT_PUBLIC_NEYNAR_API_KEY || '',
+        },
+      });
+
+      if (!userResponse.ok)
+        throw new Error('User search network response was not ok');
+      const userData = await userResponse.json();
+      setInputUsers(userData.result.users);
+    } catch (error) {
+      console.error('Error fetching input users:', error);
+    } finally {
+      setLoading((prev) => ({ ...prev, inputUsers: false }));
+    }
+  }, []);
+
+  const fetchInputChannels = useCallback(async (inputChannelId: string) => {
+    if (loading.inputChannels || inputChannelId.length < 1) return;
+
+    setLoading((prev) => ({ ...prev, inputChannels: true }));
+    try {
+      const channelUrl = new URL(
+        'https://api.neynar.com/v2/farcaster/channel/search'
+      );
+      channelUrl.searchParams.append('q', inputChannelId);
+      channelUrl.searchParams.append('limit', '5');
+
+      const channelResponse = await fetch(channelUrl, {
+        headers: {
+          Accept: 'application/json',
+          api_key: process.env.NEXT_PUBLIC_NEYNAR_API_KEY || '',
+        },
+      });
+
+      if (!channelResponse.ok)
+        throw new Error('Channel search network response was not ok');
+      const channelData = await channelResponse.json();
+      setInputChannels(channelData.channels);
+    } catch (error) {
+      console.error('Error fetching input channels:', error);
+    } finally {
+      setLoading((prev) => ({ ...prev, inputChannels: false }));
+    }
+  }, []);
 
   const handleUsernameChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -204,35 +246,25 @@ const CastSearch = ({ query }: { query: string }) => {
         setShowUserDropdown(true);
       } else {
         setShowUserDropdown(false);
+        setSearchParams((prev) => ({ ...prev, authorFid: '' }));
       }
       fetchInputUsers(newUsername);
     },
     [fetchInputUsers]
   );
 
-  const handleUserSelect = useCallback(
-    (user: User) => {
-      setAuthorFid(user.fid.toString());
-      setUsername(user.username);
-      setShowUserDropdown(false);
-      const newParams = new URLSearchParams(params as URLSearchParams);
-      newParams.set('authorFid', user.fid.toString());
-      router.push(`/${query}?${newParams.toString()}`);
-      performSearch(true);
-    },
-    [params, query, router, performSearch]
-  );
+  const handleUserSelect = useCallback((user: User) => {
+    setUsername(user.username);
+    setSearchParams((prev) => ({ ...prev, authorFid: user.fid.toString() }));
+    setShowUserDropdown(false);
+  }, []);
 
   const handleSearch = useCallback(
     (e: React.FormEvent) => {
       e.preventDefault();
-      const newParams = new URLSearchParams();
-      if (authorFid) newParams.append('authorFid', authorFid);
-      if (channelId) newParams.append('channelId', channelId);
-      router.push(`/${query}?${newParams.toString()}`);
-      performSearch(true);
+      debouncedSearch();
     },
-    [authorFid, channelId, query, router, performSearch]
+    [debouncedSearch]
   );
 
   // Set up Intersection Observers
@@ -277,12 +309,10 @@ const CastSearch = ({ query }: { query: string }) => {
     }
   }, [searchUsers, casts]);
 
-  // Initial fetch when component mounts
+  // Trigger search when searchParams change
   useEffect(() => {
-    if (query || authorFid || channelId) {
-      performSearch(true);
-    }
-  }, []); // Empty dependency array ensures this only runs once on mount
+    debouncedSearch();
+  }, [searchParams, debouncedSearch]);
 
   // Handle click outside of dropdown
   useEffect(() => {
@@ -325,8 +355,50 @@ const CastSearch = ({ query }: { query: string }) => {
     [handleSearch]
   );
 
+  // ... (rest of the existing functions)
+
+  const handleChannelIdChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const newChannelId = e.target.value;
+      setChannelId(newChannelId);
+      if (newChannelId.length > 0) {
+        setShowChannelDropdown(true);
+      } else {
+        setShowChannelDropdown(false);
+        setSearchParams((prev) => ({ ...prev, channelId: '' }));
+      }
+      fetchInputChannels(newChannelId);
+    },
+    [fetchInputChannels]
+  );
+
+  const handleChannelSelect = useCallback((channel: Channel) => {
+    setChannelId(channel.name);
+    setSearchParams((prev) => ({ ...prev, channelId: channel.id }));
+    setShowChannelDropdown(false);
+  }, []);
+
+  // ... (rest of the existing useEffects)
+
+  // Add a new useEffect for handling clicks outside the channel dropdown
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        channelDropdownRef.current &&
+        !channelDropdownRef.current.contains(event.target as Node)
+      ) {
+        setShowChannelDropdown(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
   return (
-    <div className="w-full max-w-6xl mx-auto  pb-8">
+    <div className="w-full max-w-6xl mx-auto pb-8">
       <form onSubmit={handleSearch} className="space-y-2 mb-4">
         <div className="flex flex-col items-center sm:items-start sm:flex-row gap-4 w-full justify-between md:space-x-4">
           <div className="relative w-1/2">
@@ -374,11 +446,34 @@ const CastSearch = ({ query }: { query: string }) => {
             <Input
               type="text"
               value={channelId}
-              onChange={(e) => setChannelId(e.target.value)}
+              onChange={handleChannelIdChange}
               onKeyDown={handleChannelIdKeyDown}
               placeholder="Channel ID (optional)"
               className="w-full sm:w-auto rounded-none sm:min-w-96"
             />
+            {showChannelDropdown && (
+              <div
+                ref={channelDropdownRef}
+                className="absolute z-10 w-full max-w-sm mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg"
+              >
+                <ul className="max-h-[300px] overflow-auto">
+                  {inputChannels.map((channel) => (
+                    <li
+                      key={channel.id}
+                      className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer flex items-center"
+                      onClick={() => handleChannelSelect(channel)}
+                    >
+                      <img
+                        src={channel.image_url}
+                        alt={channel.name}
+                        className="w-8 h-8 rounded-full mr-2"
+                      />
+                      <span className="truncate">{channel.name}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
         </div>
       </form>
@@ -428,7 +523,7 @@ const CastSearch = ({ query }: { query: string }) => {
                   <div className="flex justify-center items-center py-4">
                     <Loader2 className="h-6 w-6 animate-spin text-purple-600" />
                     <span className="ml-2 text-white font-jetbrains">
-                      Loading more users...
+                      Loading more users
                     </span>
                   </div>
                 )}
