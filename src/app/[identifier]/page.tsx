@@ -2,6 +2,7 @@
 import CastSearch from '@/components/CastSearch';
 import NetworkResponse from '@/components/NetworkResponse';
 import Search from '@/components/search';
+import SearchComponent from '@/components/SearchComponent';
 
 interface ResponseProps {
   params: { identifier: string };
@@ -36,11 +37,11 @@ export default function Page({ params }: ResponseProps) {
           </div>
         </div>
 
-        <div className="flex pb-4">
+        <div className="flex ">
           <Search />
         </div>
         {isSearch ? (
-          <CastSearch initialQuery={encodeURIComponent(identifier)} />
+          <SearchComponent initialQuery={encodeURIComponent(identifier)} />
         ) : (
           <NetworkResponse identifier={identifier} />
         )}
