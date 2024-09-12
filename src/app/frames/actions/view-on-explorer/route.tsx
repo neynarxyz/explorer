@@ -29,15 +29,11 @@ export const GET = frames(async (ctx: any) => {
   };
 });
 
-export const POST = frames(async (ctx: any) => {
+export const POST = frames(async (ctx) => {
   const hash = ctx.message?.castId?.hash;
-
-  return {
-    image: seo.ogImage,
-    buttons: [
-      <Button action="link" target={`${seo.url}/${hash}`}>
-        View on Neynar Explorer
-      </Button>,
-    ],
-  };
+  return Response.json({
+    message: `View on Neynar Explorer`,
+    link: `${seo.url}/${hash}`,
+    type: 'message',
+  });
 });
