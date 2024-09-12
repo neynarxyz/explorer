@@ -1,7 +1,7 @@
 export const seo = {
   title: 'Farcaster Explorer',
   description: 'Explore event propogation on farcaster.',
-  ogImage: '/neynarplanet.png',
+  ogImage: 'https://explorer.neynar.com/neynarplanet.png',
   url: 'https://explorer.neynar.com',
 };
 
