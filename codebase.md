@@ -163,7 +163,7 @@ export default config;
     "axios": "^1.6.8",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
-    "frames.js": "^0.17.0",
+    "frames.js": "^0.17.5",
     "hls.js": "^1.5.13",
     "lucide-react": "^0.378.0",
     "next": "14.2.3",
@@ -753,9 +753,7 @@ const fetchHubData = async (
       isCast,
       followRelationship
     );
-
     const castData = await fetchCastFromHub(hash, fid, hub, isCast);
-
     return { name: hub.shortname, author: authorData, cast: castData };
   });
   return Promise.all(promises);
@@ -1510,347 +1508,6 @@ const useFetchEmbedData = (embeds: any[]) => {
 };
 
 export default useFetchEmbedData;
-```
-
-# src/app/providers.tsx
-
-```tsx
-'use client';
-import React from 'react';
-import { Next13ProgressBar } from 'next13-progressbar';
-
-const Providers = ({ children }: { children: React.ReactNode }) => {
-  const neynarPurple = '#9B59B6';
-  return (
-    <>
-      {children}
-      <Next13ProgressBar
-        height="2px"
-        color={neynarPurple}
-        options={{ showSpinner: true }}
-        showOnShallow
-      />
-    </>
-  );
-};
-
-export default Providers;
-```
-
-# src/app/page.tsx
-
-```tsx
-import Home from '@/components/home';
-import { seo } from '@/constants';
-import { fetchMetadata } from 'frames.js/next';
-import { Metadata } from 'next';
-
-export async function generateMetadata() {
-  return {
-    metadataBase: new URL(seo.url),
-    title: {
-      default: seo.title,
-      template: `%s | ${seo.title}`,
-    },
-    description: seo.description,
-    openGraph: {
-      title: seo.title,
-      description: seo.description,
-      images: [seo.ogImage],
-      url: seo.url,
-      siteName: seo.title,
-      locale: 'en_US',
-      type: 'website',
-    },
-    robots: {
-      index: true,
-      follow: true,
-      googleBot: {
-        index: true,
-        follow: true,
-        'max-video-preview': -1,
-        'max-image-preview': 'large',
-        'max-snippet': -1,
-      },
-    },
-    other: {
-      ...(await fetchMetadata(
-        new URL(
-          '/frames',
-          process.env.VERCEL_URL
-            ? `https://${process.env.VERCEL_URL}`
-            : 'http://localhost:3000'
-        )
-      )),
-    },
-  } as Metadata;
-}
-
-export default function Page() {
-  return <Home />;
-}
-```
-
-# src/app/layout.tsx
-
-```tsx
-/* eslint-disable @next/next/no-img-element */
-
-'use client';
-import '@neynar/react/dist/style.css';
-import './globals.css';
-import Link from 'next/link';
-import Providers from './providers';
-import { useEffect } from 'react';
-import { seo } from '@/constants';
-import { Button } from '@/components/ui/button';
-import { Grid2X2 } from 'lucide-react';
-import { NeynarContextProvider, Theme } from '@neynar/react';
-import * as amplitude from '@amplitude/analytics-browser';
-import { v4 as uuidv4 } from 'uuid';
-import { usePathname } from 'next/navigation';
-import HubsDataComponent from '@/components/hubs-data';
-import AuthButton from '@/components/AuthButton';
-
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
-  const pathname = usePathname();
-
-  useEffect(() => {
-    let userId = localStorage.getItem('user_uuid');
-    if (!userId) {
-      userId = uuidv4();
-      localStorage.setItem('user_uuid', userId);
-    }
-    amplitude.init(process.env.NEXT_PUBLIC_AMPLITUDE_API_KEY as string, userId);
-  }, []);
-
-  const getBackgroundImage = () => {
-    if (pathname === '/') {
-      return 'url(/background-horizontal.svg)';
-    }
-    return 'url(/background-vertical.svg)';
-  };
-
-  return (
-    <html lang="en">
-      <NeynarContextProvider
-        settings={{
-          clientId: process.env.NEXT_PUBLIC_CLIENT_ID as string,
-          defaultTheme: Theme.Dark,
-        }}
-      >
-        <head>
-          <meta property="og:title" content={seo.title} />
-          <meta property="og:description" content={seo.description} />
-          <meta property="og:image" content={seo.ogImage} />
-          <meta property="og:url" content={seo.url} />
-          <meta property="og:type" content="website" />
-          <meta name="twitter:card" content="summary_large_image" />
-          <meta name="twitter:title" content={seo.title} />
-          <meta name="twitter:description" content={seo.description} />
-          <meta name="twitter:image" content={seo.ogImage} />
-        </head>
-        <body
-          className="relative h-screen min-h-screen"
-          style={{
-            backgroundImage: getBackgroundImage(),
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-          }}
-        >
-          <div className="flex flex-col min-h-screen">
-            <Providers>
-              <div className="sticky top-0 z-10 w-full flex justify-between px-0 pl-0">
-                <div className="flex items-center space-x-4 h-full">
-                  <Link href={'/'} className="h-full">
-                    <div className="flex items-center bg-[#4C376C] border border-white h-full">
-                      <div className="w-20 h-full flex-shrink-0 bg-white flex items-center justify-center">
-                        <img
-                          className="w-full h-auto object-contain"
-                          src={'/neynarplanet.png'}
-                          alt="Neynar logo"
-                        />
-                      </div>
-                      <div className="flex-grow h-full flex items-center justify-center px-4">
-                        <p className="font-pixelify text-white text-xl text-center">
-                          explorer
-                        </p>
-                      </div>
-                    </div>
-                  </Link>
-                </div>
-
-                <div className="flex items-center space-x-1 bg-white py-1 pl-1 pr-0.5">
-                  <Link
-                    className="font-jetbrains text-white text-md bg-gray-700 hover:bg-gray-600  p-1.5 px-3 rounded"
-                    href={'/'}
-                  >
-                    home
-                  </Link>
-                  <Link
-                    target="_blank"
-                    className="font-jetbrains text-white text-md bg-gray-700 hover:bg-gray-600  p-1.5 px-3 rounded"
-                    href={'https://blog.neynar.com/'}
-                  >
-                    blog
-                  </Link>
-                  <Link
-                    target="_blank"
-                    className="font-jetbrains text-md text-white bg-gray-700 hover:bg-gray-600  p-1.5 px-3 rounded"
-                    href={'https://github.com/neynarxyz/explorer'}
-                  >
-                    github
-                  </Link>
-                  <Link
-                    target="_blank"
-                    className="font-jetbrains text-md text-white bg-gray-700 hover:bg-gray-600  p-1.5 px-3 rounded"
-                    href={'https://docs.neynar.com/'}
-                  >
-                    docs
-                  </Link>
-                  <AuthButton />
-                </div>
-              </div>
-              <div className="w-full min-h-screen flex-1">{children}</div>
-              <div className="sticky bottom-0 flex items-center justify-between">
-                <HubsDataComponent />
-                <div className="p-0">
-                  <Button className="bg-black w-full flex flex-row rounded-none">
-                    <Link
-                      target="_blank"
-                      className="text-sm md:text-md"
-                      href="https://warpcast.com/~/add-cast-action?url=https://explorer.neynar.com/frames/actions/view-on-explorer"
-                    >
-                      <div className="flex flex-row items-center">
-                        <Grid2X2 className="w-4 h-4 mr-2 hidden md:block" />
-                        <p>Install Cast Action</p>
-                      </div>
-                    </Link>
-                  </Button>
-                </div>
-              </div>
-            </Providers>
-          </div>
-        </body>
-      </NeynarContextProvider>
-    </html>
-  );
-}
-```
-
-# src/app/icon.ico
-
-This is a binary file of the type: Binary
-
-# src/app/globals.css
-
-```css
-@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&family=Pixelify+Sans:wght@400..700&display=swap');
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-@layer base {
-  :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
-
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
-
-    --radius: 0.5rem;
-  }
-
-  .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-  }
-}
-
-@layer base {
-  * {
-    @apply border-border;
-  }
-  body {
-    @apply bg-background text-foreground;
-  }
-}
-
-/* globals.css */
-/* Customize nprogress */
-#nprogress {
-  pointer-events: none;
-}
-
-#nprogress .bar {
-  background: #29d;
-  position: fixed;
-  z-index: 1031;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 2px;
-}
-
-.farcaster-embed-container {
-  max-height: 320px;
-}
-
-.farcaster-embed-container img {
-  max-height: 75px; /* This makes the image's max height equal to the container's max height */
-}
 ```
 
 # src/components/skeleton-header.tsx
@@ -2885,7 +2542,6 @@ const NetworkResponse = ({ identifier }: any) => {
   } = data ?? {};
 
   const hubsData = data?.hubData ?? [];
-  console.log(hubsData);
   const hoyt = hubsData[0] ?? {};
   const neynarHub = hubsData[1] ?? {};
   const { author: hoytAuthor, cast: hoytCast } = hoyt || {};
@@ -3252,9 +2908,6 @@ const CastSearch = ({
   };
 
   useEffect(() => {
-    console.log('searchQuery:', searchQuery);
-    console.log('username:', username);
-    console.log('channelId:', channelId);
     setCasts([]);
     setCursor(null);
     setHasMore(true);
@@ -3402,6 +3055,347 @@ const ActionButtons = ({ fid, hash, identifier }: any) => {
 };
 
 export default ActionButtons;
+```
+
+# src/app/providers.tsx
+
+```tsx
+'use client';
+import React from 'react';
+import { Next13ProgressBar } from 'next13-progressbar';
+
+const Providers = ({ children }: { children: React.ReactNode }) => {
+  const neynarPurple = '#9B59B6';
+  return (
+    <>
+      {children}
+      <Next13ProgressBar
+        height="2px"
+        color={neynarPurple}
+        options={{ showSpinner: true }}
+        showOnShallow
+      />
+    </>
+  );
+};
+
+export default Providers;
+```
+
+# src/app/page.tsx
+
+```tsx
+import Home from '@/components/home';
+import { seo } from '@/constants';
+import { fetchMetadata } from 'frames.js/next';
+import { Metadata } from 'next';
+
+export async function generateMetadata() {
+  return {
+    metadataBase: new URL(seo.url),
+    title: {
+      default: seo.title,
+      template: `%s | ${seo.title}`,
+    },
+    description: seo.description,
+    openGraph: {
+      title: seo.title,
+      description: seo.description,
+      images: [seo.ogImage],
+      url: seo.url,
+      siteName: seo.title,
+      locale: 'en_US',
+      type: 'website',
+    },
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: {
+        index: true,
+        follow: true,
+        'max-video-preview': -1,
+        'max-image-preview': 'large',
+        'max-snippet': -1,
+      },
+    },
+    other: {
+      ...(await fetchMetadata(
+        new URL(
+          '/frames',
+          process.env.VERCEL_URL
+            ? `https://${process.env.VERCEL_URL}`
+            : 'http://localhost:3000'
+        )
+      )),
+    },
+  } as Metadata;
+}
+
+export default function Page() {
+  return <Home />;
+}
+```
+
+# src/app/layout.tsx
+
+```tsx
+/* eslint-disable @next/next/no-img-element */
+
+'use client';
+import '@neynar/react/dist/style.css';
+import './globals.css';
+import Link from 'next/link';
+import Providers from './providers';
+import { useEffect } from 'react';
+import { seo } from '@/constants';
+import { Button } from '@/components/ui/button';
+import { Grid2X2 } from 'lucide-react';
+import { NeynarContextProvider, Theme } from '@neynar/react';
+import * as amplitude from '@amplitude/analytics-browser';
+import { v4 as uuidv4 } from 'uuid';
+import { usePathname } from 'next/navigation';
+import HubsDataComponent from '@/components/hubs-data';
+import AuthButton from '@/components/AuthButton';
+
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  const pathname = usePathname();
+
+  useEffect(() => {
+    let userId = localStorage.getItem('user_uuid');
+    if (!userId) {
+      userId = uuidv4();
+      localStorage.setItem('user_uuid', userId);
+    }
+    amplitude.init(process.env.NEXT_PUBLIC_AMPLITUDE_API_KEY as string, userId);
+  }, []);
+
+  const getBackgroundImage = () => {
+    if (pathname === '/') {
+      return 'url(/background-horizontal.svg)';
+    }
+    return 'url(/background-vertical.svg)';
+  };
+
+  return (
+    <html lang="en">
+      <NeynarContextProvider
+        settings={{
+          clientId: process.env.NEXT_PUBLIC_CLIENT_ID as string,
+          defaultTheme: Theme.Dark,
+        }}
+      >
+        <head>
+          <meta property="og:title" content={seo.title} />
+          <meta property="og:description" content={seo.description} />
+          <meta property="og:image" content={seo.ogImage} />
+          <meta property="og:url" content={seo.url} />
+          <meta property="og:type" content="website" />
+          <meta name="twitter:card" content="summary_large_image" />
+          <meta name="twitter:title" content={seo.title} />
+          <meta name="twitter:description" content={seo.description} />
+          <meta name="twitter:image" content={seo.ogImage} />
+        </head>
+        <body
+          className="relative h-screen min-h-screen"
+          style={{
+            backgroundImage: getBackgroundImage(),
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+          }}
+        >
+          <div className="flex flex-col min-h-screen">
+            <Providers>
+              <div className="sticky top-0 z-10 w-full flex justify-between px-0 pl-0">
+                <div className="flex items-center space-x-4 h-full">
+                  <Link href={'/'} className="h-full">
+                    <div className="flex items-center bg-[#4C376C] border border-white h-full">
+                      <div className="w-20 h-full flex-shrink-0 bg-white flex items-center justify-center">
+                        <img
+                          className="w-full h-auto object-contain"
+                          src={'/neynarplanet.png'}
+                          alt="Neynar logo"
+                        />
+                      </div>
+                      <div className="flex-grow h-full flex items-center justify-center px-4">
+                        <p className="font-pixelify text-white text-xl text-center">
+                          explorer
+                        </p>
+                      </div>
+                    </div>
+                  </Link>
+                </div>
+
+                <div className="flex items-center space-x-1 bg-white py-1 pl-1 pr-0.5">
+                  <Link
+                    className="font-jetbrains text-white text-md bg-gray-700 hover:bg-gray-600  p-1.5 px-3 rounded"
+                    href={'/'}
+                  >
+                    home
+                  </Link>
+                  <Link
+                    target="_blank"
+                    className="font-jetbrains text-white text-md bg-gray-700 hover:bg-gray-600  p-1.5 px-3 rounded"
+                    href={'https://blog.neynar.com/'}
+                  >
+                    blog
+                  </Link>
+                  <Link
+                    target="_blank"
+                    className="font-jetbrains text-md text-white bg-gray-700 hover:bg-gray-600  p-1.5 px-3 rounded"
+                    href={'https://github.com/neynarxyz/explorer'}
+                  >
+                    github
+                  </Link>
+                  <Link
+                    target="_blank"
+                    className="font-jetbrains text-md text-white bg-gray-700 hover:bg-gray-600  p-1.5 px-3 rounded"
+                    href={'https://docs.neynar.com/'}
+                  >
+                    docs
+                  </Link>
+                  <AuthButton />
+                </div>
+              </div>
+              <div className="w-full min-h-screen flex-1">{children}</div>
+              <div className="sticky bottom-0 flex items-center justify-between">
+                <HubsDataComponent />
+                <div className="p-0">
+                  <Button className="bg-black w-full flex flex-row rounded-none">
+                    <Link
+                      target="_blank"
+                      className="text-sm md:text-md"
+                      href="https://warpcast.com/~/add-cast-action?url=https://explorer.neynar.com/frames/actions/view-on-explorer"
+                    >
+                      <div className="flex flex-row items-center">
+                        <Grid2X2 className="w-4 h-4 mr-2 hidden md:block" />
+                        <p>Install Cast Action</p>
+                      </div>
+                    </Link>
+                  </Button>
+                </div>
+              </div>
+            </Providers>
+          </div>
+        </body>
+      </NeynarContextProvider>
+    </html>
+  );
+}
+```
+
+# src/app/icon.ico
+
+This is a binary file of the type: Binary
+
+# src/app/globals.css
+
+```css
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&family=Pixelify+Sans:wght@400..700&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+
+    --primary: 222.2 47.4% 11.2%;
+    --primary-foreground: 210 40% 98%;
+
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 222.2 84% 4.9%;
+
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 210 40% 98%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 212.7 26.8% 83.9%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* globals.css */
+/* Customize nprogress */
+#nprogress {
+  pointer-events: none;
+}
+
+#nprogress .bar {
+  background: #29d;
+  position: fixed;
+  z-index: 1031;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+}
+
+.farcaster-embed-container {
+  max-height: 320px;
+}
+
+.farcaster-embed-container img {
+  max-height: 75px; /* This makes the image's max height equal to the container's max height */
+}
 ```
 
 # .github/workflows/ci.yml
