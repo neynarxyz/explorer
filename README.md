@@ -1,6 +1,6 @@
 ## What is Explorer?
 
-This is a simple website to track event propagation across Farcaster. In some cases, a cast or user event that occurred on a hub can take up to 4 hours to propagate across the network. This site lets you see where in a network a given user or cast has been propagated.
+This is a simple website to track event propagation across [Farcaster](https://farcaster.xyz). In some cases, a cast or user event that occurred on a hub can take up to 4 hours to propagate across the network. This [site](https://explorer.neynar.com) lets you see where in a network a given user or cast has been propagated. Find other Farcaster dev tools on [Neynar](https://neynar.com).
 
 ## Getting Started
 
