@@ -12,6 +12,23 @@ export function CastComponent({ cast, warpcastUrl }: any) {
         type={warpcastUrl ? 'url' : 'hash'}
         identifier={warpcastUrl ? warpcastUrl : cast.hash}
         allowReactions={true}
+        containerStyles={{
+          color: 'white',
+          maxWidth: '100%',
+          minWidth: '400px',
+          minHeight: '400px',
+          maxHeight: '100%',
+          overflowX: 'hidden',
+          display: 'flex',
+          flexDirection: 'row',
+          border: 'none',
+          alignItems: 'center',
+          background: '#333333',
+        }}
+        textStyles={{
+          color: 'white',
+          fontFamily: 'JetBrains Mono',
+        }}
       />
     </Link>
   );

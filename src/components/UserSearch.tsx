@@ -87,15 +87,18 @@ const UserSearch = ({ searchQuery }: { searchQuery: string }) => {
           className="border border-gray-200 rounded-none bg-[#333333]"
         >
           <NeynarProfileCard
-            customStyles={{
+            containerStyles={{
               color: 'white',
               maxWidth: '100%',
+              minWidth: '400px',
+              minHeight: '400px',
+              maxHeight: '100%',
               overflowX: 'hidden',
               display: 'flex',
               flexDirection: 'row',
+              border: 'none',
               alignItems: 'center',
               background: '#333333',
-              border: 'none',
             }}
             fid={user.fid}
           />

@@ -106,7 +106,7 @@ const CastSearch = ({
           className="border border-gray-200 rounded-none  w-full h-full"
         >
           <NeynarCastCard
-            customStyles={{
+            containerStyles={{
               color: 'white',
               maxWidth: '100%',
               minWidth: '400px',
@@ -118,6 +118,11 @@ const CastSearch = ({
               border: 'none',
               alignItems: 'center',
               background: '#333333',
+            }}
+            textStyles={{
+              color: 'white',
+
+              fontFamily: 'JetBrains Mono',
             }}
             type="hash"
             identifier={cast.hash}

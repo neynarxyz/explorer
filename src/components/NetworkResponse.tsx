@@ -359,29 +359,39 @@ const NetworkResponse = ({ identifier }: any) => {
                     type={isValidWarpcastUrl(identifier) ? 'url' : 'hash'}
                     identifier={identifier}
                     allowReactions={true}
-                    customStyles={{
+                    containerStyles={{
                       color: 'white',
+                      maxWidth: '100%',
+                      minWidth: '400px',
+                      minHeight: '400px',
+                      maxHeight: '100%',
+                      overflowX: 'hidden',
                       display: 'flex',
                       flexDirection: 'row',
+                      border: 'none',
                       alignItems: 'center',
                       background: '#333333',
-                      border: '0.915556px solid #FFFFFF',
-                      boxSizing: 'border-box',
-                      borderRadius: '0px',
+                    }}
+                    textStyles={{
+                      color: 'white',
+                      fontFamily: 'JetBrains Mono',
                     }}
                   />
                 ) : authorFid ? (
                   <NeynarProfileCard
                     fid={authorFid}
-                    customStyles={{
+                    containerStyles={{
                       color: 'white',
+                      maxWidth: '100%',
+                      minWidth: '400px',
+                      minHeight: '400px',
+                      maxHeight: '100%',
+                      overflowX: 'hidden',
                       display: 'flex',
                       flexDirection: 'row',
+                      border: 'none',
                       alignItems: 'center',
                       background: '#333333',
-                      border: '0.915556px solid #FFFFFF',
-                      boxSizing: 'border-box',
-                      borderRadius: '0px',
                     }}
                   />
                 ) : null}
