@@ -13,20 +13,16 @@ function constructCastActionUrl(params: { url: string }): string {
 }
 
 export const GET = frames(async (ctx: any) => {
-  const installFrameActionUrl = constructCastActionUrl({
-    url: `${seo.url}/frames/actions/view-on-explorer`,
-  });
-  return {
-    image: seo.ogImage,
-    buttons: [
-      <Button action="link" target={seo.url}>
-        View Explorer
-      </Button>,
-      <Button action="link" target={installFrameActionUrl}>
-        Install Cast Action
-      </Button>,
-    ],
+  const actionMetadata = {
+    action: {
+      type: 'post',
+    },
+    icon: 'info',
+    name: 'View on Neynar Explorer',
+    aboutUrl: `${seo.url}`,
+    description: 'View the details of a cast on Neynar Explorer',
   };
+  return Response.json(actionMetadata);
 });
 
 export const POST = frames(async (ctx) => {
