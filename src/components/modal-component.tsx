@@ -1,4 +1,7 @@
-import React, { useEffect, useRef } from 'react';
+import { useClipboard } from '@/hooks/useClipboard';
+import { CopyCheckIcon, CopyIcon } from 'lucide-react';
+import React, { useEffect, useRef, useState } from 'react';
+import * as amplitude from '@amplitude/analytics-browser';
 
 interface ModalProps {
   isOpen: boolean;
@@ -14,6 +17,7 @@ const Modal: React.FC<ModalProps> = ({
   title,
 }) => {
   const modalRef = useRef<HTMLDivElement>(null);
+  const { copied, copy } = useClipboard();
 
   useEffect(() => {
     const handleOutsideClick = (event: MouseEvent) => {
@@ -39,6 +43,7 @@ const Modal: React.FC<ModalProps> = ({
   if (!isOpen) return null;
 
   const { missingObjects, ...restResponse } = response;
+
   const linkify = (text: any) => {
     const urlPattern = /https?:\/\/[^\s/$.?#].[^\s]*/g;
     const fidPattern = /"fid":\s?(\d+)/g;
@@ -83,15 +88,17 @@ const Modal: React.FC<ModalProps> = ({
   return (
     <div className="fixed inset-0 flex items-center justify-center z-50">
       <div className="fixed inset-0 bg-black opacity-30"></div>
+
       <div
         ref={modalRef}
-        className="p-6 rounded shadow-lg relative z-50 max-w-lg md:max-w-4xl w-full mx-auto"
+        className="relative p-6 rounded shadow-lg z-50 max-w-lg md:max-w-4xl w-full mx-auto bg-transparent"
       >
         {missingObjects && missingObjects.length > 0 && (
           <div className="text-red-500 font-jetbrains mb-4">
             <strong>Missing:</strong> {missingObjects.join(', ')}
           </div>
         )}
+
         <div className="bg-[#0000A8] text-white p-4 rounded  overflow-y-auto max-h-64 md:max-h-[27rem] md:max-w-6xl max-w-lg">
           <pre
             className="font-jetbrains text-xs"
@@ -99,6 +106,30 @@ const Modal: React.FC<ModalProps> = ({
               __html: linkify(JSON.stringify(restResponse, null, 2)),
             }}
           ></pre>
+        </div>
+
+        <div className="flex justify-end flex-1 w-full">
+          <button
+            className="font-jetbrains bg-white text-black    border border-white hover:bg-gray-200 font-jetbrains px-2 py-1"
+            onClick={() => {
+              amplitude.track('Click on response', {
+                response,
+              });
+              copy(JSON.stringify(restResponse, null, 2));
+            }}
+          >
+            {copied ? (
+              <div className="flex flex-row items-center">
+                <p className="text-md">Copied&nbsp;</p>{' '}
+                <CopyCheckIcon className="w-4 h-4 mr-1" />
+              </div>
+            ) : (
+              <div className="flex flex-row items-center">
+                <p className="text-md">Copy</p>{' '}
+                <CopyIcon className="w-3 h-3 ml-1" />
+              </div>
+            )}
+          </button>
         </div>
       </div>
     </div>
