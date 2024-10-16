@@ -352,7 +352,7 @@ const NetworkResponse = ({ identifier }: any) => {
                   </>
                 )}
               </div>
-              <div className="hidden md:block">
+              <div className="hidden md:block mt-3">
                 {hash && isFollowSyntax(hash) ? null : hash &&
                   !extractUsernameFromUrl(hash) ? (
                   <NeynarCastCard
@@ -363,9 +363,9 @@ const NetworkResponse = ({ identifier }: any) => {
                       color: 'white',
                       maxWidth: '100%',
                       minWidth: '400px',
-                      minHeight: '400px',
-                      maxHeight: '100%',
+                      maxHeight: '1000px',
                       overflowX: 'hidden',
+                      overflowY: 'auto',
                       display: 'flex',
                       flexDirection: 'row',
                       border: 'none',
@@ -384,8 +384,6 @@ const NetworkResponse = ({ identifier }: any) => {
                       color: 'white',
                       maxWidth: '100%',
                       minWidth: '400px',
-                      minHeight: '400px',
-                      maxHeight: '100%',
                       overflowX: 'hidden',
                       display: 'flex',
                       flexDirection: 'row',
