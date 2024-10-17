@@ -283,12 +283,12 @@ const NetworkResponse = ({ identifier }: any) => {
                       warpcastCastHubMissing
                     )}
                     {renderHeader(
-                      'Neynar hub',
+                      'Neynar hub-api',
                       neynarHubAuthor,
                       neynarAuthorHubMissing
                     )}
                     {renderHeader(
-                      'Neynar hub',
+                      'Neynar hub-api',
                       neynarHubCast,
                       neynarCastHubMissing
                     )}
@@ -326,29 +326,32 @@ const NetworkResponse = ({ identifier }: any) => {
                       </button>
                     )}
                     {showOtherHubs && (
-                      <div>
-                        {hubs.slice(2).map((hub, index) => {
-                          const hubData = data?.hubData?.[index + 2];
-                          const hubAuthor = hubData?.author;
-                          const hubCast = hubData?.cast;
-                          const missingObjectsAuthor = checkWarning(hubAuthor);
-                          const missingObjectsCast: any[] = [];
-                          return (
-                            <div key={index}>
-                              {renderHeader(
-                                `${capitalizeNickname(hub.shortname)}`,
-                                hubAuthor,
-                                missingObjectsAuthor
-                              )}
-                              {renderHeader(
-                                `${capitalizeNickname(hub.shortname)}`,
-                                hubCast,
-                                missingObjectsCast
-                              )}
-                            </div>
-                          );
-                        })}
-                      </div>
+                      <>
+                        {data?.hubData
+                          .slice(2)
+                          .map((hub: any, index: number) => {
+                            const hubData = hub;
+                            const hubAuthor = hubData?.author;
+                            const hubCast = hubData?.cast;
+                            const missingObjectsAuthor =
+                              checkWarning(hubAuthor);
+                            const missingObjectsCast: any[] = [];
+                            return (
+                              <div key={index}>
+                                {renderHeader(
+                                  `${capitalizeNickname(hub.name)}`,
+                                  hubAuthor,
+                                  missingObjectsAuthor
+                                )}
+                                {renderHeader(
+                                  `${capitalizeNickname(hub.name)}`,
+                                  hubCast,
+                                  missingObjectsCast
+                                )}
+                              </div>
+                            );
+                          })}
+                      </>
                     )}
                   </>
                 )}

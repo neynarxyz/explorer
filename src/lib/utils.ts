@@ -344,7 +344,7 @@ export async function fetchCastFromHub(
       api_key?: string;
       'x-airstack-hubs'?: string;
     } = { 'Content-Type': 'application/json' };
-    if (hub.shortname === 'Neynar hub') {
+    if (hub.shortname.includes('Neynar hub')) {
       headers.api_key = `${process.env.NEXT_PUBLIC_NEYNAR_API_KEY}`;
     }
     const response = await axios.get(
@@ -392,7 +392,7 @@ async function fetchLink(hub: HubType, fid: string, target_fid: string) {
     'Content-Type': string;
     api_key?: string;
   } = { 'Content-Type': 'application/json' };
-  if (hub.shortname === 'Neynar hub') {
+  if (hub.shortname.includes('Neynar')) {
     headers.api_key = `${process.env.NEXT_PUBLIC_NEYNAR_API_KEY}`;
   }
   try {
@@ -439,7 +439,7 @@ export async function fetchFidFromHub(
       api_key?: string;
       'x-airstack-hubs'?: string;
     } = { 'Content-Type': 'application/json' };
-    if (hub.shortname === 'Neynar hub') {
+    if (hub.shortname.includes('Neynar')) {
       headers.api_key = `${process.env.NEXT_PUBLIC_NEYNAR_API_KEY}`;
     }
     if (followRelationship) {

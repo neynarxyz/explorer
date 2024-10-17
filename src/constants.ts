@@ -5,7 +5,15 @@ export const seo = {
   url: 'https://explorer.neynar.com',
 };
 
-export const hubs = [
+const additionalHubs =
+  process.env.ADDITIONAL_HUBS?.split(',').map((hub) => hub.trim()) || [];
+
+const extractFirstLetter = (hubUrl: string) => {
+  const hubName = hubUrl.match(/https?:\/\/([^.]+)\.hubs\.neynar\.com/);
+  return hubName ? hubName[1].charAt(0).toUpperCase() : 'Unknown';
+};
+
+const defaultHubs = [
   {
     shortname: 'Warpcast hub (Lamia)',
     url: 'https://lamia.farcaster.xyz:2281',
@@ -14,8 +22,19 @@ export const hubs = [
   { shortname: 'Warpcast hub (Hoyt)', url: 'https://hoyt.farcaster.xyz:2281' },
 ];
 
+export const hubs = [
+  ...defaultHubs,
+  ...additionalHubs.map((hubUrl) => {
+    const firstLetter = extractFirstLetter(hubUrl);
+    return {
+      shortname: `Neynar hub ${firstLetter}`,
+      url: hubUrl,
+    };
+  }),
+];
+
 export const neynarHub = {
-  shortname: 'Neynar hub',
+  shortname: 'Neynar hub-api',
   url: 'https://hub-api.neynar.com',
 };
 export const defaultHash = '0x3e7326f8da760ed926c1fe82e1444cd528fe6c78';
