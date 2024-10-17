@@ -3,6 +3,7 @@ import CastSearch from '@/components/CastSearch';
 import NetworkResponse from '@/components/NetworkResponse';
 import Search from '@/components/search';
 import SearchComponent from '@/components/SearchComponent';
+import { isFollowSyntax } from '@/lib/helpers';
 
 interface ResponseProps {
   params: { identifier: string };
@@ -18,7 +19,10 @@ const isNetworkResponse = (identifier: string): boolean => {
     /^\d+$/, // This pattern matches any string consisting only of digits
   ];
 
-  return patterns.some((pattern) => pattern.test(identifier));
+  return (
+    patterns.some((pattern) => pattern.test(identifier)) ||
+    isFollowSyntax(identifier)
+  );
 };
 
 export default function Page({ params }: ResponseProps) {
