@@ -5,6 +5,7 @@ import {
   fetchCastAndFidData,
   extractUsernameFromUrl,
   isValidWarpcastUrl,
+  emptyFrame,
 } from '@/lib/utils';
 import { NeynarCastCard, NeynarProfileCard } from '@neynar/react';
 import {
@@ -356,6 +357,9 @@ const NetworkResponse = ({ identifier }: any) => {
                 {hash && isFollowSyntax(hash) ? null : hash &&
                   !extractUsernameFromUrl(hash) ? (
                   <NeynarCastCard
+                    renderEmbeds={true}
+                    renderFrames={true}
+                    onFrameBtnPress={emptyFrame}
                     type={isValidWarpcastUrl(identifier) ? 'url' : 'hash'}
                     identifier={identifier}
                     allowReactions={true}

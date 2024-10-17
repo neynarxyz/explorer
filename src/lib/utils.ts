@@ -321,12 +321,13 @@ export async function fetchCastAndFidData(
     processedHash = null;
   }
   if (!processedFid && !processedHash) return { apiData, hubData: null };
-  const hubData = await fetchHubData(
-    processedFid,
-    processedHash,
-    apiData.neynar?.cast || apiData.warpcast?.cast,
-    followRelationship
+
+  // Replace fetchHubData with the API call
+  const response = await fetch(
+    `/api/fetchHubData?fid=${processedFid}&hash=${processedHash}&isCast=${!!apiData.neynar?.cast || !!apiData.warpcast?.cast}&followRelationship=${followRelationship}`
   );
+
+  const { hubData } = await response.json();
   return { apiData, hubData };
 }
 
@@ -666,4 +667,8 @@ export async function getHubsInfo() {
 export const isValidWarpcastUrl = (url: string | null) => {
   if (!url) return false;
   return url.includes('https://warpcast.com');
+};
+
+export const emptyFrame: any = () => {
+  return;
 };

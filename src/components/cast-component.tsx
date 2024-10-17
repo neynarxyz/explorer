@@ -1,3 +1,4 @@
+import { emptyFrame } from '@/lib/utils';
 import { NeynarCastCard } from '@neynar/react';
 //note: not using this in favor of https://github.com/pugson/react-farcaster-embed, but this is a good example of how to render a cast.
 import Link from 'next/link';
@@ -9,6 +10,9 @@ export function CastComponent({ cast, warpcastUrl }: any) {
       href={`/${warpcastUrl ? encodeURIComponent(warpcastUrl) : cast.hash}`}
     >
       <NeynarCastCard
+        renderEmbeds={true}
+        renderFrames={true}
+        onFrameBtnPress={emptyFrame}
         type={warpcastUrl ? 'url' : 'hash'}
         identifier={warpcastUrl ? warpcastUrl : cast.hash}
         allowReactions={true}

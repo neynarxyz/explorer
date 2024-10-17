@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { NeynarCastCard } from '@neynar/react';
 import { Loader2 } from 'lucide-react';
+import { emptyFrame } from '@/lib/utils';
 
 interface Cast {
   hash: string;
@@ -106,6 +107,9 @@ const CastSearch = ({
           className="border border-gray-200 rounded-none  w-full h-full"
         >
           <NeynarCastCard
+            renderEmbeds={true}
+            renderFrames={true}
+            onFrameBtnPress={emptyFrame}
             containerStyles={{
               color: 'white',
               maxWidth: '100%',
